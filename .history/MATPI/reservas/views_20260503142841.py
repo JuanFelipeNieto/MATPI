@@ -12,16 +12,22 @@ from clientes.models import Cliente
 
 def listar_reservas(request, edit_id=None):
     # Auto-eliminación de reservas pasadas al acceder al listado
-    Reserva.objects.filter(fecha__lt=timezone.now()).delete()
+    try:
+        Reserva.objects.filter(fecha__lt=timezone.now()).delete()
+    except Exception:
+        pass
     
     buscar = request.GET.get('buscar', '')
-    if buscar:
-        reservas_list = Reserva.objects.filter(
-            Q(cliente__nombre_completo__icontains=buscar) |
-            Q(cliente__id__icontains=buscar)
-        ).order_by('-fecha')
-    else:
-        reservas_list = Reserva.objects.all().order_by('-fecha')
+    try:
+        if buscar:
+            reservas_list = Reserva.objects.filter(
+                Q(cliente__nombre_completo__icontains=buscar) |
+                Q(cliente__id__icontains=buscar)
+            ).order_by('-fecha')
+        else:
+            reservas_list = Reserva.objects.all().order_by('-fecha')
+    except Exception:
+        reservas_list = []
         
     paginator = Paginator(reservas_list, 4)
     page_number = request.GET.get('page')
@@ -60,10 +66,6 @@ def registrar_reserva(request):
                 
             if fecha_dt < timezone.now():
                 messages.error(request, "La fecha de reserva no puede ser anterior a la actual.")
-                return redirect('listar_reservas')
-                
-            if fecha_dt.hour < 11 or fecha_dt.hour > 19 or (fecha_dt.hour == 19 and fecha_dt.minute > 0):
-                messages.error(request, "Las reservas solo están permitidas entre las 11:00 AM y las 7:00 PM.")
                 return redirect('listar_reservas')
         except ValueError:
             pass
@@ -118,10 +120,6 @@ def editar_reserva(request):
                 
             if fecha_dt < timezone.now():
                 messages.error(request, "La fecha de reserva no puede ser anterior a la actual.")
-                return redirect('pre_editar_reserva', id=id)
-                
-            if fecha_dt.hour < 11 or fecha_dt.hour > 19 or (fecha_dt.hour == 19 and fecha_dt.minute > 0):
-                messages.error(request, "Las reservas solo están permitidas entre las 11:00 AM y las 7:00 PM.")
                 return redirect('pre_editar_reserva', id=id)
         except ValueError:
             pass

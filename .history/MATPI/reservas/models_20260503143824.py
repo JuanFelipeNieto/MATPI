@@ -13,27 +13,11 @@ def validate_future_date(value):
 class Reserva(models.Model):
     """Reserva asociada a un cajero y un cliente del sistema."""
 
-    id: models.AutoField = models.AutoField(primary_key=True)
-    fecha: models.DateTimeField = models.DateTimeField(
-        'Fecha y Hora',
-        validators=[validate_future_date]
-    )
-    fecha_registro: models.DateTimeField = models.DateTimeField(
-        'Fecha de Registro',
-        auto_now_add=True,
-        null=True,
-        blank=True,
-    )
-    estado: models.BooleanField = models.BooleanField(
-        'Estado',
-        default=True,
-    )
-    observaciones: models.TextField = models.TextField(
-        'Observaciones',
-        max_length=255,
-        blank=True,
-        null=True,
-    )
+    id = models.AutoField(primary_key=True)
+    fecha = models.DateTimeField('Fecha y Hora', validators=[validate_future_date])
+    fecha_registro = models.DateTimeField('Fecha de Registro', auto_now_add=True, null=True, blank=True)
+    estado = models.BooleanField('Estado', default=True)
+    observaciones = models.TextField('Observaciones', max_length=255, blank=True, null=True)
     cliente: models.ForeignKey = models.ForeignKey(
         Cliente,
         on_delete=models.SET_NULL,

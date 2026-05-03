@@ -3,6 +3,15 @@
 {% block title %}Materia Prima — Matpi{% endblock %}
 
 {% block content %}
+<style>
+    /* Reduce específicamente el padding lateral en la tabla de materia prima */
+    .tabla-materia-prima th,
+    .tabla-materia-prima td {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+</style>
+
 <div class="formulario-seccion">
     <h1>Materia Prima</h1>
 
@@ -24,7 +33,7 @@
     </div>
 
     <div class="table-responsive">
-        <table class="custom-table">
+        <table class="custom-table tabla-materia-prima">
             <thead>
                 <tr>
                     <th>Nombre</th>
