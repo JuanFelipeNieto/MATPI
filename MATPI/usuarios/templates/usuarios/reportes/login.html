@@ -13,7 +13,7 @@
         <h2>Iniciar Sesión MATPI</h2>
         <form method="POST">
             {% csrf_token %}
-            <p>Documento: <input type="text" name="txt_id" required></p>
+            <p>Documento: <input type="text" name="txt_id" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></p>
             <p>Contraseña: <input type="password" name="txt_contrasena" required></p>
             <button type="submit">Entrar al Sistema</button>
         </form>

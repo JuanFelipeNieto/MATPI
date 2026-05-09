@@ -18,22 +18,22 @@
 
         <div class="form-group">
             <label for="txt_nombre">Nombre Completo</label>
-            <input type="text" id="txt_nombre" name="txt_nombre" value="{{ cliente.nombre_completo }}" required>
+            <input type="text" id="txt_nombre" name="txt_nombre" value="{{ cliente.nombre_completo }}" required minlength="5" maxlength="40" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+">
         </div>
 
         <div class="form-group">
             <label for="txt_telefono">Teléfono</label>
-            <input type="text" id="txt_telefono" name="txt_telefono" value="{{ cliente.telefono|default:'' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input type="text" id="txt_telefono" name="txt_telefono" value="{{ cliente.telefono|default:'' }}" required minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
         </div>
 
         <div class="form-group">
             <label for="txt_direccion">Dirección</label>
-            <input type="text" id="txt_direccion" name="txt_direccion" value="{{ cliente.direccion|default:'' }}" placeholder="Ingrese dirección residencial">
+            <input type="text" id="txt_direccion" name="txt_direccion" value="{{ cliente.direccion|default:'' }}" placeholder="Ingrese dirección residencial" required minlength="5" maxlength="100">
         </div>
 
         <div class="form-group">
             <label for="txt_localidad">Localidad (Bogotá)</label>
-            <select id="txt_localidad" name="txt_localidad" class="form-control">
+            <select id="txt_localidad" name="txt_localidad" class="form-control" required>
                 <option value="">Seleccione una localidad</option>
                 {% for loc in localidades %}
                     <option value="{{ loc }}" {% if cliente.localidad == loc %}selected{% endif %}>{{ loc }}</option>
@@ -61,7 +61,7 @@
         </div>
 
         <button type="submit" class="btn btn-guardar">💾 Actualizar Cliente</button>
-        <a href="{% url 'listar_clientes' %}" class="btn btn-cancelar">🔙 Volver al listado</a>
+        <a href="{% url 'listar_clientes' %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">🔙 Volver al listado</a>
     </form>
 </div>
 {% endblock %}

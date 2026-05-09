@@ -204,7 +204,7 @@ def registrar_usuario(request):
                     contacto_emergencia_parentesco=emergencia_parentesco,
                     contacto_emergencia_numero=emergencia_numero
                 )
-            messages.success(request, f"Cajero {u.nombre_completo} creado.")
+            messages.success(request, f" {u.nombre_completo} creado.")
             return redirect('listar_usuarios')
         except Exception as e:
             messages.error(request, f"Error: {e}")

@@ -101,7 +101,7 @@
                 <h3>Información de Orden</h3>
                 <div class="form-group">
                     <label for="txt_numero_orden">Número de Orden</label>
-                    <input type="number" id="txt_numero_orden" name="txt_numero_orden" value="{{ pedido.numero_orden }}" readonly class="readonly-field">
+                    <input type="number" id="txt_numero_orden" name="txt_numero_orden" value="{{ pedido.numero_orden }}" readonly class="readonly-field" required min="1" max="999">
                 </div>
                 <div class="form-group">
                     <label for="txt_fecha">Fecha</label>
@@ -125,7 +125,7 @@
                 <h3>Asociaciones</h3>
                 <div class="form-group">
                     <label for="txt_cliente_search">Cliente</label>
-                    <input type="text" id="txt_cliente_search" list="clientes_list" placeholder="Busque por Nombre" autocomplete="off" oninput="sincronizarClienteId(this.value)" value="{{ pedido.cliente.nombre_completo|default:'' }}">
+                    <input type="text" id="txt_cliente_search" list="clientes_list" placeholder="Busque por Nombre" autocomplete="off" oninput="sincronizarClienteId(this.value)" value="{{ pedido.cliente.nombre_completo|default:'' }}" minlength="2" maxlength="30">
                     <input type="hidden" id="txt_cliente_id" name="txt_cliente" value="{{ pedido.cliente_id|default:'' }}">
                     <datalist id="clientes_list">
                         {% for cliente in clientes %}
@@ -191,7 +191,7 @@
                 <p style="font-size: 0.75rem; color: #888; margin-top: 5px;">Total de productos: <span id="span-total-items">0</span></p>
             </div>
             <div>
-                <a href="{% url 'listar_pedidos' %}" class="btn btn-cancelar" style="padding: 12px 25px;">Cancelar</a>
+                <a href="{% url 'listar_pedidos' %}" class="btn btn-cancelar" style="padding: 12px 25px;" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">Cancelar</a>
                 <button type="submit" class="btn btn-guardar" style="padding: 12px 40px; font-size: 1rem; box-shadow: 0 4px 15px var(--primary-glow);">
                     Guardar Cambios
                 </button>
@@ -279,7 +279,7 @@
         nuevaFila.innerHTML = `
             <td>${document.getElementById(datos && datos.tipo === 'bebida' ? 'select-bebidas-html' : 'select-productos-html').innerHTML}</td>
             <td>
-                <select name="producto_cantidad[]" class="form-control select-cantidad" onchange="calcularTotal()">
+                <select name="producto_cantidad[]" class="form-control select-cantidad" onchange="calcularTotal()" required>
                     ${generarOpcionesCantidad(datos ? datos.cantidad : 1)}
                 </select>
             </td>

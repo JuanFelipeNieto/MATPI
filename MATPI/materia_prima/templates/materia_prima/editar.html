@@ -15,8 +15,7 @@
 
         <div class="form-group">
             <label for="txt_nombre">Nombre</label>
-            <input type="text" id="txt_nombre" name="txt_nombre" value="{{ materia_prima.nombre_materia_prima }}"
-                required>
+            <input type="text" id="txt_nombre" name="txt_nombre" value="{{ materia_prima.nombre_materia_prima }}" required minlength="4" maxlength="25" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+">
         </div>
 
         <div class="form-group">
@@ -34,7 +33,7 @@
 
         <div class="form-group">
             <label for="txt_cantidad_unidad">Cantidad por Unidad (Equivalencia)</label>
-            <input type="number" id="txt_cantidad_unidad" name="txt_cantidad_unidad" step="1" value="{{ materia_prima.cantidad_por_unidad }}" required>
+            <input type="number" id="txt_cantidad_unidad" name="txt_cantidad_unidad" step="1" value="{{ materia_prima.cantidad_por_unidad }}" required min="0" max="9999">
             <small>Ej: Si 1 caja tiene 24 unidades, ingrese 24.</small>
         </div>
 
@@ -49,7 +48,7 @@
 
         <div style="display: flex; gap: 10px;">
             <button type="submit" class="btn btn-guardar">💾 Actualizar</button>
-            <a href="{% url 'listar_materia_prima' %}" class="btn btn-cancelar">🔙 Volver al listado</a>
+            <a href="{% url 'listar_materia_prima' %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">🔙 Volver al listado</a>
         </div>
     </form>
 </div>

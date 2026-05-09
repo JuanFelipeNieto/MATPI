@@ -15,7 +15,7 @@ class Usuario(models.Model):
     nombre_completo = models.CharField('Nombre Completo', max_length=40)
     direccion = models.CharField('Dirección', max_length=50)
     fecha_ingreso = models.DateField('Fecha de Ingreso')
-    experiencia_laboral = models.CharField('Experiencia Laboral', max_length=100)
+    experiencia_laboral = models.FileField('Experiencia Laboral (PDF)', upload_to='experiencia_laboral/', blank=True, null=True)
 
     class Meta:
         db_table = 'usuarios_usuario'

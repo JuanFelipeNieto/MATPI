@@ -11,27 +11,27 @@
 
         <div class="form-group">
             <label for="txt_id">Número de Documento</label>
-            <input type="text" id="txt_id" name="txt_id" placeholder="Ingrese documento" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input type="text" id="txt_id" name="txt_id" placeholder="Ingrese documento" required minlength="4" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
         </div>
 
         <div class="form-group">
             <label for="txt_nombre">Nombre Completo</label>
-            <input type="text" id="txt_nombre" name="txt_nombre" placeholder="Ingrese nombre completo" required>
+            <input type="text" id="txt_nombre" name="txt_nombre" placeholder="Ingrese nombre completo" required minlength="5" maxlength="40" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+">
         </div>
 
         <div class="form-group">
             <label for="txt_telefono">Teléfono</label>
-            <input type="text" id="txt_telefono" name="txt_telefono" placeholder="Ingrese teléfono" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input type="text" id="txt_telefono" name="txt_telefono" placeholder="Ingrese teléfono" required minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
         </div>
 
         <div class="form-group">
             <label for="txt_direccion">Dirección</label>
-            <input type="text" id="txt_direccion" name="txt_direccion" placeholder="Ingrese dirección residencial">
+            <input type="text" id="txt_direccion" name="txt_direccion" placeholder="Ingrese dirección residencial" required minlength="5" maxlength="100">
         </div>
 
         <div class="form-group">
             <label for="txt_localidad">Localidad (Bogotá)</label>
-            <select id="txt_localidad" name="txt_localidad" class="form-control">
+            <select id="txt_localidad" name="txt_localidad" class="form-control" required>
                 <option value="">Seleccione una localidad</option>
                 {% for loc in localidades %}
                     <option value="{{ loc }}">{{ loc }}</option>
@@ -40,7 +40,7 @@
         </div>
 
         <button type="submit" class="btn btn-guardar">Guardar</button>
-        <a href="{% url 'listar_clientes' %}" class="btn btn-cancelar">Cancelar</a>
+        <a href="{% url 'listar_clientes' %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro que quiere cancelar el registro?');">Cancelar</a>
     </form>
 </div>
 {% endblock %}

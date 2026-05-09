@@ -15,9 +15,9 @@
         </div>
 
         <div class="form-group">
-            <label for="txt_valor_total">Valor Total</label>
+            <label for="txt_valor_total">Valor Total (incl. 8% IVA)</label>
             <input type="number" id="txt_valor_total" name="txt_valor_total" 
-                value="{{ pedido_seleccionado.valor|default:0 }}" 
+                value="{{ valor_con_iva|default:0 }}" 
                 readonly class="readonly-field">
         </div>
 
@@ -28,9 +28,14 @@
         </div>
 
         <div class="form-group">
+            <label for="txt_metodo_pago">Método de Pago</label>
+            <input type="text" id="txt_metodo_pago" readonly class="readonly-field" value="{{ pedido_seleccionado.metodo_pago|default:'—' }}">
+        </div>
+
+        <div class="form-group">
             <label for="txt_descripcion">Descripción</label>
             <textarea id="txt_descripcion" name="txt_descripcion" rows="3"
-                placeholder="Descripción opcional">{% if descripcion_automatica %}{{ descripcion_automatica }}{% else %}{% if pedido_seleccionado %}Factura del Pedido #{{ pedido_seleccionado.id }}{% endif %}{% endif %}</textarea>
+                placeholder="Descripción opcional" readonly class="readonly-field">{% if descripcion_automatica %}{{ descripcion_automatica }}{% else %}{% if pedido_seleccionado %}Factura del Pedido #{{ pedido_seleccionado.id }}{% endif %}{% endif %}</textarea>
         </div>
 
         <div class="form-group">
@@ -50,13 +55,12 @@
                     {% endfor %}
                 </select>
             {% endif %}
-            <small style="color: #64748b; margin-top: 5px; display: block;">El valor total de la factura se ajustará al valor del pedido seleccionado.</small>
         </div>
 
         <div style="margin-top: 30px; display: flex; gap: 10px; align-items: center;">
             <button type="submit" class="btn btn-guardar">Guardar Factura</button>
             <a id="btn_editar_pedido" href="#" class="btn btn-azul" style="display: none; padding: 10px 15px; font-size: 0.9rem; white-space: nowrap; justify-content: center; align-items: center;">
-                ✏️ Editar Pedido
+                ✏Editar Pedido
             </a>
             <a href="{% url 'listar_facturas' %}" class="btn btn-cancelar">Cancelar</a>
         </div>
@@ -76,11 +80,14 @@
         const pedido = pedidosData.find(p => p.id == pedidoId);
         
         if (pedido) {
-            inputValor.value = pedido.valor;
+            const totalConIva = Math.round((pedido.valor * 1.08) / 100) * 100;
+            inputValor.value = totalConIva;
+            document.getElementById('txt_metodo_pago').value = pedido.metodo_pago || '—';
             btnEditar.href = `/pedidos/editar/${pedidoId}/`;
             btnEditar.style.display = 'inline-flex';
         } else {
             inputValor.value = 0;
+            document.getElementById('txt_metodo_pago').value = '—';
             btnEditar.style.display = 'none';
         }
     }

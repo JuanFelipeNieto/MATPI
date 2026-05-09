@@ -30,7 +30,7 @@
 
         <div class="form-group">
             <label for="txt_precio">Precio de Venta</label>
-            <input type="number" id="txt_precio" name="txt_precio" placeholder="Ingrese precio" required>
+            <input type="number" id="txt_precio" name="txt_precio" placeholder="Ingrese precio" required min="1000" max="90000">
         </div>
 
         <div class="form-group">
@@ -40,7 +40,7 @@
 
         <div style="margin-top: 20px;">
             <button type="submit" class="btn btn-guardar">Guardar Bebida</button>
-            <a href="{% url 'listar_productos' %}" class="btn btn-cancelar">Cancelar</a>
+            <a href="{% url 'listar_productos' %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro que quiere cancelar el registro?');">Cancelar</a>
         </div>
     </form>
 </div>

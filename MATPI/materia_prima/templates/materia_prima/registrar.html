@@ -13,7 +13,7 @@
 
         <div class="form-group">
             <label for="txt_nombre">Nombre</label>
-            <input type="text" id="txt_nombre" name="txt_nombre" placeholder="Nombre de la materia prima" required>
+            <input type="text" id="txt_nombre" name="txt_nombre" placeholder="Nombre de la materia prima" required minlength="4" maxlength="25" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+">
         </div>
 
         <div class="form-group">
@@ -33,7 +33,7 @@
 
         <div class="form-group">
             <label for="txt_cantidad_unidad">Equivalencia</label>
-            <input type="number" id="txt_cantidad_unidad" name="txt_cantidad_unidad" step="1" required>
+            <input type="number" id="txt_cantidad_unidad" name="txt_cantidad_unidad" step="1" required min="0" max="9999">
         </div>
 
         <div class="form-group">
@@ -46,17 +46,17 @@
 
         <div class="form-group">
             <label for="txt_cantidad">Cantidad de unidades</label>
-            <input type="number" id="txt_cantidad" name="txt_cantidad" value="0" step="1">
+            <input type="number" id="txt_cantidad" name="txt_cantidad" value="0" step="1" required min="0" max="99999">
         </div>
 
         <div class="form-group">
             <label for="txt_fecha_ingreso">Fecha de Ingreso</label>
-            <input type="datetime-local" id="txt_fecha_ingreso" name="txt_fecha_ingreso" value="{{ fecha_actual|date:'Y-m-d\TH:i' }}">
+            <input type="datetime-local" id="txt_fecha_ingreso" name="txt_fecha_ingreso" value="{{ fecha_actual|date:'Y-m-d\TH:i' }}" required min="{{ fecha_actual|date:'Y-m-d\TH:i' }}">
         </div>
 
 
         <button type="submit" class="btn btn-guardar">Guardar</button>
-        <a href="{% url 'listar_materia_prima' %}" class="btn btn-cancelar">Cancelar</a>
+        <a href="{% url 'listar_materia_prima' %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro que quiere cancelar el registro?');">Cancelar</a>
     </form>
 </div>
 

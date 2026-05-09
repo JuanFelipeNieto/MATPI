@@ -15,8 +15,8 @@ urlpatterns = [
     
     # Rutas con ID (Perfil y Edición)
     path('perfil/<str:id>/', views.ver_perfil, name='ver_perfil'),
-    path('editar/<str:id>/', views.editar_usuario, name='editar_usuario'),
     path('editar/guardar/', views.editar_usuario, name='procesar_edicion'),
+    path('editar/<str:id>/', views.editar_usuario, name='editar_usuario'),
     
     path('eliminar/<str:id>/', views.eliminar_usuario, name='eliminar_usuario'),
 

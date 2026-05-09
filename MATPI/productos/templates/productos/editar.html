@@ -15,7 +15,7 @@
 
         <div class="form-group">
             <label for="txt_nombre">Nombre del Producto</label>
-            <input type="text" id="txt_nombre" name="txt_nombre" value="{{ producto.nombre_producto }}" required>
+            <input type="text" id="txt_nombre" name="txt_nombre" value="{{ producto.nombre_producto }}" required minlength="3" maxlength="30">
         </div>
 
         <div class="form-group">
@@ -97,7 +97,7 @@
 
         <div class="form-group">
             <label for="txt_precio">Precio</label>
-            <input type="number" id="txt_precio" name="txt_precio" value="{{ producto.precio }}" min="0" required>
+            <input type="number" id="txt_precio" name="txt_precio" value="{{ producto.precio }}" min="1000" max="90000" required>
         </div>
 
         <div class="form-group">
@@ -127,7 +127,7 @@
         </div>
 
         <button type="submit" class="btn btn-guardar">💾 Actualizar Producto</button>
-        <a href="{% url 'listar_productos' %}" class="btn btn-cancelar">🔙 Volver al listado</a>
+        <a href="{% url 'listar_productos' %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">🔙 Volver al listado</a>
     </form>
 </div>
 
