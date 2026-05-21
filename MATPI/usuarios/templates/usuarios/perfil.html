@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mi Perfil — Matpi{% endblock %}
+{% block title %}{% if es_admin and cajero %}Perfil Cajero{% else %}Mi Perfil{% endif %} — Matpi{% endblock %}
 
 
 {% block content %}
 <div class="content-header" style="margin-bottom: 30px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;">
     <h1 style="color: var(--black); font-weight: 800; font-size: 2rem; margin: 0; display: flex; align-items: center; gap: 12px;">
         <span style="background: var(--primary); width: 8px; height: 32px; border-radius: 4px; display: inline-block;"></span>
-        Mi Perfil
+        {% if es_admin and cajero %}Perfil Cajero{% else %}Mi Perfil{% endif %}
     </h1>
 </div>
 <div class="profile-premium-container" style="max-width: 900px; margin: 0 auto; animation: fadeIn 0.5s ease-out;">
@@ -26,7 +26,7 @@
                 <h1 style="color: var(--white); margin: 0; font-size: 2.2rem; letter-spacing: -0.5px;">{{ usuario.nombre_completo }}</h1>
                 <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
                     <span style="background: var(--primary); color: var(--black); font-weight: 800; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; text-transform: uppercase;">
-                        {% if es_admin %}Administrador{% else %}Cajero{% endif %}
+                        {% if usuario.es_administrador %}Administrador{% else %}Cajero{% endif %}
                     </span>
                     <span style="color: #888; font-size: 0.9rem;">
                         {{ usuario.correo_electronico }}
@@ -60,6 +60,11 @@
                 </div>
                 
                 <div style="padding: 10px; background: #fafafa; border-radius: 10px; border-left: 3px solid #eee;">
+                    <small style="display: block; color: #888; text-transform: uppercase; font-size: 0.65rem; font-weight: 700; margin-bottom: 2px;">Teléfono</small>
+                    <span style="font-weight: 600; color: #333;">{{ usuario.telefono|default:"No registrado" }}</span>
+                </div>
+                
+                <div style="padding: 10px; background: #fafafa; border-radius: 10px; border-left: 3px solid #eee;">
                     <small style="display: block; color: #888; text-transform: uppercase; font-size: 0.65rem; font-weight: 700; margin-bottom: 2px;">Fecha de Nacimiento</small>
                     <span style="font-weight: 600; color: #333;">{{ usuario.fecha_nacimiento|date:"d \d\e F, Y"|default:"No registrada" }}</span>
                 </div>
@@ -81,6 +86,15 @@
                 <div style="padding: 10px; background: #fafafa; border-radius: 10px; border-left: 3px solid #eee;">
                     <small style="display: block; color: #888; text-transform: uppercase; font-size: 0.65rem; font-weight: 700; margin-bottom: 2px;">Fecha de Ingreso</small>
                     <span style="font-weight: 600; color: #333;">{{ usuario.fecha_ingreso|date:"d \d\e F, Y"|default:"No registrada" }}</span>
+                </div>
+
+                <div style="padding: 10px; background: #fafafa; border-radius: 10px; border-left: 3px solid #eee;">
+                    <small style="display: block; color: #888; text-transform: uppercase; font-size: 0.65rem; font-weight: 700; margin-bottom: 2px;">Experiencia Laboral (PDF)</small>
+                    {% if usuario.experiencia_laboral %}
+                        <a href="{{ usuario.experiencia_laboral.url }}" target="_blank" style="font-weight: 600; color: var(--primary); text-decoration: none;">📄 Ver Documento PDF</a>
+                    {% else %}
+                        <span style="font-weight: 600; color: #888;">No registrada</span>
+                    {% endif %}
                 </div>
 
                 {% if usuario.cajero %}

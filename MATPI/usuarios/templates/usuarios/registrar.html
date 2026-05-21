@@ -14,32 +14,32 @@
         <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
             <div class="form-group">
                 <label for="txt_id">Documento de Identidad</label>
-                <input type="text" id="txt_id" name="txt_id" placeholder="Número de documento" required minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <input type="text" id="txt_id" name="txt_id" placeholder="Número de documento" required minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ datos.txt_id|default_if_none:'' }}">
             </div>
 
             <div class="form-group">
                 <label for="txt_nombre">Nombre Completo</label>
-                <input type="text" id="txt_nombre" name="txt_nombre" placeholder="Nombre completo" required minlength="2" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
+                <input type="text" id="txt_nombre" name="txt_nombre" placeholder="Nombre completo" required minlength="3" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" value="{{ datos.txt_nombre|default_if_none:'' }}">
             </div>
 
             <div class="form-group">
                 <label for="txt_fecha_nacimiento">Fecha de Nacimiento</label>
-                <input type="date" id="txt_fecha_nacimiento" name="txt_fecha_nacimiento" required>
+                <input type="date" id="txt_fecha_nacimiento" name="txt_fecha_nacimiento" required value="{{ datos.txt_fecha_nacimiento|default_if_none:'' }}">
             </div>
 
             <div class="form-group">
                 <label for="txt_telefono">Teléfono</label>
-                <input type="text" id="txt_telefono" name="txt_telefono" placeholder="Ej: 3001234567" required minlength="9" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <input type="text" id="txt_telefono" name="txt_telefono" placeholder="Ej: 3001234567" required minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ datos.txt_telefono|default_if_none:'' }}">
             </div>
 
             <div class="form-group">
                 <label for="txt_correo">Correo Electrónico</label>
-                <input type="email" id="txt_correo" name="txt_correo" placeholder="correo@ejemplo.com" required minlength="7" maxlength="50">
+                <input type="email" id="txt_correo" name="txt_correo" placeholder="correo@ejemplo.com" required minlength="7" maxlength="50" value="{{ datos.txt_correo|default_if_none:'' }}">
             </div>
 
             <div class="form-group">
                 <label for="txt_direccion">Dirección</label>
-                <input type="text" id="txt_direccion" name="txt_direccion" placeholder="Dirección de residencia" required minlength="5" maxlength="30">
+                <input type="text" id="txt_direccion" name="txt_direccion" placeholder="Dirección de residencia" required minlength="5" maxlength="30" value="{{ datos.txt_direccion|default_if_none:'' }}">
             </div>
         </div>
 
@@ -49,46 +49,46 @@
             <div class="form-group">
                 <label for="txt_eps">EPS</label>
                 <select id="txt_eps" name="txt_eps" required>
-                    <option value="" disabled selected>Seleccione EPS</option>
-                    <option value="Nueva EPS">Nueva EPS</option>
-                    <option value="Sanitas">Sanitas</option>
-                    <option value="SURA">SURA</option>
-                    <option value="Salud Total">Salud Total</option>
-                    <option value="Compensar">Compensar</option>
-                    <option value="Famisanar">Famisanar</option>
-                    <option value="Coosalud">Coosalud</option>
-                    <option value="Mutual Ser">Mutual Ser</option>
-                    <option value="SOS">SOS</option>
-                    <option value="Capital Salud">Capital Salud</option>
-                    <option value="Savia Salud">Savia Salud</option>
+                    <option value="" disabled {% if not datos.txt_eps %}selected{% endif %}>Seleccione EPS</option>
+                    <option value="Nueva EPS" {% if datos.txt_eps == 'Nueva EPS' %}selected{% endif %}>Nueva EPS</option>
+                    <option value="Sanitas" {% if datos.txt_eps == 'Sanitas' %}selected{% endif %}>Sanitas</option>
+                    <option value="SURA" {% if datos.txt_eps == 'SURA' %}selected{% endif %}>SURA</option>
+                    <option value="Salud Total" {% if datos.txt_eps == 'Salud Total' %}selected{% endif %}>Salud Total</option>
+                    <option value="Compensar" {% if datos.txt_eps == 'Compensar' %}selected{% endif %}>Compensar</option>
+                    <option value="Famisanar" {% if datos.txt_eps == 'Famisanar' %}selected{% endif %}>Famisanar</option>
+                    <option value="Coosalud" {% if datos.txt_eps == 'Coosalud' %}selected{% endif %}>Coosalud</option>
+                    <option value="Mutual Ser" {% if datos.txt_eps == 'Mutual Ser' %}selected{% endif %}>Mutual Ser</option>
+                    <option value="SOS" {% if datos.txt_eps == 'SOS' %}selected{% endif %}>SOS</option>
+                    <option value="Capital Salud" {% if datos.txt_eps == 'Capital Salud' %}selected{% endif %}>Capital Salud</option>
+                    <option value="Savia Salud" {% if datos.txt_eps == 'Savia Salud' %}selected{% endif %}>Savia Salud</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="txt_tipo_contrato">Tipo de Contrato</label>
                 <select id="txt_tipo_contrato" name="txt_tipo_contrato" required>
-                    <option value="Indefinido">Indefinido</option>
-                    <option value="Fijo">Fijo</option>
+                    <option value="Indefinido" {% if datos.txt_tipo_contrato == 'Indefinido' or not datos.txt_tipo_contrato %}selected{% endif %}>Indefinido</option>
+                    <option value="Fijo" {% if datos.txt_tipo_contrato == 'Fijo' %}selected{% endif %}>Fijo</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="txt_turno">Turno</label>
                 <select id="txt_turno" name="txt_turno" required>
-                    <option value="Mañana">Mañana</option>
-                    <option value="Tarde">Tarde</option>
-                    <option value="Noche">Noche</option>
+                    <option value="Mañana" {% if datos.txt_turno == 'Mañana' or not datos.txt_turno %}selected{% endif %}>Mañana</option>
+                    <option value="Tarde" {% if datos.txt_turno == 'Tarde' %}selected{% endif %}>Tarde</option>
+                    <option value="Noche" {% if datos.txt_turno == 'Noche' %}selected{% endif %}>Noche</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="txt_fecha_ingreso">Fecha de Ingreso</label>
-                <input type="date" id="txt_fecha_ingreso" name="txt_fecha_ingreso" required>
+                <input type="date" id="txt_fecha_ingreso" name="txt_fecha_ingreso" required value="{{ datos.txt_fecha_ingreso|default_if_none:'' }}">
             </div>
 
             <div class="form-group" id="group_fecha_terminacion" style="display: none;">
                 <label for="txt_fecha_terminacion">Fecha Terminación Contrato</label>
-                <input type="date" id="txt_fecha_terminacion" name="txt_fecha_terminacion">
+                <input type="date" id="txt_fecha_terminacion" name="txt_fecha_terminacion" value="{{ datos.txt_fecha_terminacion|default_if_none:'' }}">
                 <small style="color: #888;">Sólo si es contrato fijo.</small>
             </div>
 
@@ -103,17 +103,17 @@
         <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
             <div class="form-group">
                 <label for="txt_emergencia_nombre">Nombre Completo</label>
-                <input type="text" id="txt_emergencia_nombre" name="txt_emergencia_nombre" placeholder="Nombre al contacto" required minlength="2" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
+                <input type="text" id="txt_emergencia_nombre" name="txt_emergencia_nombre" placeholder="Nombre al contacto" required minlength="3" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" value="{{ datos.txt_emergencia_nombre|default_if_none:'' }}">
             </div>
 
             <div class="form-group">
                 <label for="txt_emergencia_parentesco">Parentesco / Relación</label>
-                <input type="text" id="txt_emergencia_parentesco" name="txt_emergencia_parentesco" placeholder="Ej: Madre, Esposo" required minlength="4" maxlength="5" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
+                <input type="text" id="txt_emergencia_parentesco" name="txt_emergencia_parentesco" placeholder="Ej: Madre, Esposo" required minlength="4" maxlength="15" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" value="{{ datos.txt_emergencia_parentesco|default_if_none:'' }}">
             </div>
 
             <div class="form-group">
                 <label for="txt_emergencia_numero">Número de Teléfono</label>
-                <input type="text" id="txt_emergencia_numero" name="txt_emergencia_numero" placeholder="Teléfono de emergencia" required minlength="9" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <input type="text" id="txt_emergencia_numero" name="txt_emergencia_numero" placeholder="Teléfono de emergencia" required minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ datos.txt_emergencia_numero|default_if_none:'' }}">
             </div>
         </div>
 
@@ -127,8 +127,8 @@
             <div class="form-group">
                 <label for="txt_estado">Estado Inicial</label>
                 <select id="txt_estado" name="txt_estado">
-                    <option value="Activo">🟢 Activo</option>
-                    <option value="Inactivo">🔴 Inactivo</option>
+                    <option value="Activo" {% if datos.txt_estado == 'Activo' or not datos.txt_estado %}selected{% endif %}>🟢 Activo</option>
+                    <option value="Inactivo" {% if datos.txt_estado == 'Inactivo' %}selected{% endif %}>🔴 Inactivo</option>
                 </select>
             </div>
         </div>
@@ -161,7 +161,9 @@
         }
 
         if (inputFechaIngreso) {
-            inputFechaIngreso.value = formattedToday;
+            if (!inputFechaIngreso.value) {
+                inputFechaIngreso.value = formattedToday;
+            }
             inputFechaIngreso.min = formattedToday;
             inputFechaIngreso.addEventListener('change', updateEstadoByFecha);
         }

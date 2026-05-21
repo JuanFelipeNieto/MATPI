@@ -79,7 +79,7 @@
 
         <div class="form-group">
             <label for="txt_imagen">Imagen del Producto</label>
-            <input type="file" id="txt_imagen" name="txt_imagen" accept="image/*">
+            <input type="file" id="txt_imagen" name="txt_imagen" accept=".png, .jpg, .jpeg">
         </div>
 
         <button type="submit" class="btn btn-guardar">Guardar Comida</button>
@@ -195,5 +195,22 @@
             actualizarUnidades(inputObj);
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputImagen = document.getElementById('txt_imagen');
+        if (inputImagen) {
+            inputImagen.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const validExtensions = ['png', 'jpg', 'jpeg'];
+                    const fileExtension = file.name.split('.').pop().toLowerCase();
+                    if (!validExtensions.includes(fileExtension)) {
+                        alert('Solo se permiten imágenes en formato JPG o PNG.');
+                        this.value = ''; // Limpiar la selección
+                    }
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}

@@ -119,6 +119,16 @@ def registrar_producto(request):
         return redirect('listar_productos')
 
     if request.method == 'POST':
+        imagen = request.FILES.get('txt_imagen')
+        if imagen:
+            ext = imagen.name.split('.')[-1].lower()
+            if ext not in ['png', 'jpg', 'jpeg']:
+                messages.error(request, "Solo se permiten imágenes en formato JPG o PNG.")
+                if request.POST.get('txt_categoria') == 'Bebidas':
+                    return redirect('mostrar_registro_bebida')
+                else:
+                    return redirect('mostrar_registro_comida')
+
         # 1. Obtener datos básicos
         nombre = request.POST.get('txt_nombre')
         categoria = request.POST.get('txt_categoria')
@@ -131,12 +141,12 @@ def registrar_producto(request):
                 mp = MateriaPrima.objects.get(pk=materia_id)
                 nombre = mp.nombre_materia_prima
 
-        # 3. Crear el producto base
+        # 3. Crear el product base
         producto = Producto.objects.create(
             nombre_producto=nombre or "Sin nombre",
             precio=request.POST.get('txt_precio'),
             categoria=categoria,
-            imagen=request.FILES.get('txt_imagen'),
+            imagen=imagen,
         )
 
         # 2. Guardar composición (materias primas, cantidades y unidades)
@@ -222,8 +232,13 @@ def editar_producto(request):
         producto.precio          = request.POST.get('txt_precio')
         producto.categoria       = categoria
         
-        if request.FILES.get('txt_imagen'):
-            producto.imagen = request.FILES.get('txt_imagen')
+        imagen = request.FILES.get('txt_imagen')
+        if imagen:
+            ext = imagen.name.split('.')[-1].lower()
+            if ext not in ['png', 'jpg', 'jpeg']:
+                messages.error(request, "Solo se permiten imágenes en formato JPG o PNG.")
+                return redirect('pre_editar_producto', id=producto.id)
+            producto.imagen = imagen
             
         producto.save()
 

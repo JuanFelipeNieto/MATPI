@@ -26,7 +26,7 @@
 
                 <div class="form-group">
                     <label for="txt_nombre">Nombre Completo</label>
-                    <input type="text" id="txt_nombre" name="txt_nombre" value="{{ usuario.nombre_completo }}" required placeholder="Ej: Juan Pérez" minlength="2" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
+                    <input type="text" id="txt_nombre" name="txt_nombre" value="{{ usuario.nombre_completo }}" required placeholder="Ej: Juan Pérez" minlength="3" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
                 </div>
 
                 <div class="form-group">
@@ -46,7 +46,7 @@
 
                 <div class="form-group">
                     <label for="txt_telefono">Teléfono de Contacto</label>
-                    <input type="text" id="txt_telefono" name="txt_telefono" value="{{ usuario.telefono|default:'' }}" required placeholder="Ej: 3001234567" minlength="9" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    <input type="text" id="txt_telefono" name="txt_telefono" value="{{ usuario.telefono|default:'' }}" required placeholder="Ej: 3001234567" minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
 
                 <div class="form-group">
@@ -137,17 +137,17 @@
                 
                 <div class="form-group">
                     <label for="txt_emergencia_nombre">Nombre Completo</label>
-                    <input type="text" id="txt_emergencia_nombre" name="txt_emergencia_nombre" value="{{ usuario.cajero.contacto_emergencia_nombre|default:'' }}" required minlength="2" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
+                    <input type="text" id="txt_emergencia_nombre" name="txt_emergencia_nombre" value="{{ usuario.cajero.contacto_emergencia_nombre|default:'' }}" required minlength="3" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
                 </div>
 
                 <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div>
                         <label for="txt_emergencia_parentesco">Parentesco</label>
-                        <input type="text" id="txt_emergencia_parentesco" name="txt_emergencia_parentesco" value="{{ usuario.cajero.contacto_emergencia_parentesco|default:'' }}" required minlength="4" maxlength="5" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
+                        <input type="text" id="txt_emergencia_parentesco" name="txt_emergencia_parentesco" value="{{ usuario.cajero.contacto_emergencia_parentesco|default:'' }}" required minlength="4" maxlength="15" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
                     </div>
                     <div>
                         <label for="txt_emergencia_numero">Teléfono</label>
-                        <input type="text" id="txt_emergencia_numero" name="txt_emergencia_numero" value="{{ usuario.cajero.contacto_emergencia_numero|default:'' }}" required minlength="9" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        <input type="text" id="txt_emergencia_numero" name="txt_emergencia_numero" value="{{ usuario.cajero.contacto_emergencia_numero|default:'' }}" required minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     </div>
                 </div>
             </div>

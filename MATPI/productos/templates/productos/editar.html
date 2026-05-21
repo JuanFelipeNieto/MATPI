@@ -123,7 +123,7 @@
                     <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre_producto }}" style="max-width: 200px; border-radius: 8px;">
                 </div>
             {% endif %}
-            <input type="file" id="txt_imagen" name="txt_imagen" accept="image/*">
+            <input type="file" id="txt_imagen" name="txt_imagen" accept=".png, .jpg, .jpeg">
         </div>
 
         <button type="submit" class="btn btn-guardar">💾 Actualizar Producto</button>
@@ -246,6 +246,21 @@
                 actualizarUnidades(input);
             }
         });
+
+        const inputImagen = document.getElementById('txt_imagen');
+        if (inputImagen) {
+            inputImagen.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const validExtensions = ['png', 'jpg', 'jpeg'];
+                    const fileExtension = file.name.split('.').pop().toLowerCase();
+                    if (!validExtensions.includes(fileExtension)) {
+                        alert('Solo se permiten imágenes en formato JPG o PNG.');
+                        this.value = ''; // Limpiar la selección
+                    }
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
