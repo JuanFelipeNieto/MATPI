@@ -1,0 +1,5 @@
+[TYPECHECK]
+# List of members which are set dynamically and missed by pylint inference
+# system, and so shouldn't trigger E1101 when accessed. Python regular
+# expressions are accepted.
+generated-members=objects,.*\.objects,.*_set,pk,id,get_.*_display,DoesNotExist,MultipleObjectsReturned,get_next_by_.*,get_previous_by_.*

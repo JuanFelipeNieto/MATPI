@@ -9,7 +9,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import transaction, models
 from django.db.models import Sum, Count
-from django.db.models.functions import ExtractHour, ExtractWeekDay, ExtractDay
 from matplotlib.ticker import MaxNLocator
 from django.http import HttpResponse
 from django.template.loader import get_template, TemplateDoesNotExist
@@ -27,9 +26,6 @@ from materia_prima.models import MateriaPrima
 from facturas.models import Factura
 from proveedores.models import Proveedor
 
-# ==========================================
-# --- UTILIDADES DE SEGURIDAD ---
-# ==========================================
 
 # Función auxiliar para validar si el ID en sesión es Administrador
 def check_admin(request):
@@ -61,9 +57,6 @@ def login_requerido(view_func):
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
-# ==========================================
-# --- VISTAS DE ACCESO ---
-# ==========================================
 
 def login_view(request):
     if request.method == 'POST':
@@ -88,9 +81,7 @@ def logout_view(request):
     request.session.flush()
     return redirect('login')
 
-# ==========================================
-# --- DASHBOARD PRINCIPAL ---
-# ==========================================
+
 
 @login_requerido
 def dashboard(request):

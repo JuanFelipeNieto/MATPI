@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Proveedor, DetalleProveedorMateriaP
-from usuarios.models import Cajero, Administrador
+from usuarios.models import Administrador
 from materia_prima.models import MateriaPrima
 from django.contrib import messages
 from django.db import transaction
