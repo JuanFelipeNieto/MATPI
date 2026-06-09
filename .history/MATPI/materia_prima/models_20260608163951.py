@@ -3,6 +3,7 @@ from productos.models import Producto
 
 
 class MateriaPrima(models.Model):
+    """Materia prima utilizada en la elaboración de productos."""
 
     TIPOS = [
         ('Comida', 'Comida'),
