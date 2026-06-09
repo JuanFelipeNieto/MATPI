@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes — Matpi{% endblock %}
+
+{% block content %}
+<div class="formulario-seccion">
+    <h1>Clientes</h1>
+
+    <!-- Buscador + botón nuevo -->
+    <div class="form-busqueda">
+        <div class="buscador-izq">
+            <form method="GET" action="{% url 'listar_clientes' %}" style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" name="buscar" placeholder="Buscar por documento o nombre" value="{{ buscar|default:'' }}">
+                
+                <select name="localidad" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+                    <option value="">Todas las localidades</option>
+                    {% for loc in localidades %}
+                        <option value="{{ loc }}" {% if localidad_filtro == loc %}selected{% endif %}>{{ loc }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn btn-guardar">Filtrar</button>
+                {% if buscar or localidad_filtro %}
+                    <a href="{% url 'listar_clientes' %}" class="btn btn-cancelar" style="text-decoration: none; padding: 8px 15px;">Limpiar</a>
+                {% endif %}
+            </form>
+        </div>
+        <a href="{% url 'mostrar_registro_cliente' %}" class="btn btn-guardar">+ Nuevo Cliente</a>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Numero Documento</th>
+                    <th>Nombre Completo</th>
+                    <th>Total Pedidos</th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Localidad</th>
+                    <th>Registrado por</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.id }}</td>
+                    <td>{{ cliente.nombre_completo }}</td>
+                    <td>{{ cliente.total_pedidos }}</td>
+                    <td>{{ cliente.telefono|default:"—" }}</td>
+                    <td>{{ cliente.direccion|default:"—" }}</td>
+                    <td>{{ cliente.localidad|default:"—" }}</td>
+                    <td>{{ cliente.usuario.nombre_completo|default:"—" }}</td>
+                    <td class="acciones">
+                        <a href="{% url 'pre_editar_cliente' cliente.id %}" class="btn-editar">Editar</a>
+                        <a href="{% url 'eliminar_cliente' cliente.id %}" class="btn-danger"
+                            onclick="return confirm('¿Seguro que deseas eliminar este cliente?')">Eliminar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align:center;">No hay clientes registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
