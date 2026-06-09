@@ -1,4 +1,7 @@
-
+"""
+Django settings for MATPI project.
+Optimizado para desarrollo de Software (ADSO) - 2026
+"""
 
 from pathlib import Path
 import os
@@ -108,18 +111,29 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+# STATIC_ROOT es para cuando el proyecto se sube a internet (Producción)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Configuración de Archivos Multimedia (Fotos de hamburguesas/productos)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Configuración de Autenticación
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard' 
+LOGIN_REDIRECT_URL = 'dashboard' # Redirigir al dashboard tras loguearse
 LOGOUT_REDIRECT_URL = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Confiugración de Envío de Correos (Reportes)
+# Usando consola para desarrollo. Para usar SMTP real, descomentar y llenar:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'tu_correo@gmail.com'
+# EMAIL_HOST_PASSWORD = 'tu_contraseña_de_aplicacion'

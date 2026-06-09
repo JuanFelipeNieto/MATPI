@@ -1,7 +1,4 @@
-"""
-Django settings for MATPI project.
-Optimizado para desarrollo de Software (ADSO) - 2026
-"""
+
 
 from pathlib import Path
 import os
@@ -16,7 +13,7 @@ SECRET_KEY = 'django-insecure-8y5t1(=$gafy3)1@4_!@p=)&1(42v!-1mp%cfk2%8)g_i2uczb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*'] # Permitir conexiones locales en Bogotá
+ALLOWED_HOSTS = ['*'] 
 
 
 # Application definition
@@ -29,7 +26,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Apps del proyecto MATPI
     'clientes',
     'facturas',
     'materia_prima',
@@ -40,7 +36,6 @@ INSTALLED_APPS = [
     'usuarios',
     'reportes',
     
-    # Librerías adicionales
     'rest_framework',
 ]
 
@@ -113,13 +108,11 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 # STATIC_ROOT es para cuando el proyecto se sube a internet (Producción)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Configuración de Archivos Multimedia (Fotos de hamburguesas/productos)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
