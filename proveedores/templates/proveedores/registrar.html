@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Proveedor — Matpi{% endblock %}
+
+{% block content %}
+<div class="formulario-seccion">
+    <h1>Registrar Proveedor</h1>
+
+    <form method="POST" action="{% url 'registrar_proveedor' %}">
+        {% csrf_token %}
+
+
+
+        <div class="form-group">
+            <label for="txt_nombre">Nombre del Proveedor</label>
+            <input type="text" id="txt_nombre" name="txt_nombre" placeholder="Nombre del proveedor" required minlength="3" maxlength="25">
+        </div>
+
+        <div class="form-group">
+            <label for="txt_direccion">Dirección</label>
+            <input type="text" id="txt_direccion" name="txt_direccion" placeholder="Dirección" required minlength="5" maxlength="25">
+        </div>
+
+        <div class="form-group">
+            <label for="txt_correo">Correo Electrónico</label>
+            <input type="email" id="txt_correo" name="txt_correo" placeholder="correo@ejemplo.com" required minlength="5" maxlength="25">
+        </div>
+
+        <div class="form-group">
+            <label for="txt_telefono">Teléfono</label>
+            <input type="text" id="txt_telefono" name="txt_telefono" placeholder="Teléfono" required minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        </div>
+
+
+
+        <button type="submit" class="btn btn-guardar">Guardar</button>
+        <a href="{% url 'listar_proveedores' %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro que quiere cancelar el registro?');">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
