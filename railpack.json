@@ -1,0 +1,3 @@
+{
+  "aptPackages": ["libcairo2-dev", "pkg-config"]
+}
