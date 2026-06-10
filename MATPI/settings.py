@@ -15,6 +15,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*'] 
 
+# Confiar en los dominios de Railway para formularios POST (Login)
+CSRF_TRUSTED_ORIGINS = ['https://*.railway.app', 'https://*.up.railway.app']
 
 # Application definition
 
