@@ -113,7 +113,10 @@ def dashboard(request):
         'pedidos_recientes': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin).order_by('-id')[:5],
         'config': config,
         'usuario_nombre': request.session.get('usuario_nombre'),
-        'usuario_nombre_corto': request.session.get('usuario_nombre_corto', request.session.get('usuario_nombre', 'Usuario')),
+        'usuario_nombre_corto': (' '.join([
+            p for i, p in enumerate(request.session.get('usuario_nombre', 'Usuario').split())
+            if i in (0, 2)
+        ]) or request.session.get('usuario_nombre', 'Usuario')),
     }
     return render(request, 'dashboard.html', contexto)
 
