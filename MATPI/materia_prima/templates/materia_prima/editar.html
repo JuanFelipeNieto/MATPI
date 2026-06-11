@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Materia Prima — Matpi{% endblock %}
+
+
+{% block content %}
+<div class="formulario-seccion">
+    <h1>Editar Materia Prima</h1>
+
+    <form method="POST" action="{% url 'editar_materia_prima' %}">
+        {% csrf_token %}
+        <input type="hidden" name="txt_id" value="{{ materia_prima.id }}">
+
+
+
+        <div class="form-group">
+            <label for="txt_nombre">Nombre</label>
+            <input type="text" id="txt_nombre" name="txt_nombre" value="{{ materia_prima.nombre_materia_prima }}" required minlength="4" maxlength="25" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+">
+        </div>
+
+        <div class="form-group">
+            <label for="txt_unidad">Unidad de Medida</label>
+            <select id="txt_unidad" name="txt_unidad" required>
+                <option value="kg" {% if materia_prima.unidad_medida == 'kg' %}selected{% endif %}>Kilogramo (kg)</option>
+                <option value="g" {% if materia_prima.unidad_medida == 'g' %}selected{% endif %}>Gramo (g)</option>
+                <option value="L" {% if materia_prima.unidad_medida == 'L' %}selected{% endif %}>Litro (L)</option>
+                <option value="ml" {% if materia_prima.unidad_medida == 'ml' %}selected{% endif %}>Mililitro (ml)</option>
+                <option value="und" {% if materia_prima.unidad_medida == 'und' %}selected{% endif %}>Unidad (und)</option>
+                <option value="paq" {% if materia_prima.unidad_medida == 'paq' %}selected{% endif %}>Paquete (paq)</option>
+                <option value="lb" {% if materia_prima.unidad_medida == 'lb' %}selected{% endif %}>Libra (lb)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="txt_cantidad_unidad">Cantidad por Unidad (Equivalencia)</label>
+            <input type="number" id="txt_cantidad_unidad" name="txt_cantidad_unidad" step="1" value="{{ materia_prima.cantidad_por_unidad }}" required min="0" max="9999">
+            <small>Ej: Si 1 caja tiene 24 unidades, ingrese 24.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="txt_tipo">Tipo de Materia Prima</label>
+            <select id="txt_tipo" name="txt_tipo" required>
+                <option value="Comida" {% if materia_prima.tipo == 'Comida' %}selected{% endif %}>Para Comida (Ingrediente)</option>
+                <option value="Bebida" {% if materia_prima.tipo == 'Bebida' %}selected{% endif %}>Bebida (Venta directa)</option>
+            </select>
+        </div>
+     
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-guardar">💾 Actualizar</button>
+            <a href="{% url 'listar_materia_prima' %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">🔙 Volver al listado</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectUnidad = document.getElementById('txt_unidad');
+        const inputEquivalencia = document.getElementById('txt_cantidad_unidad');
+        const fieldEquivalencia = inputEquivalencia.closest('.form-group');
+
+        function toggleEquivalencia() {
+            if (selectUnidad.value === 'und') {
+                fieldEquivalencia.style.display = 'none';
+                inputEquivalencia.value = 1;
+                inputEquivalencia.required = false;
+            } else {
+                fieldEquivalencia.style.display = 'block';
+                inputEquivalencia.required = true;
+            }
+        }
+
+        selectUnidad.addEventListener('change', toggleEquivalencia);
+        toggleEquivalencia();
+    });
+</script>
+{% endblock %}
