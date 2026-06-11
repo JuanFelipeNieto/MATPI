@@ -94,7 +94,7 @@
                 👤
             </div>
             <div class="sidebar-label" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <span style="display: block; color: white; font-weight: 600;">{{ request.session.usuario_nombre_corto|default:request.session.usuario_nombre|default:"Usuario" }}</span>
+                <span style="display: block; color: white; font-weight: 600;">{{ request.session.usuario_nombre|default:"Usuario" }}</span>
                 <small style="font-size: 0.65rem; color: #FFD700; font-weight: 800; text-transform: uppercase;">
                     {% if es_admin %}ADMINISTRADOR{% else %}CAJERO{% endif %}
                 </small>
@@ -191,7 +191,7 @@
         </main>
 
         <footer>
-            <p>© 2026 Matpi. Todos los derechos reservados.</p>
+            <p>© Esta pagina fue creada por Hextech. Todos los derechos reservados.</p>
         </footer>
     </div>
 

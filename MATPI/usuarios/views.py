@@ -72,6 +72,10 @@ def login_view(request):
                 
             request.session['usuario_id'] = user.id
             request.session['usuario_nombre'] = user.nombre_completo
+            # Guardar solo el primer nombre y primer apellido para mostrar en UI
+            partes = user.nombre_completo.split()
+            nombre_corto = partes[0] if len(partes) < 3 else f"{partes[0]} {partes[2]}"
+            request.session['usuario_nombre_corto'] = nombre_corto
             return redirect('dashboard')
         except Usuario.DoesNotExist:
             messages.error(request, "Documento o contraseña incorrectos.")
@@ -109,6 +113,7 @@ def dashboard(request):
         'pedidos_recientes': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin).order_by('-id')[:5],
         'config': config,
         'usuario_nombre': request.session.get('usuario_nombre'),
+        'usuario_nombre_corto': request.session.get('usuario_nombre_corto', request.session.get('usuario_nombre', 'Usuario')),
     }
     return render(request, 'dashboard.html', contexto)
 
