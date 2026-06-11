@@ -1,0 +1,325 @@
+/* =========================
+   EMPLEADOS.CSS - ESTILOS
+   ========================= */
+
+/* === Contenedor principal del formulario === */
+.formulario-seccion {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* === Título del formulario === */
+.formulario-seccion h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: black;
+}
+
+/* === Secciones secundarias === */
+.formulario-seccion h4 {
+    margin-top: 25px;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #ff5722;
+    color: #ff5722;
+    font-size: 20px;
+}
+
+/* === Mensajes de alerta === */
+.alert {
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+/* === Form groups === */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    color: #333;
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #ff5722;
+    box-shadow: 0 0 6px rgba(255,87,34,0.3);
+    outline: none;
+}
+
+/* === Botones === */
+.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #ff5722;
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.btn:hover {
+    background-color: #e64a19;
+    transform: translateY(-2px);
+}
+
+
+.btn-cancelar {
+    background-color: #6c757d;
+}
+
+.btn-cancelar:hover {
+    background-color: #5c636a;
+}
+
+/* === Inputs de contraseña con toggle === */
+.input-group {
+    position: relative;
+    width: 100%;
+}
+
+.input-group input {
+    padding-right: 40px;
+}
+
+.input-group .toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+    background: transparent;
+    border: none;
+    outline: none;
+    transition: color 0.3s;
+}
+
+.input-group .toggle-password:hover {
+    color: #ff5722;
+}
+
+/* === Mensaje de ayuda debajo del input === */
+.input-help {
+    font-size: 13px;
+    color: #999;
+    margin-top: 3px;
+}
+
+/* === Responsivo === */
+@media (max-width: 600px) {
+    .formulario-seccion {
+        padding: 15px;
+        margin: 20px;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .btn-cancelar {
+        margin-right: 0;
+    }
+}
+
+/* === Tabla horizontal personalizada === */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.custom-table th,
+.custom-table td {
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.custom-table th {
+    background-color: #ff5722;
+    color: #fff;
+    font-weight: bold;
+}
+
+.custom-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.custom-table tr:hover {
+    background-color: #ffe0b2;
+}
+
+.custom-table td.acciones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Botones de tabla */
+/* Botones de tabla unificados */
+.btn-editar,
+.btn-danger {
+    padding: 8px 16px;      /* mismo padding para ambos */
+    min-width: 80px;        /* ancho mínimo igual */
+    font-size: 14px;        /* tamaño de fuente igual */
+    text-align: center;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+/* Colores separados */
+.btn-editar {
+    background-color: #ff9800;
+    color: #fff;
+}
+
+.btn-editar:hover {
+    background-color: #f57c00;
+}
+
+.btn-danger {
+    background-color: #d32f2f;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #b71c1c;
+}
+
+/* === Paginación personalizada === */
+.perfil-actions .pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.perfil-actions .pagination li {
+    display: inline-block;
+}
+
+.perfil-actions .pagination li a,
+.perfil-actions .pagination li span {
+    display: block;
+    padding: 8px 12px;
+    background: #ff5722;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.perfil-actions .pagination li a:hover {
+    background: #e64a19;
+}
+
+.perfil-actions .pagination li.active span {
+    background: #d84315;
+}
+
+/* === Buscador de empleados === */
+.form-busqueda {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.form-busqueda input[type="text"] {
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 250px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-busqueda input[type="text"]:focus {
+    border-color: #ff5722;
+    box-shadow: 0 0 4px rgba(255,87,34,0.3);
+    outline: none;
+}
+
+.form-busqueda button {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #ff5722;
+    color: #fff;
+    border: none;
+    transition: background 0.3s;
+}
+
+.form-busqueda button:hover {
+    background-color: #e64a19;
+}
+
+/* === Responsivo: Buscador para pantallas <= 600px === */
+@media (max-width: 600px) {
+    .form-busqueda {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-busqueda input[type="text"],
+    .form-busqueda button {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    .form-busqueda button {
+        margin-top: 5px;
+    }
+}

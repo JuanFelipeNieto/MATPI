@@ -1,0 +1,336 @@
+/* public/css/app.css */
+
+/* Variables globales (tomadas de cssDashboard.css y style.css) */
+:root {
+    --primary-color: #ff9f00; /* Ámbar/Naranja */
+    --secondary-color: #000;  /* Negro */
+    --text-color: #333;       /* Gris oscuro para texto principal */
+    --font-family: 'Segoe UI', sans-serif; /* Fuente principal */
+    --bg-light: #f5f5f5;      /* Fondo claro para el dashboard */
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra estándar */
+}
+
+/* Reset básico (combinado de todos los archivos) */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+}
+
+/* Estilos para la barra de scroll (tomados de cssDashboard.css y style.css) */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #000000;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #424242;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #383838;
+}
+
+/* Estilos para html y body (combinado de cssDashboard.css y style.css) */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    color: var(--text-color);
+    background-color: var(--bg-light); /* Usamos el fondo claro del dashboard como base */
+}
+
+/* HEADER (Mantenido como en app.blade.php y estilos de referencia) */
+.header {
+    display: flex;
+    align-items: center; /* Alineación vertical */
+    justify-content: space-between;
+    background-color: var(--secondary-color); /* Negro */
+    padding: 10px 20px;
+    color: white;
+    position: sticky; /* Para que se quede arriba al hacer scroll */
+    top: 0;
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para el header */
+}
+
+.header > div > a { /* Estilo para enlaces dentro de divs en el header */
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+}
+
+.logo { /* Ajustado a 40px como en cssDashboard.css para consistencia */
+    height: 40px;
+}
+
+/* Navegación superior (Mantenido como en app.blade.php y estilos de referencia) */
+.top-nav {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap; /* Para que los enlaces se ajusten en pantallas pequeñas */
+    justify-content: center; /* Centra los enlaces si hay espacio */
+    flex-grow: 1; /* Permite que la nav ocupe el espacio disponible */
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background-color: var(--primary-color); /* Color ámbar/naranja */
+    color: #000; /* Texto negro al hacer hover o estar activo */
+}
+
+/* Iconos (tomado de style.css y cssDashboard.css) */
+.icon a {
+    font-size: 10px;
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+}
+
+/* Estilos para el dropdown del perfil (tomado de cssDashboard.css) */
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: white; /* Asegura que el botón sea blanco */
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.profile-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Estilos para el main content (tomado de cssDashboard.css) */
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+/* FOOTER (Mantenido como en app.blade.php y estilos de referencia) */
+footer {
+    background-color: var(--secondary-color); /* Negro */
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px; /* Espacio superior para separar del contenido */
+}
+
+footer p {
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 20px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--primary-color); /* Ámbar/Naranja */
+}
+
+/* Estilos generales para formularios y tablas (tomado de cssDashboard.css) */
+.formulario-seccion {
+    max-width: 860px;
+    margin: 40px auto;
+    background-color: #fff;
+    padding: 30px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.formulario-seccion h2 {
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.formulario label {
+    font-weight: bold;
+    color: #333;
+}
+
+.formulario input,
+.formulario textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.formulario input[type="file"] {
+    padding: 5px;
+}
+
+.formulario button {
+    align-self: flex-start;
+    background-color: var(--primary-color);
+    border: none;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.formulario button:hover {
+    background-color: #e68a00;
+}
+
+button > a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Estilos para tablas (tomado de cssDashboard.css) */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 10px 0;
+}
+
+.formulario-seccion table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px auto;
+    box-shadow: var(--shadow);
+}
+
+.formulario-seccion table th,
+.formulario-seccion table td {
+    padding: 12px 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.formulario-seccion table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+}
+
+.formulario-seccion table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.formulario-seccion table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Responsive Design (combinado de todos los archivos) */
+@media (max-width: 768px) {
+    .top-nav {
+        flex-direction: column; /* Apila los enlaces en pantallas pequeñas */
+        align-items: center;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .dashboard { /* Si tienes un dashboard, ajusta el padding */
+        padding: 20px 10px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .producto-lista {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .producto {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid { /* Si tienes un grid de estadísticas */
+        grid-template-columns: 1fr;
+    }
+
+    .progress-section { /* Si tienes secciones de progreso */
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        padding: 10px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .container {
+        padding: 15px;
+    }
+}
+

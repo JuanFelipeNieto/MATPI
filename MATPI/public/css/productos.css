@@ -1,0 +1,412 @@
+/* === Sección Principal === */
+.formulario-seccion {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* === Título === */
+.formulario-seccion h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: black;
+    font-size: 28px;
+}
+
+/* === Subtítulos === */
+.formulario-seccion h4 {
+    margin-top: 25px;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #ff5722;
+    color: #ff5722;
+    font-size: 20px;
+}
+
+/* === Mensajes de alerta === */
+.alert {
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+/* === Form groups === */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    color: #333;
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #ff5722;
+    box-shadow: 0 0 6px rgba(255,87,34,0.3);
+    outline: none;
+}
+
+/* === Botones === */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #ff5722;
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-right: 5px;
+    font-size: 14px;
+}
+
+.btn:hover {
+    background-color: #e64a19;
+    transform: translateY(-2px);
+}
+
+.btn-cancelar {
+    background-color: #6c757d;
+}
+
+.btn-cancelar:hover {
+    background-color: #5c636a;
+}
+
+/* === Tabla personalizada === */
+.table-responsive {
+    overflow-x:auto;
+}
+
+.custom-table th,
+.custom-table td {
+    border: 1px solid #ddd;
+    padding: 6px 8px;
+    text-align: left;
+}
+
+.custom-table th {
+    background-color: #ff5722;
+    color: #fff;
+    font-weight: bold;
+}
+
+.custom-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.custom-table tr:hover {
+    background-color: #ffe0b2;
+}
+
+/* Botones de tabla */
+
+.btn-editar,
+.btn-danger,
+.btn-info {
+    padding: 4px 8px;
+    min-width: 70px;
+    font-size: 15px;
+    text-align: center;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    display: inline-block;
+}
+
+/* Colores de botones */
+.btn-editar {
+    background-color: #ff9800;
+    color: #fff;
+}
+
+.btn-editar:hover {
+    background-color: #f57c00;
+}
+
+.btn-danger {
+    background-color: #d32f2f;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #b71c1c;
+}
+
+.btn-info {
+    background-color: #2196f3;
+    color: #fff;
+}
+
+.btn-info:hover {
+    background-color: #1976d2;
+}
+
+/* === Paginación === */
+.perfil-actions .pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.perfil-actions .pagination li {
+    display: inline-block;
+}
+
+.perfil-actions .pagination li a,
+.perfil-actions .pagination li span {
+    display: block;
+    padding: 8px 12px;
+    background: #ff5722;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.perfil-actions .pagination li a:hover {
+    background: #e64a19;
+}
+
+.perfil-actions .pagination li.active span {
+    background: #d84315;
+}
+
+/* === Buscador === */
+.form-busqueda {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.form-busqueda input[type="text"] {
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 250px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-busqueda input[type="text"]:focus {
+    border-color: #ff5722;
+    box-shadow: 0 0 4px rgba(255,87,34,0.3);
+    outline: none;
+}
+
+.form-busqueda button {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #ff5722;
+    color: #fff;
+    border: none;
+    transition: background 0.3s;
+}
+
+.form-busqueda button:hover {
+    background-color: #e64a19;
+}
+
+/* === Responsivo === */
+@media (max-width: 600px) {
+    .formulario-seccion {
+        padding: 15px;
+        margin: 20px;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .form-busqueda {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-busqueda input[type="text"],
+    .form-busqueda button {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    .form-busqueda button {
+        margin-top: 5px;
+    }
+}
+
+/* === Detalle (Show) === */
+.detalle-card {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0px 3px 8px rgba(0,0,0,0.05);
+}
+
+.detalle-card h4 {
+    margin-bottom: 12px;
+    color: #ff5722;
+    font-size: 18px;
+    border-bottom: 1px solid #ffccbc;
+    padding-bottom: 6px;
+}
+
+.detalle-card p {
+    margin: 6px 0;
+    font-size: 15px;
+    color: #333;
+}
+
+.detalle-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.detalle-lista li {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.detalle-lista li:last-child {
+    border-bottom: none;
+}
+
+.detalle-lista .nombre {
+    font-weight: bold;
+    color: #333;
+}
+
+.detalle-lista .info {
+    font-size: 14px;
+    color: #555;
+    margin-left: 10px;
+}
+
+.detalle-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+/* Imagen en tabla de productos */
+.producto-imagen {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+.formulario-producto {
+    display: grid;
+    gap: 1.2rem;
+    max-width: 700px;
+    margin: auto;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+textarea, select, input[type="text"], 
+input[type="number"], input[type="file"] {
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.producto-preview {
+    max-width: 120px;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
+}
+
+.materia-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    margin-top: 1.5rem;
+}
+.materia-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.materia-item select,
+.materia-item input {
+    flex: 1;
+}
+
+.btn-remove {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+}
+
+.btn-remove:hover {
+    background: #cc0000;
+}
