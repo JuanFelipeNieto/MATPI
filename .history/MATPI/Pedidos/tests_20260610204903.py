@@ -11,6 +11,7 @@ from reservas.models import Reserva
 
 class PedidoViewsTest(TestCase):
     def setUp(self):
+        # Crear usuario para la sesión y cajero
         self.cajero_user = Usuario.objects.create(
             id="1234567890",
             nombre_completo="Cajero Pedidos",
