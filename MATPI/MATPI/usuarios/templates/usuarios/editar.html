@@ -192,12 +192,8 @@
                 💾 Guardar Cambios
             </button>
             
-            <a href="{% url 'listar_usuarios' %}" class="btn btn-cancelar" style="padding: 12px 30px; font-size: 1rem; display: flex; align-items: center;" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">
-                🔙 Volver al listado
-            </a>
-            
-            <a href="{% url 'dashboard' %}" class="btn" style="padding: 12px 30px; font-size: 1rem; display: flex; align-items: center; border: 1px solid #ddd; background: #fff; color: #333;">
-                🏠 Inicio
+            <a href="{% url 'ver_perfil' usuario.id %}" class="btn btn-cancelar" style="padding: 12px 30px; font-size: 1rem; display: flex; align-items: center;" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">
+                🔙 Volver al perfil
             </a>
         </div>
     </form>
