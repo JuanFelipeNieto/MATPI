@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Cajero — Matpi{% endblock %}
+
+{% block content %}
+<div class="formulario-seccion">
+    <h1>Registrar Nuevo Cajero</h1>
+
+    <form method="POST" action="{% url 'registrar_usuario' %}" class="grid-form" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Sección: Información Personal -->
+        <h3 class="section-title" style="margin: 20px 0 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">👤 Información Personal</h3>
+        <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div class="form-group">
+                <label for="txt_id">Documento de Identidad</label>
+                <input type="text" id="txt_id" name="txt_id" placeholder="Número de documento" required minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ datos.txt_id|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_nombre">Nombre Completo</label>
+                <input type="text" id="txt_nombre" name="txt_nombre" placeholder="Nombre completo" required minlength="3" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" value="{{ datos.txt_nombre|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_fecha_nacimiento">Fecha de Nacimiento</label>
+                <input type="date" id="txt_fecha_nacimiento" name="txt_fecha_nacimiento" required value="{{ datos.txt_fecha_nacimiento|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_telefono">Teléfono</label>
+                <input type="text" id="txt_telefono" name="txt_telefono" placeholder="Ej: 3001234567" required minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ datos.txt_telefono|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_correo">Correo Electrónico</label>
+                <input type="email" id="txt_correo" name="txt_correo" placeholder="correo@ejemplo.com" required minlength="7" maxlength="50" value="{{ datos.txt_correo|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_direccion">Dirección</label>
+                <input type="text" id="txt_direccion" name="txt_direccion" placeholder="Dirección de residencia" required minlength="5" maxlength="30" value="{{ datos.txt_direccion|default_if_none:'' }}">
+            </div>
+        </div>
+
+        <!-- Sección: Información Laboral -->
+        <h3 class="section-title" style="margin: 40px 0 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">💼 Información Laboral (Cajero)</h3>
+        <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div class="form-group">
+                <label for="txt_eps">EPS</label>
+                <select id="txt_eps" name="txt_eps" required>
+                    <option value="" disabled {% if not datos.txt_eps %}selected{% endif %}>Seleccione EPS</option>
+                    <option value="Nueva EPS" {% if datos.txt_eps == 'Nueva EPS' %}selected{% endif %}>Nueva EPS</option>
+                    <option value="Sanitas" {% if datos.txt_eps == 'Sanitas' %}selected{% endif %}>Sanitas</option>
+                    <option value="SURA" {% if datos.txt_eps == 'SURA' %}selected{% endif %}>SURA</option>
+                    <option value="Salud Total" {% if datos.txt_eps == 'Salud Total' %}selected{% endif %}>Salud Total</option>
+                    <option value="Compensar" {% if datos.txt_eps == 'Compensar' %}selected{% endif %}>Compensar</option>
+                    <option value="Famisanar" {% if datos.txt_eps == 'Famisanar' %}selected{% endif %}>Famisanar</option>
+                    <option value="Coosalud" {% if datos.txt_eps == 'Coosalud' %}selected{% endif %}>Coosalud</option>
+                    <option value="Mutual Ser" {% if datos.txt_eps == 'Mutual Ser' %}selected{% endif %}>Mutual Ser</option>
+                    <option value="SOS" {% if datos.txt_eps == 'SOS' %}selected{% endif %}>SOS</option>
+                    <option value="Capital Salud" {% if datos.txt_eps == 'Capital Salud' %}selected{% endif %}>Capital Salud</option>
+                    <option value="Savia Salud" {% if datos.txt_eps == 'Savia Salud' %}selected{% endif %}>Savia Salud</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="txt_tipo_contrato">Tipo de Contrato</label>
+                <select id="txt_tipo_contrato" name="txt_tipo_contrato" required>
+                    <option value="Indefinido" {% if datos.txt_tipo_contrato == 'Indefinido' or not datos.txt_tipo_contrato %}selected{% endif %}>Indefinido</option>
+                    <option value="Fijo" {% if datos.txt_tipo_contrato == 'Fijo' %}selected{% endif %}>Fijo</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="txt_turno">Turno</label>
+                <select id="txt_turno" name="txt_turno" required>
+                    <option value="Mañana" {% if datos.txt_turno == 'Mañana' or not datos.txt_turno %}selected{% endif %}>Mañana</option>
+                    <option value="Tarde" {% if datos.txt_turno == 'Tarde' %}selected{% endif %}>Tarde</option>
+                    <option value="Noche" {% if datos.txt_turno == 'Noche' %}selected{% endif %}>Noche</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="txt_fecha_ingreso">Fecha de Ingreso</label>
+                <input type="date" id="txt_fecha_ingreso" name="txt_fecha_ingreso" required value="{{ datos.txt_fecha_ingreso|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group" id="group_fecha_terminacion" style="display: none;">
+                <label for="txt_fecha_terminacion">Fecha Terminación Contrato</label>
+                <input type="date" id="txt_fecha_terminacion" name="txt_fecha_terminacion" value="{{ datos.txt_fecha_terminacion|default_if_none:'' }}">
+                <small style="color: #888;">Sólo si es contrato fijo.</small>
+            </div>
+
+            <div class="form-group" style="grid-column: span 1;">
+                <label for="txt_experiencia">Experiencia Previa (PDF)</label>
+                <input type="file" id="txt_experiencia" name="txt_experiencia" accept=".pdf" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+        </div>
+
+        <!-- Sección: Contacto de Emergencia -->
+        <h3 class="section-title" style="margin: 40px 0 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">🚨 Contacto de Emergencia</h3>
+        <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div class="form-group">
+                <label for="txt_emergencia_nombre">Nombre Completo</label>
+                <input type="text" id="txt_emergencia_nombre" name="txt_emergencia_nombre" placeholder="Nombre al contacto" required minlength="3" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" value="{{ datos.txt_emergencia_nombre|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_emergencia_parentesco">Parentesco / Relación</label>
+                <input type="text" id="txt_emergencia_parentesco" name="txt_emergencia_parentesco" placeholder="Ej: Madre, Esposo" required minlength="4" maxlength="15" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" value="{{ datos.txt_emergencia_parentesco|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="txt_emergencia_numero">Número de Teléfono</label>
+                <input type="text" id="txt_emergencia_numero" name="txt_emergencia_numero" placeholder="Teléfono de emergencia" required minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ datos.txt_emergencia_numero|default_if_none:'' }}">
+            </div>
+        </div>
+
+        <!-- Sección: Seguridad -->
+        <h3 class="section-title" style="margin: 40px 0 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">🔒 Seguridad</h3>
+        <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+            <div class="form-group">
+                <label for="txt_contrasena">Establecer Contraseña</label>
+                <input type="password" id="txt_contrasena" name="txt_contrasena" placeholder="Mínimo 8 caracteres" required minlength="8" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label for="txt_estado">Estado Inicial</label>
+                <select id="txt_estado" name="txt_estado">
+                    <option value="Activo" {% if datos.txt_estado == 'Activo' or not datos.txt_estado %}selected{% endif %}>🟢 Activo</option>
+                    <option value="Inactivo" {% if datos.txt_estado == 'Inactivo' %}selected{% endif %}>🔴 Inactivo</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-actions" style="margin-top: 40px; display: flex; gap: 15px; border-top: 2px solid #eee; padding-top: 25px;">
+            <button type="submit" class="btn" style="padding: 12px 40px; font-size: 1rem; flex: 1;">💾 Registrar Cajero</button>
+            <a href="{% url 'listar_usuarios' %}" class="btn btn-cancelar" style="padding: 12px 30px; font-size: 1rem; display: flex; align-items: center; justify-content: center;" onclick="return confirm('¿Está seguro que quiere cancelar el registro?');">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const formattedToday = `${yyyy}-${mm}-${dd}`;
+        
+        // 1. Fecha de Ingreso: Por defecto hoy, mínimo hoy.
+        const inputFechaIngreso = document.getElementById('txt_fecha_ingreso');
+        const selectEstado = document.getElementById('txt_estado');
+        
+        function updateEstadoByFecha() {
+            if (inputFechaIngreso.value === formattedToday) {
+                selectEstado.value = 'Activo';
+            } else if (inputFechaIngreso.value > formattedToday) {
+                selectEstado.value = 'Inactivo';
+            }
+        }
+
+        if (inputFechaIngreso) {
+            if (!inputFechaIngreso.value) {
+                inputFechaIngreso.value = formattedToday;
+            }
+            inputFechaIngreso.min = formattedToday;
+            inputFechaIngreso.addEventListener('change', updateEstadoByFecha);
+        }
+
+        // 2. Fecha de Nacimiento: Máximo hace 18 años.
+        const inputFechaNacimiento = document.getElementById('txt_fecha_nacimiento');
+        if (inputFechaNacimiento) {
+            const minYear = yyyy - 18;
+            const maxDateNacimiento = `${minYear}-${mm}-${dd}`;
+            inputFechaNacimiento.max = maxDateNacimiento;
+        }
+
+        // 3. Mostrar/Ocultar fecha de terminación
+        const selectContrato = document.getElementById('txt_tipo_contrato');
+        const groupFechaTerminacion = document.getElementById('group_fecha_terminacion');
+
+        function toggleFechaTerminacion() {
+            if (selectContrato.value === 'Fijo') {
+                groupFechaTerminacion.style.display = 'block';
+            } else {
+                groupFechaTerminacion.style.display = 'none';
+            }
+        }
+
+        if (selectContrato) {
+            selectContrato.addEventListener('change', toggleFechaTerminacion);
+            toggleFechaTerminacion(); // Ejecutar al cargar
+        }
+    });
+</script>
+{% endblock %}
