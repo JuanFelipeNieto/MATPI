@@ -1,1 +1,1 @@
-web: gunicorn MATPI.wsgi
+web: python manage.py migrate && gunicorn MATPI.wsgi
