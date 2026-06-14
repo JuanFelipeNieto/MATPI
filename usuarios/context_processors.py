@@ -16,6 +16,18 @@ def roles_usuario(request):
         # Buscamos en la tabla de administradores
         es_admin = Administrador.objects.filter(usuario_id=id_usuario).exists()
         
+        # Asegurar tipo_navegacion y usuario_nombre_corto en sesión
+        if 'tipo_navegacion' not in request.session or 'usuario_nombre_corto' not in request.session:
+            from .models import Usuario
+            usuario = Usuario.objects.filter(id=id_usuario).first()
+            if usuario:
+                if 'tipo_navegacion' not in request.session:
+                    request.session['tipo_navegacion'] = getattr(usuario, 'tipo_navegacion', 'desplegable')
+                if 'usuario_nombre_corto' not in request.session:
+                    partes = usuario.nombre_completo.split()
+                    nombre_corto = partes[0] if len(partes) < 3 else f"{partes[0]} {partes[2]}"
+                    request.session['usuario_nombre_corto'] = nombre_corto
+        
         # 1. Materias con bajo stock
         materias_bajas = [mp for mp in MateriaPrima.objects.all() if mp.stock_total <= 10]
         

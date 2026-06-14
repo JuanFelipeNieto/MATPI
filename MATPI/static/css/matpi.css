@@ -803,3 +803,30 @@ input[type=number]::-webkit-outer-spin-button {
         grid-template-columns: 1fr;
     }
 }
+
+/* ================================================
+   NAVEGACIÓN FIJA (Sidebar siempre visible)
+   ================================================ */
+@media (min-width: 769px) {
+    body.nav-fixed .sidebar {
+        transform: translateX(0) !important;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    body.nav-fixed .sidebar-close-btn {
+        display: none !important;
+    }
+
+    body.nav-fixed .sidebar-overlay {
+        display: none !important;
+    }
+
+    body.nav-fixed .page-wrapper {
+        padding-left: var(--sidebar-w);
+        transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.nav-fixed .topbar-menu-btn {
+        display: none !important;
+    }
+}

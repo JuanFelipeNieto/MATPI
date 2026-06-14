@@ -76,6 +76,7 @@ def login_view(request):
             partes = user.nombre_completo.split()
             nombre_corto = partes[0] if len(partes) < 3 else f"{partes[0]} {partes[2]}"
             request.session['usuario_nombre_corto'] = nombre_corto
+            request.session['tipo_navegacion'] = getattr(user, 'tipo_navegacion', 'desplegable')
             return redirect('dashboard')
         except Usuario.DoesNotExist:
             messages.error(request, "Documento o contraseña incorrectos.")
@@ -142,10 +143,23 @@ def listar_usuarios(request):
 def ver_perfil(request, id):
     usuario = get_object_or_404(Usuario, id=id)
     cajero = Cajero.objects.filter(usuario=usuario).first()
+    
+    es_propio = str(usuario.id) == str(request.session.get('usuario_id'))
+    
+    if request.method == 'POST' and es_propio:
+        tipo_nav = request.POST.get('tipo_navegacion')
+        if tipo_nav in ['desplegable', 'fijo']:
+            usuario.tipo_navegacion = tipo_nav
+            usuario.save()
+            request.session['tipo_navegacion'] = tipo_nav
+            messages.success(request, "Preferencia de navegación actualizada.")
+            return redirect('ver_perfil', id=id)
+            
     return render(request, 'usuarios/perfil.html', {
         'usuario': usuario, 
         'cajero': cajero,
-        'es_admin': es_administrador(request)
+        'es_admin': es_administrador(request),
+        'es_propio': es_propio
     })
 
 @login_requerido

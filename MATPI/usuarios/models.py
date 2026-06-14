@@ -16,6 +16,12 @@ class Usuario(models.Model):
     direccion = models.CharField('Dirección', max_length=50)
     fecha_ingreso = models.DateField('Fecha de Ingreso')
     experiencia_laboral = models.FileField('Experiencia Laboral (PDF)', upload_to='experiencia_laboral/', blank=True, null=True)
+    tipo_navegacion = models.CharField(
+        'Tipo de Navegación',
+        max_length=15,
+        default='desplegable',
+        choices=[('desplegable', 'Desplegable'), ('fijo', 'Fijo')]
+    )
 
     class Meta:
         db_table = 'usuarios_usuario'

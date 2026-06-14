@@ -14,7 +14,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body>
+<body class="{% if request.session.tipo_navegacion == 'fijo' %}nav-fixed{% endif %}">
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
@@ -94,7 +94,7 @@
                 👤
             </div>
             <div class="sidebar-label" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <span style="display: block; color: white; font-weight: 600;">{{ request.session.usuario_nombre|default:"Usuario" }}</span>
+                <span style="display: block; color: white; font-weight: 600;">{{ request.session.usuario_nombre_corto|default:"Usuario" }}</span>
                 <small style="font-size: 0.65rem; color: #FFD700; font-weight: 800; text-transform: uppercase;">
                     {% if es_admin %}ADMINISTRADOR{% else %}CAJERO{% endif %}
                 </small>

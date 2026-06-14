@@ -153,6 +153,30 @@
         </div>
         {% endif %}
 
+        <!-- Tarjeta de Preferencias de Interfaz -->
+        {% if es_propio %}
+        <div class="info-card" style="background: var(--white); border-radius: 15px; padding: 25px; box-shadow: var(--shadow); border: 1px solid #f0f0f0;">
+            <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--black);">
+                <span style="color: var(--primary);">⚙️</span> Preferencias de Interfaz
+            </h3>
+            
+            <form method="POST" style="display: grid; gap: 15px;">
+                {% csrf_token %}
+                <div style="padding: 10px; background: #fafafa; border-radius: 10px; border-left: 3px solid var(--primary);">
+                    <label for="tipo_navegacion" style="display: block; color: #888; text-transform: uppercase; font-size: 0.65rem; font-weight: 700; margin-bottom: 6px;">Tipo de Navegación</label>
+                    <select name="tipo_navegacion" id="tipo_navegacion" style="width: 100%; padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 8px; font-family: var(--font); font-size: 0.9rem; background: white;">
+                        <option value="desplegable" {% if usuario.tipo_navegacion == 'desplegable' %}selected{% endif %}>Desplegable (Oculto por defecto)</option>
+                        <option value="fijo" {% if usuario.tipo_navegacion == 'fijo' %}selected{% endif %}>Fijo (Siempre visible en pantalla grande)</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn" style="background: var(--black); color: var(--white); border-radius: 10px; padding: 10px 20px; font-size: 0.9rem; font-weight: 700; transition: all 0.3s; width: 100%; border: none; cursor: pointer; text-align: center; display: block;">
+                    💾 Guardar Preferencia
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
     </div>
 
 </div>
