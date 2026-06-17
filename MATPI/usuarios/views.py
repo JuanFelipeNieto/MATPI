@@ -135,12 +135,22 @@ def listar_usuarios(request):
         return redirect('dashboard')
 
     buscar = request.GET.get('buscar', '')
-    usuarios = Usuario.objects.filter(cajero__isnull=False)
+    usuarios = Usuario.objects.filter(cajero__isnull=False).order_by('nombre_completo')
     if buscar:
         usuarios = usuarios.filter(
             models.Q(id__icontains=buscar) | models.Q(nombre_completo__icontains=buscar)
         )
-    return render(request, 'usuarios/listar.html', {'usuarios': usuarios, 'buscar': buscar})
+
+    from django.core.paginator import Paginator
+    paginator = Paginator(usuarios, 10)
+    page_number = request.GET.get('page')
+    usuarios_paginated = paginator.get_page(page_number)
+
+    return render(request, 'usuarios/listar.html', {
+        'usuarios': usuarios_paginated,
+        'buscar': buscar,
+        'es_admin': True
+    })
 
 def _validar_usuario_base(doc_id, nombre, telefono, experiencia_file=None):
     if doc_id is not None and len(doc_id) != 10:

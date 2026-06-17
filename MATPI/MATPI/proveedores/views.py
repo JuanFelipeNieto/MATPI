@@ -22,10 +22,26 @@ def listar_proveedores(request):
         return redirect('login')
 
     es_admin = check_admin(request)
-    proveedores = Proveedor.objects.all()
+    buscar = request.GET.get('buscar', '')
+
+    from django.db.models import Q
+    proveedores = Proveedor.objects.all().order_by('nombre_proveedor')
+
+    if buscar:
+        proveedores = proveedores.filter(
+            Q(nombre_proveedor__icontains=buscar) |
+            Q(telefono__icontains=buscar)
+        )
+
+    from django.core.paginator import Paginator
+    paginator = Paginator(proveedores, 10)
+    page_number = request.GET.get('page')
+    proveedores_paginated = paginator.get_page(page_number)
+
     return render(request, 'proveedores/listar.html', {
-        'proveedores': proveedores,
-        'es_admin': es_admin
+        'proveedores': proveedores_paginated,
+        'es_admin': es_admin,
+        'buscar': buscar
     })
 
 

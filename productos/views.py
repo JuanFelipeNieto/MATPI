@@ -57,15 +57,20 @@ def listar_productos(request):
         return redirect('login')
 
     es_admin = check_admin(request)
-    query = request.GET.get('buscar')
+    query = request.GET.get('buscar', '')
 
     if query:
-        productos = Producto.objects.filter(nombre_producto__icontains=query).prefetch_related('detalles_materia__materia_prima')
+        productos = Producto.objects.filter(nombre_producto__icontains=query).prefetch_related('detalles_materia__materia_prima').order_by('nombre_producto')
     else:
-        productos = Producto.objects.all().prefetch_related('detalles_materia__materia_prima')
+        productos = Producto.objects.all().prefetch_related('detalles_materia__materia_prima').order_by('nombre_producto')
+
+    from django.core.paginator import Paginator
+    paginator = Paginator(productos, 10)
+    page_number = request.GET.get('page')
+    productos_paginated = paginator.get_page(page_number)
 
     return render(request, 'productos/listar.html', {
-        'productos': productos,
+        'productos': productos_paginated,
         'es_admin': es_admin,
         'buscar': query
     })

@@ -71,5 +71,23 @@
             </tbody>
         </table>
     </div>
+
+    {% if materia_primas.has_other_pages %}
+    <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
+        {% if materia_primas.has_previous %}
+            <a href="?page=1{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&laquo;</a>
+            <a href="?page={{ materia_primas.previous_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&lsaquo;</a>
+        {% endif %}
+
+        <span class="current" style="font-weight: bold; color: #555;">
+            Página {{ materia_primas.number }} de {{ materia_primas.paginator.num_pages }}
+        </span>
+
+        {% if materia_primas.has_next %}
+            <a href="?page={{ materia_primas.next_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&rsaquo;</a>
+            <a href="?page={{ materia_primas.paginator.num_pages }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

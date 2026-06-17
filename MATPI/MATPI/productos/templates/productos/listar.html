@@ -84,5 +84,23 @@
             </tbody>
         </table>
     </div>
+
+    {% if productos.has_other_pages %}
+    <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
+        {% if productos.has_previous %}
+            <a href="?page=1{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&laquo;</a>
+            <a href="?page={{ productos.previous_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&lsaquo;</a>
+        {% endif %}
+
+        <span class="current" style="font-weight: bold; color: #555;">
+            Página {{ productos.number }} de {{ productos.paginator.num_pages }}
+        </span>
+
+        {% if productos.has_next %}
+            <a href="?page={{ productos.next_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&rsaquo;</a>
+            <a href="?page={{ productos.paginator.num_pages }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

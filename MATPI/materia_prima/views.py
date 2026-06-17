@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.utils import timezone
 from .models import MateriaPrima, Lote
@@ -57,15 +58,19 @@ def listar_materia_prima(request):
         return redirect('login')
 
     es_admin = check_admin(request)
-    query = request.GET.get('buscar')
+    query = request.GET.get('buscar', '')
 
     if query:
-        materia_primas = MateriaPrima.objects.filter(nombre_materia_prima__icontains=query)
+        materia_primas = MateriaPrima.objects.filter(nombre_materia_prima__icontains=query).order_by('nombre_materia_prima')
     else:
-        materia_primas = MateriaPrima.objects.all()
+        materia_primas = MateriaPrima.objects.all().order_by('nombre_materia_prima')
+
+    paginator = Paginator(materia_primas, 10)
+    page_number = request.GET.get('page')
+    materia_primas_paginated = paginator.get_page(page_number)
 
     return render(request, 'materia_prima/listar.html', {
-        'materia_primas': materia_primas,
+        'materia_primas': materia_primas_paginated,
         'es_admin': es_admin,
         'buscar': query
     })

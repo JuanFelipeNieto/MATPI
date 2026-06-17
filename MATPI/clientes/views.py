@@ -15,7 +15,7 @@ def listar_clientes(request):
     buscar = request.GET.get('buscar', '')
     localidad_filtro = request.GET.get('localidad', '')
 
-    clientes = Cliente.objects.annotate(total_pedidos=Count('pedidos'))
+    clientes = Cliente.objects.annotate(total_pedidos=Count('pedidos')).order_by('nombre_completo')
 
     if buscar:
         clientes = clientes.filter(
@@ -26,10 +26,15 @@ def listar_clientes(request):
     if localidad_filtro:
         clientes = clientes.filter(localidad=localidad_filtro)
 
+    from django.core.paginator import Paginator
+    paginator = Paginator(clientes, 10)
+    page_number = request.GET.get('page')
+    clientes_paginated = paginator.get_page(page_number)
+
     localidades = obtener_localidades()
 
     data = {
-        'clientes': clientes,
+        'clientes': clientes_paginated,
         'buscar': buscar,
         'localidad_filtro': localidad_filtro,
         'localidades': localidades,

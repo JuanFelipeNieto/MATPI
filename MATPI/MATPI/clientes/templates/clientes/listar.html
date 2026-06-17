@@ -69,5 +69,23 @@
             </tbody>
         </table>
     </div>
+
+    {% if clientes.has_other_pages %}
+    <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
+        {% if clientes.has_previous %}
+            <a href="?page=1{% if buscar %}&buscar={{ buscar }}{% endif %}{% if localidad_filtro %}&localidad={{ localidad_filtro }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&laquo;</a>
+            <a href="?page={{ clientes.previous_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}{% if localidad_filtro %}&localidad={{ localidad_filtro }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&lsaquo;</a>
+        {% endif %}
+
+        <span class="current" style="font-weight: bold; color: #555;">
+            Página {{ clientes.number }} de {{ clientes.paginator.num_pages }}
+        </span>
+
+        {% if clientes.has_next %}
+            <a href="?page={{ clientes.next_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}{% if localidad_filtro %}&localidad={{ localidad_filtro }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&rsaquo;</a>
+            <a href="?page={{ clientes.paginator.num_pages }}{% if buscar %}&buscar={{ buscar }}{% endif %}{% if localidad_filtro %}&localidad={{ localidad_filtro }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

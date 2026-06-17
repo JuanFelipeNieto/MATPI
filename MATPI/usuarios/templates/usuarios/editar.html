@@ -194,8 +194,8 @@
                 💾 Guardar Cambios
             </button>
 
-            <a href="{% url 'ver_perfil' usuario.id %}" class="btn btn-cancelar" style="padding: 12px 30px; font-size: 1rem; display: flex; align-items: center;" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">
-                🔙 Volver al perfil
+            <a href="{% if es_admin %}{% url 'listar_usuarios' %}{% else %}{% url 'ver_perfil' usuario.id %}{% endif %}" class="btn btn-cancelar" style="padding: 12px 30px; font-size: 1rem; display: flex; align-items: center;" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">
+                🔙 {% if es_admin %}Volver al listado{% else %}Volver al perfil{% endif %}
             </a>
         </div>
     </form>

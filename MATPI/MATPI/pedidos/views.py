@@ -65,7 +65,7 @@ def _cancelar_pedidos_abandonados():
 @require_GET
 def listar_pedidos(request):
     _cancelar_pedidos_abandonados() # Limpieza automática
-    buscar = request.GET.get('buscar')
+    buscar = request.GET.get('buscar', '')
     # Excluimos los pedidos cancelados y los registrados (que esperan factura) por petición del usuario
     pedidos = Pedido.objects.exclude(estado__in=['Cancelado', 'Registrado']).order_by('-fecha', '-id')
 
@@ -77,8 +77,13 @@ def listar_pedidos(request):
             # Búsqueda parcial por nombre de cliente como fallback amigable
             pedidos = pedidos.filter(cliente__nombre_completo__icontains=buscar)
 
+    from django.core.paginator import Paginator
+    paginator = Paginator(pedidos, 10)
+    page_number = request.GET.get('page')
+    pedidos_paginated = paginator.get_page(page_number)
+
     return render(request, 'pedidos/listar.html', _obtener_contexto_rol(request, {
-        'pedidos': pedidos,
+        'pedidos': pedidos_paginated,
         'buscar': buscar
     }))
 
