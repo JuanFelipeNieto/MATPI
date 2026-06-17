@@ -5,6 +5,10 @@
 # Environment variables
 .env
 
+# Static files
+staticfiles/
+**/staticfiles/
+
 # Local history
 .history/
 **/.history/
