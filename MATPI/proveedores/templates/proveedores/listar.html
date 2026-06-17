@@ -9,7 +9,6 @@
     <div class="form-busqueda">
         <div class="buscador-izq">
             <form method="GET" action="{% url 'listar_proveedores' %}" style="display: flex; gap: 10px; align-items: center;">
-                <label class="sr-only" for="txt_buscar">Buscar por nomb</label>
                 <input type="text" id="txt_buscar" name="buscar" placeholder="Buscar por nombre o teléfono"
                     value="{{ buscar|default:'' }}">
                 <button type="submit" class="btn btn-guardar">Buscar</button>

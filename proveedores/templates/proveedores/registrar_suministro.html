@@ -7,7 +7,7 @@
     <h1>Registrar Suministro de Materia Prima</h1>
     <p style="color: #666; margin-bottom: 20px;">Proveedor: <strong>{{ proveedor.nombre_proveedor }}</strong></p>
 
-    <form action="{% url 'registrar_suministro_materia' %}" method="POST" class="custom-form">
+    <form action="{% url 'registrar_suministro_materia' %}" method="POST" class="custom-form" onsubmit="return confirm('¿Está seguro de que desea registrar este suministro?');">
         {% csrf_token %}
         <input type="hidden" name="txt_proveedor_id" value="{{ proveedor.id }}">
 
