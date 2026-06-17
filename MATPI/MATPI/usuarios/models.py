@@ -47,7 +47,7 @@ class Administrador(models.Model):
         related_name='administrador'
     )
     ultima_fecha_login = models.DateTimeField('Última Fecha de Login', blank=True, null=True, db_column='Ult_Fecha_login')
-    formacion_educativa = models.CharField('Formación Educativa', max_length=35, blank=True, null=True, db_column='Formacion_Educativa')
+    formacion_educativa = models.CharField('Formación Educativa', max_length=35, blank=True, default='', db_column='Formacion_Educativa')
 
     def __str__(self):
         return self.usuario.nombre_completo
@@ -82,12 +82,12 @@ class Cajero(models.Model):
         db_column='ID_Usr',
         related_name='cajero'
     )
-    eps = models.CharField('EPS', max_length=20, choices=EPS_CHOICES, blank=True, null=True, db_column='EPS')
-    tipo_contrato = models.CharField('Tipo de Contrato', max_length=10, choices=CONTRATO_CHOICES, blank=True, null=True, db_column='tipo_contrato')
-    turno = models.CharField('Turno', max_length=7, choices=TURNO_CHOICES, blank=True, null=True, db_column='Turno')
-    contacto_emergencia_nombre = models.CharField('Nombre Contacto Emergencia', max_length=35, blank=True, null=True, db_column='Contacto_Emergencia_Nombre')
-    contacto_emergencia_parentesco = models.CharField('Parentesco Contacto Emergencia', max_length=15, blank=True, null=True, db_column='Contacto_Emergencia_Parentesco')
-    contacto_emergencia_numero = models.CharField('Número Contacto Emergencia', max_length=14, blank=True, null=True, db_column='Contacto_Emergencia_Numero')
+    eps = models.CharField('EPS', max_length=20, choices=EPS_CHOICES, blank=True, default='', db_column='EPS')
+    tipo_contrato = models.CharField('Tipo de Contrato', max_length=10, choices=CONTRATO_CHOICES, blank=True, default='', db_column='tipo_contrato')
+    turno = models.CharField('Turno', max_length=7, choices=TURNO_CHOICES, blank=True, default='', db_column='Turno')
+    contacto_emergencia_nombre = models.CharField('Nombre Contacto Emergencia', max_length=35, blank=True, default='', db_column='Contacto_Emergencia_Nombre')
+    contacto_emergencia_parentesco = models.CharField('Parentesco Contacto Emergencia', max_length=15, blank=True, default='', db_column='Contacto_Emergencia_Parentesco')
+    contacto_emergencia_numero = models.CharField('Número Contacto Emergencia', max_length=14, blank=True, default='', db_column='Contacto_Emergencia_Numero')
     fecha_terminacion_contrato = models.DateField('Fecha Terminación Contrato', blank=True, null=True, db_column='Fecha_Terminacion_Contrato')
 
     def __str__(self):

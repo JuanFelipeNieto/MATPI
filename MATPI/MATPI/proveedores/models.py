@@ -8,9 +8,9 @@ class Proveedor(models.Model):
 
     id = models.AutoField(primary_key=True)
     nombre_proveedor = models.CharField('Nombre del Proveedor', max_length=50)
-    direccion = models.CharField('Dirección', max_length=120, blank=True, null=True)
-    correo_electronico = models.EmailField('Correo Electrónico', max_length=35, blank=True, null=True)
-    telefono = models.CharField('Teléfono', max_length=14, blank=True, null=True)
+    direccion = models.CharField('Dirección', max_length=120, blank=True, default='')
+    correo_electronico = models.EmailField('Correo Electrónico', max_length=35, blank=True, default='')
+    telefono = models.CharField('Teléfono', max_length=14, blank=True, default='')
     cajero = models.ForeignKey(
         Cajero,
         on_delete=models.SET_NULL,

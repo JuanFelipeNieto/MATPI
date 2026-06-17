@@ -112,7 +112,7 @@ class DetallePedidoProducto(models.Model):
         verbose_name='Materias Excluidas',
         related_name='excluidas_en_pedidos'
     )
-    notas = models.TextField('Notas/Modificaciones', max_length=255, blank=True, null=True)
+    notas = models.TextField('Notas/Modificaciones', max_length=255, blank=True, default='')
 
     @property
     def subtotal(self):

@@ -12,7 +12,7 @@ class MateriaPrima(models.Model):
 
     id = models.AutoField(primary_key=True)
     nombre_materia_prima = models.CharField('Nombre', max_length=60)
-    unidad_medida = models.CharField('Unidad de Medida', max_length=20, blank=True, null=True)
+    unidad_medida = models.CharField('Unidad de Medida', max_length=20, blank=True, default='')
     cantidad_por_unidad = models.PositiveIntegerField('Cantidad por Unidad', default=1)
     tipo = models.CharField('Tipo', max_length=10, choices=TIPOS, default='Comida')
 
@@ -99,7 +99,7 @@ class DetalleProductoMateriaP(models.Model):
         related_name='detalles_producto'
     )
     cantidad_usada = models.DecimalField('Cantidad Usada', max_digits=10, decimal_places=2, default=0)
-    unidad_medida = models.CharField('Unidad Usada', max_length=20, blank=True, null=True)
+    unidad_medida = models.CharField('Unidad Usada', max_length=20, blank=True, default='')
 
     class Meta:
         db_table = 'Details_Producto_MateriaP'

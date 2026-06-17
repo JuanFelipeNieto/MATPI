@@ -43,4 +43,5 @@
          public function cliente()
           {
             return $this->hasOne(Cliente::class, 'ID_Usr', 'ID');
-        } }
+        }
+}

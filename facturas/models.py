@@ -7,7 +7,7 @@ class Factura(models.Model):
 
     id = models.SmallIntegerField('ID', primary_key=True)
     valor_total = models.PositiveIntegerField('Valor Total')
-    descripcion = models.TextField('Descripción', max_length=255, blank=True, null=True)
+    descripcion = models.TextField('Descripción', max_length=255, blank=True, default='')
     iva = models.FloatField('IVA (%)', blank=True, null=True)
     pedido = models.ForeignKey(
         Pedido,

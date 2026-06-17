@@ -14,7 +14,7 @@ def obtener_localidades():
                 data = response.json()
 
                 nombres = [feature['attributes']['LOCNOMBRE'] for feature in data.get('features', [])]
-                localidades = sorted(list(set(nombres)))
+                localidades = sorted(set(nombres))
                 cache.set('lista_localidades_bogota', localidades, 86400) # 24h
             else:
                 return []
