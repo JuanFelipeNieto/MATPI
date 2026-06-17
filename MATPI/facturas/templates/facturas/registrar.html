@@ -39,13 +39,14 @@
         </div>
 
         <div class="form-group">
-            <label for="txt_pedido">Fecha de Pedido</label>
             {% if pedido_seleccionado %}
+                <label for="txt_pedido_display">Fecha de Pedido</label>
                 <input type="hidden" name="txt_pedido" value="{{ pedido_seleccionado.id }}">
                 <select id="txt_pedido_display" class="form-control readonly-field" disabled>
                     <option selected>Pedido #{{ pedido_seleccionado.id }} ({{ pedido_seleccionado.fecha }})</option>
                 </select>
             {% else %}
+                <label for="txt_pedido">Fecha de Pedido</label>
                 <select id="txt_pedido" name="txt_pedido" required onchange="actualizarDesdePedido()">
                     <option value="">— Seleccione fecha —</option>
                     {% for pedido in pedidos %}

@@ -3,15 +3,18 @@ from django.db.models import Max
 import json
 from .models import Factura
 from pedidos.models import Pedido
+from django.views.decorators.http import require_http_methods, require_GET
 
 # Create your views here.
 
+@require_GET
 def listar_facturas(request):
     facturas = Factura.objects.all().order_by('-id')
     data = {'facturas': facturas}
     return render(request, 'facturas/listar.html', data)
 
 
+@require_GET
 def mostrar_registro_factura(request):
     pedidos = Pedido.objects.filter(estado='Registrado')
 
@@ -43,6 +46,7 @@ def mostrar_registro_factura(request):
     return render(request, 'facturas/registrar.html', data)
 
 
+@require_http_methods(["GET", "POST"])
 def registrar_factura(request):
     if request.method == 'POST':
         id_factura = request.POST.get('txt_id')
@@ -53,7 +57,7 @@ def registrar_factura(request):
 
         pedido = Pedido.objects.get(pk=pedido_id) if pedido_id else None
 
-        factura_obj = Factura.objects.create(
+        Factura.objects.create(
             id=id_factura,
             valor_total=valor_total,
             descripcion=descripcion,
@@ -68,6 +72,7 @@ def registrar_factura(request):
         return redirect('listar_facturas')
     return redirect('mostrar_registro_factura')
 
+@require_http_methods(["GET", "POST"])
 def eliminar_factura(request, id):
     # Por integridad de datos, las facturas ya no se pueden eliminar.
     # Solo el administrador de la BD podría hacerlo manualmente.

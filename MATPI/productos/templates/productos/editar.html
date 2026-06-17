@@ -19,7 +19,7 @@
         </div>
 
         <div class="form-group">
-            <label>Composición del Producto (Materias Primas)</label>
+            <span style="display:block; font-weight:bold; margin-bottom:5px;">Composición del Producto (Materias Primas)</span>
             <div class="table-container">
                 <table class="table" id="tabla-composicion">
                     <thead>
@@ -35,7 +35,7 @@
                             {% for item in composicion %}
                             <tr class="fila-materia">
                                 <td>
-                                    <select name="materia_id[]" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
+                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" aria-label="Materia Prima" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
                                         <option value="" data-equiv="" data-unidad="">— Seleccione —</option>
                                         {% for materia in materias_primas %}
                                             <option value="{{ materia.id }}" data-equiv="{{ materia.cantidad_por_unidad|unlocalize }}" data-unidad="{{ materia.unidad_medida }}" {% if materia.id == item.materia_prima.id %}selected{% endif %}>
@@ -63,7 +63,7 @@
                         {% else %}
                             <tr class="fila-materia">
                                 <td>
-                                    <select name="materia_id[]" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
+                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" aria-label="Materia Prima" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
                                         <option value="" data-equiv="" data-unidad="">— Seleccione —</option>
                                         {% for materia in materias_primas %}
                                             <option value="{{ materia.id }}" data-equiv="{{ materia.cantidad_por_unidad|unlocalize }}" data-unidad="{{ materia.unidad_medida }}">{{ materia.nombre_materia_prima }}</option>

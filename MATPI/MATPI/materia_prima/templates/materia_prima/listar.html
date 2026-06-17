@@ -18,7 +18,8 @@
     <div class="form-busqueda">
         <div class="buscador-izq">
             <form method="GET" action="{% url 'listar_materia_prima' %}">
-                <input type="text" name="buscar" placeholder="Buscar por nombre" value="{{ buscar|default:'' }}">
+                <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por nombre</label>
+                <input type="text" id="buscar" name="buscar" placeholder="Buscar por nombre" value="{{ buscar|default:'' }}">
                 <button type="submit" class="btn btn-guardar">Buscar</button>
             </form>
         </div>

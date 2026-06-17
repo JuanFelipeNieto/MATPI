@@ -7,6 +7,10 @@ from usuarios.models import Administrador
 import openpyxl
 from datetime import datetime
 import re
+from django.views.decorators.http import require_http_methods, require_GET
+
+MSG_NO_PERMISOS = "No tienes permisos para realizar esta acción."
+MSG_DATOS_INVALIDOS = "Los datos no son válidos"
 
 # Función auxiliar para validar si el ID en sesión es Administrador
 def check_admin(request):
@@ -46,6 +50,7 @@ def unpack_materia_prima_data(data):
 
 # --- VISTA PRINCIPAL (LISTADO) ---
 
+@require_GET
 def listar_materia_prima(request):
     id_sesion = request.session.get('usuario_id')
     if not id_sesion:
@@ -67,6 +72,7 @@ def listar_materia_prima(request):
 
 # --- GESTIÓN DE MATERIA PRIMA (CREACIÓN ABIERTA A CAJERO Y ADMIN) ---
 
+@require_GET
 def mostrar_registro_materia_prima(request):
     id_sesion = request.session.get('usuario_id')
     if not id_sesion:
@@ -83,10 +89,11 @@ def mostrar_registro_materia_prima(request):
         'fecha_actual': timezone.now()
     })
 
+@require_http_methods(["GET", "POST"])
 def registrar_materia_prima(request):
     # Verificamos que sea administrador
     if not check_admin(request):
-        messages.error(request, "No tienes permisos para realizar esta acción.")
+        messages.error(request, MSG_NO_PERMISOS)
         return redirect('listar_materia_prima')
 
     if request.method == 'POST':
@@ -118,6 +125,7 @@ def registrar_materia_prima(request):
         return redirect('listar_materia_prima')
     return redirect('mostrar_registro_materia_prima')
 
+@require_GET
 def pre_editar_materia_prima(request, id):
     es_admin = check_admin(request)
     # Aquí sí mantenemos el bloqueo de seguridad
@@ -131,9 +139,10 @@ def pre_editar_materia_prima(request, id):
         'es_admin': es_admin
     })
 
+@require_http_methods(["GET", "POST"])
 def editar_materia_prima(request):
     if not check_admin(request):
-        messages.error(request, "No tienes permisos para realizar esta acción.")
+        messages.error(request, MSG_NO_PERMISOS)
         return redirect('listar_materia_prima')
 
     if request.method == 'POST':
@@ -149,6 +158,7 @@ def editar_materia_prima(request):
 
     return redirect('listar_materia_prima')
 
+@require_http_methods(["GET", "POST"])
 def eliminar_materia_prima(request, id):
     if not check_admin(request):
         messages.error(request, "No tienes permisos para eliminar materia prima.")
@@ -170,6 +180,7 @@ def eliminar_materia_prima(request, id):
     return redirect('listar_materia_prima')
 
 
+@require_GET
 def ver_lotes(request, id_materia):
     id_sesion = request.session.get('usuario_id')
     if not id_sesion: return redirect('login')
@@ -188,6 +199,7 @@ def ver_lotes(request, id_materia):
         'fecha_actual': timezone.now()
     })
 
+@require_GET
 def pre_editar_lote(request, id_lote):
     if not check_admin(request):
         messages.error(request, "Acceso denegado. Solo administradores pueden editar lotes.")
@@ -199,6 +211,7 @@ def pre_editar_lote(request, id_lote):
         'es_admin': True
     })
 
+@require_http_methods(["GET", "POST"])
 def editar_lote(request):
     if not check_admin(request):
         messages.error(request, "Permiso denegado.")
@@ -217,6 +230,7 @@ def editar_lote(request):
 
     return redirect('listar_materia_prima')
 
+@require_http_methods(["GET", "POST"])
 def eliminar_lote(request, id_lote):
     if not check_admin(request):
         messages.error(request, "Permiso denegado.")
@@ -231,9 +245,10 @@ def eliminar_lote(request, id_lote):
 
 
 
+@require_http_methods(["GET", "POST"])
 def importar_materia_prima_excel(request):
     if not check_admin(request):
-        messages.error(request, "No tienes permisos para realizar esta acción.")
+        messages.error(request, MSG_NO_PERMISOS)
         return redirect('listar_materia_prima')
 
     if request.method == 'POST' and request.FILES.get('archivo_excel'):
@@ -253,7 +268,7 @@ def importar_materia_prima_excel(request):
             # 1. Verificar si hay datos válidos y duplicados
             for row in rows:
                 if len(row) < 4:
-                    messages.error(request, "Los datos no son válidos")
+                    messages.error(request, MSG_DATOS_INVALIDOS)
                     return redirect('importar_materia_prima_excel')
 
                 nombre, unidad, cant_unidad, tipo = row[:4]
@@ -263,7 +278,7 @@ def importar_materia_prima_excel(request):
                 try:
                     cant_unidad = int(cant_unidad or 1)
                 except (ValueError, TypeError):
-                    messages.error(request, "Los datos no son válidos")
+                    messages.error(request, MSG_DATOS_INVALIDOS)
                     return redirect('importar_materia_prima_excel')
 
                 unidad = unidad or 'und'
@@ -304,9 +319,10 @@ def importar_materia_prima_excel(request):
     return render(request, 'materia_prima/importar_materia_prima.html')
 
 
+@require_http_methods(["GET", "POST"])
 def importar_lotes_excel(request):
     if not check_admin(request):
-        messages.error(request, "No tienes permisos para realizar esta acción.")
+        messages.error(request, MSG_NO_PERMISOS)
         return redirect('listar_materia_prima')
 
     if request.method == 'POST' and request.FILES.get('archivo_excel'):
@@ -327,7 +343,7 @@ def importar_lotes_excel(request):
             # 1. Validación de tipos, existencia de materias y duplicados
             for row_idx, row in enumerate(rows, start=2):
                 if len(row) < 2:
-                    messages.error(request, "Los datos no son válidos")
+                    messages.error(request, MSG_DATOS_INVALIDOS)
                     return redirect('importar_lotes_excel')
 
                 nombre_completo, cantidad, f_vencimiento, precio = row[:4]
@@ -339,7 +355,7 @@ def importar_lotes_excel(request):
                     if precio is not None:
                         precio = float(precio)
                 except (ValueError, TypeError):
-                    messages.error(request, "Los datos no son válidos")
+                    messages.error(request, MSG_DATOS_INVALIDOS)
                     return redirect('importar_lotes_excel')
 
                 nombre_completo = str(nombre_completo).strip()
@@ -358,7 +374,7 @@ def importar_lotes_excel(request):
                                 cantidad_por_unidad=equiv_int,
                                 unidad_medida__iexact=unidad_str
                             ).first()
-                        except: pass
+                        except Exception: pass
 
                 if not materia:
                     messages.error(request, f"Error en fila {row_idx}: Materia prima '{nombre_completo}' no encontrada.")
@@ -368,7 +384,7 @@ def importar_lotes_excel(request):
                 if isinstance(f_vencimiento, str):
                     try:
                         f_vencimiento = datetime.strptime(f_vencimiento, '%Y-%m-%d').date()
-                    except:
+                    except ValueError:
                         f_vencimiento = None
                 elif isinstance(f_vencimiento, datetime):
                     f_vencimiento = f_vencimiento.date()

@@ -145,7 +145,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="txt_estado">Estado de Orden</label>
+                    <label for="txt_estado_display">Estado de Orden</label>
                     <input type="text" id="txt_estado_display" value="{% if pedido.estado == 'Preparacion' %}En preparación{% elif pedido.estado == 'Completado' %}Completado{% else %}{{ pedido.estado }}{% endif %}" readonly class="readonly-field">
                     <input type="hidden" name="txt_estado" value="{{ pedido.estado }}">
                 </div>
@@ -203,7 +203,7 @@
 
 <!-- Template Oculto para Productos -->
 <div id="select-productos-html" style="display: none;">
-    <select name="producto_id[]" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
+    <select name="producto_id[]" aria-label="Seleccionar Producto" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
         <option value="">— Seleccione Producto —</option>
         {% for producto in productos %}
             {% if producto.categoria != 'Bebidas' %}
@@ -217,7 +217,7 @@
 
 <!-- Template Oculto para Bebidas -->
 <div id="select-bebidas-html" style="display: none;">
-    <select name="producto_id[]" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
+    <select name="producto_id[]" aria-label="Seleccionar Bebida" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
         <option value="">— Seleccione Bebida —</option>
         {% for bebida in bebidas %}
         <option value="{{ bebida.id }}" data-precio="{{ bebida.precio }}" data-composicion='[]'>

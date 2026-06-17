@@ -9,13 +9,14 @@
     <div class="form-busqueda">
         <div class="buscador-izq">
             <form method="GET" action="{% url 'listar_pedidos' %}">
-                <input type="text" name="buscar" placeholder="Número de orden..." value="{{ buscar|default:'' }}">
+                <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por número de orden</label>
+                <input type="text" id="buscar" name="buscar" placeholder="Número de orden..." value="{{ buscar|default:'' }}">
                 <button type="submit" class="btn btn-guardar">Buscar</button>
             </form>
         </div>
         <div style="display: flex; gap: 10px;">
             <a href="{% url 'cocina' %}" target="_blank" class="btn btn-negro" style="background: #0d0d0d; color: #ff9f00; border: 1px solid #ff9f00;">📺 Pantalla Cocina</a>
-            <a href="{% url 'pedidos_pendientes' %}" class="btn btn-azul" style="background: #fff9f0; border: 1px solid #ff9f00; color: #e68a00;">🕒 Ver Pedidos en Preparación</a>
+            <a href="{% url 'pedidos_pendientes' %}" class="btn btn-azul" style="background: #fff9f0; border: 1px solid #ff9f00; color: #994d00;">🕒 Ver Pedidos en Preparación</a>
             <a href="{% url 'mostrar_registro_pedido' %}" class="btn btn-guardar">+ Nuevo Pedido</a>
         </div>
     </div>
@@ -50,14 +51,14 @@
                         {% elif pedido.estado == 'Completado' or pedido.estado == '0' or pedido.estado == False %}
                             <span class="badge badge-verde">Completado</span>
                         {% else %}
-                            <span class="badge" style="background: #ef4444; color: white;">Cancelado</span>
+                            <span class="badge" style="background: #c53030; color: white;">Cancelado</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if pedido.estado == 'Completado' or pedido.estado == '0' or pedido.estado == False %}
                             <span class="badge badge-verde">{{ pedido.tiempo_preparacion_total }}</span>
                         {% elif pedido.estado == 'Cancelado' %}
-                            <span class="badge" style="background: #94a3b8; color: white;">N/A</span>
+                            <span class="badge" style="background: #475569; color: white;">N/A</span>
                         {% else %}
                             <span class="badge badge-naranja timer-preparacion" data-inicio="{{ pedido.fecha.isoformat }}">00m 00s</span>
                         {% endif %}

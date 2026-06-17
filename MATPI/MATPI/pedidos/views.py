@@ -9,6 +9,10 @@ from productos.models import Producto
 from materia_prima.models import MateriaPrima, DetalleProductoMateriaP, Lote
 from reservas.models import Reserva
 from clientes.models import Cliente
+from django.views.decorators.http import require_http_methods, require_GET
+
+PRODUCTO_ID_KEY = 'producto_id[]'
+PRODUCTO_CANTIDAD_KEY = 'producto_cantidad[]'
 
 def _obtener_contexto_rol(request, datos_extra=None):
     id_usuario = request.session.get('usuario_id')
@@ -58,6 +62,7 @@ def _cancelar_pedidos_abandonados():
         count += 1
     return count
 
+@require_GET
 def listar_pedidos(request):
     _cancelar_pedidos_abandonados() # Limpieza automática
     buscar = request.GET.get('buscar')
@@ -77,6 +82,7 @@ def listar_pedidos(request):
         'buscar': buscar
     }))
 
+@require_GET
 def detalles_pedido(request, id):
     pedido = Pedido.objects.get(pk=id)
     # Los detalles ya están relacionados por models.py (related_name='detalles' o implícito)
@@ -99,7 +105,7 @@ def _descontar_stock_pedido(pedido):
 
         # 2. Descontar materias primas de los lotes
         # Obtenemos la composición base del producto
-        composicion_base = DetalleProductoMateriaP.objects.filter(producto=producto)
+        composicion_base = DetalleProductoMateriaP.objects.filter(producto=producto).select_related('materia_prima')
         excluidas = detalle.materias_excluidas.all()
 
         for comp in composicion_base:
@@ -187,8 +193,9 @@ def _validar_stock_pedido(productos_ids, cantidades, exclusiones_por_producto):
 
     return True, None
 
+@require_GET
 def mostrar_registro_pedido(request):
-    productos = Producto.objects.all()
+    productos = Producto.objects.prefetch_related('detalles_materia__materia_prima')
     # Pre-cargar composiciones para el modal/detalles
     for p in productos:
         # Determinar si el producto tiene algún ingrediente con lote actual vencido
@@ -241,8 +248,8 @@ def registrar_pedido(request):
         cliente = Cliente.objects.filter(pk=cliente_id).first() if cliente_id else None
 
         # 0.1 Validar Stock antes de proceder
-        productos_ids = request.POST.getlist('producto_id[]')
-        cantidades = request.POST.getlist('producto_cantidad[]')
+        productos_ids = request.POST.getlist(PRODUCTO_ID_KEY)
+        cantidades = request.POST.getlist(PRODUCTO_CANTIDAD_KEY)
         exclusiones_data = []
         for i in range(len(productos_ids)):
             exclusiones_data.append(request.POST.getlist(f'producto_exclusiones_{i}[]'))
@@ -331,7 +338,7 @@ def _restaurar_stock_pedido(pedido):
         producto.save()
 
         # 2. Devolver a los lotes de materia prima
-        composicion_base = DetalleProductoMateriaP.objects.filter(producto=producto)
+        composicion_base = DetalleProductoMateriaP.objects.filter(producto=producto).select_related('materia_prima')
         excluidas = detalle.materias_excluidas.all()
 
         for comp in composicion_base:
@@ -356,6 +363,7 @@ def _restaurar_stock_pedido(pedido):
     for p in Producto.objects.all():
         recalcular_stock_producto(p)
 
+@require_GET
 def pre_editar_pedido(request, id):
     # SEGURIDAD: Solo admin o cajero pueden entrar al formulario de edición
     contexto = _obtener_contexto_rol(request)
@@ -369,7 +377,7 @@ def pre_editar_pedido(request, id):
         messages.warning(request, f"Los pedidos {status_label} no pueden ser editados. Solo es posible ver sus detalles.")
         return redirect('detalles_pedido', id=id)
 
-    productos = Producto.objects.all()
+    productos = Producto.objects.prefetch_related('detalles_materia__materia_prima')
     # Pre-cargar composiciones para el modal/detalles (igual que en registro)
     for p in productos:
         # Determinar si el producto tiene algún ingrediente con lote actual vencido
@@ -410,6 +418,7 @@ def pre_editar_pedido(request, id):
     }
     return render(request, 'pedidos/editar.html', _obtener_contexto_rol(request, datos))
 
+@require_http_methods(["GET", "POST"])
 def editar_pedido(request):
     # SEGURIDAD: Validar rol antes de procesar el cambio en BD
     contexto = _obtener_contexto_rol(request)
@@ -417,15 +426,15 @@ def editar_pedido(request):
         return redirect('listar_pedidos')
 
     if request.method == 'POST':
-        id = request.POST.get('txt_id')
-        pedido = Pedido.objects.get(pk=id)
+        pedido_id = request.POST.get('txt_id')
+        pedido = Pedido.objects.get(pk=pedido_id)
 
         # 1. Restaurar stock antiguo temporalmente para validar disponibilidad total
         _restaurar_stock_pedido(pedido)
 
         # 1.1 Validar nuevo stock antes de borrar detalles y aplicar cambios
-        productos_ids_nuevos = request.POST.getlist('producto_id[]')
-        cantidades_nuevas = request.POST.getlist('producto_cantidad[]')
+        productos_ids_nuevos = request.POST.getlist(PRODUCTO_ID_KEY)
+        cantidades_nuevas = request.POST.getlist(PRODUCTO_CANTIDAD_KEY)
         exclusiones_data_nuevas = []
         for i in range(len(productos_ids_nuevos)):
             exclusiones_data_nuevas.append(request.POST.getlist(f'producto_exclusiones_{i}[]'))
@@ -496,6 +505,7 @@ def editar_pedido(request):
 
     return redirect('listar_pedidos')
 
+@require_GET
 def pedidos_pendientes(request):
     _cancelar_pedidos_abandonados() # Limpieza automática
     pedidos = Pedido.objects.filter(estado='Preparacion').order_by('fecha')
@@ -504,6 +514,7 @@ def pedidos_pendientes(request):
         'ahora': timezone.now()
     }))
 
+@require_http_methods(["GET", "POST"])
 def entregar_pedido(request, id):
     pedido = get_object_or_404(Pedido, pk=id)
     pedido.estado = 'Completado'
@@ -514,6 +525,7 @@ def entregar_pedido(request, id):
     messages.success(request, f"Pedido #{pedido.id} marcado como ENTREGADO.")
     return redirect('pedidos_pendientes')
 
+@require_http_methods(["GET", "POST"])
 def cancelar_pedido(request, id):
     """Marca un pedido como cancelado y RESTAURA el stock consumido."""
     pedido = get_object_or_404(Pedido, pk=id)
@@ -532,6 +544,7 @@ def cancelar_pedido(request, id):
 
     return redirect('listar_pedidos')
 
+@require_GET
 def cocina(request):
     """Vista diseñada para pantalla de cocina (solo visualización)."""
     # Filtramos pedidos activos, ordenados por antigüedad

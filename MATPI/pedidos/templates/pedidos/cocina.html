@@ -114,7 +114,7 @@
             document.getElementById('reloj').innerText = now.toLocaleTimeString();
 
             document.querySelectorAll('.timer').forEach(el => {
-                const start = new Date(el.getAttribute('data-inicio'));
+                const start = new Date(el.dataset.inicio);
                 const diff = now - start;
                 const min = Math.floor(diff / 60000);
                 const sec = Math.floor((diff % 60000) / 1000);
@@ -129,7 +129,7 @@
 
         // Sincronización en "Tiempo Real" usando AJAX cada 3 segundos
         function syncCocina() {
-            fetch(window.location.href, {
+            fetch(globalThis.location.href, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(res => res.text())

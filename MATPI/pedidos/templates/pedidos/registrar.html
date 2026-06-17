@@ -162,7 +162,7 @@
                     <tbody id="body-productos">
                         <tr class="fila-producto" data-indice="0" data-tipo="producto">
                             <td>
-                                <select name="producto_id[]" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
+                                <select name="producto_id[]" id="select_producto_0" aria-label="Seleccionar Producto" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
                                     <option value="">— Seleccione Producto —</option>
                                     {% for producto in productos %}
                                         {% if producto.categoria != 'Bebidas' %}
@@ -177,7 +177,7 @@
                                 </select>
                             </td>
                             <td>
-                                <select name="producto_cantidad[]" class="form-control select-cantidad" onchange="calcularTotal()" required>
+                                <select name="producto_cantidad[]" id="select_cantidad_0" aria-label="Cantidad" class="form-control select-cantidad" onchange="calcularTotal()" required>
                                     {% for i in "123456789"|make_list %}<option value="{{ forloop.counter }}">{{ forloop.counter }}</option>{% endfor %}
                                     <option value="10">10</option>
                                     <option value="15">15</option>
@@ -193,8 +193,8 @@
                                     <p style="font-size: 0.8rem; font-weight: bold; margin-bottom: 8px; color: #e65100;">Marque los ingredientes a ELIMINAR del producto:</p>
                                     <div class="lista-exclusiones"></div>
                                     <div style="margin-top: 12px; display: none;"> <!-- Ocultamos notas si el usuario prefiere 'solo' exclusiones -->
-                                        <label style="font-size: 0.85rem; font-weight: 600; color: #64748b;">NOTAS:</label>
-                                        <textarea name="producto_notas_0" class="form-control" rows="2"></textarea>
+                                        <label for="producto_notes_0" style="font-size: 0.85rem; font-weight: 600; color: #64748b;">NOTAS:</label>
+                                        <textarea id="producto_notes_0" name="producto_notas_0" class="form-control" rows="2"></textarea>
                                     </div>
                                 </div>
                             </td>
@@ -207,10 +207,10 @@
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button type="button" class="btn btn-azul" onclick="agregarFilaProducto()" style="flex: 1; background: #f8fafc; border: 2px dashed #cbd5e1; color: #64748b;">
+                <button type="button" class="btn btn-azul" onclick="agregarFilaProducto()" style="flex: 1; background: #f8fafc; border: 2px dashed #cbd5e1; color: #334155;">
                     + Agregar Comida
                 </button>
-                <button type="button" class="btn btn-azul" onclick="agregarFilaBebida()" style="flex: 1; background: #fff9f0; border: 2px dashed #ff9f00; color: #e68a00;">
+                <button type="button" class="btn btn-azul" onclick="agregarFilaBebida()" style="flex: 1; background: #fff9f0; border: 2px dashed #ff9f00; color: #994d00;">
                     + Agregar Bebida
                 </button>
             </div>
@@ -236,7 +236,7 @@
 
 <!-- Template Oculto para Bebidas -->
 <div id="select-bebidas-html" style="display: none;">
-    <select name="producto_id[]" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
+    <select name="producto_id[]" id="select_producto_0" aria-label="Seleccionar Producto" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
         <option value="">— Seleccione Bebida —</option>
         {% for bebida in bebidas %}
         <option value="{{ bebida.id }}"
@@ -263,9 +263,9 @@
         const opciones = datalist.options;
         let clienteId = null;
 
-        for (let i = 0; i < opciones.length; i++) {
-            if (opciones[i].value === valor) {
-                clienteId = opciones[i].getAttribute('data-id');
+        for (const opcion of opciones) {
+            if (opcion.value === valor) {
+                clienteId = opcion.dataset.id;
                 break;
             }
         }
@@ -301,7 +301,7 @@
         }
 
         for (let i = 1; i < opciones.length; i++) {
-            const idC = opciones[i].getAttribute('data-cliente');
+            const idC = opciones[i].dataset.cliente;
             if (idC === clienteId) {
                 opciones[i].style.display = 'block';
                 encontradas++;
@@ -336,7 +336,7 @@
 
         const nuevaFila = filasProds[0].cloneNode(true);
         nuevaFila.classList.add('fila-bebida');
-        nuevaFila.setAttribute('data-tipo', 'bebida');
+        nuevaFila.dataset.tipo = 'bebida';
 
         const tdDesc = nuevaFila.querySelector('td:first-child');
         tdDesc.innerHTML = document.getElementById('select-bebidas-html').innerHTML;
@@ -361,7 +361,7 @@
         if(divDetalles) divDetalles.style.display = "none";
 
         const nuevoIndice = contadorFilas++;
-        fila.setAttribute('data-indice', nuevoIndice);
+        fila.dataset.indice = nuevoIndice;
         fila.querySelector('textarea')?.setAttribute('name', `producto_notas_${nuevoIndice}`);
         if(notas) notas.value = "";
 
@@ -389,11 +389,11 @@
         const selectElement = fila.querySelector('.select-producto');
         const opcion = selectElement.options[selectElement.selectedIndex];
         const listaExcl = fila.querySelector('.lista-exclusiones');
-        const indice = fila.getAttribute('data-indice') || 0;
+        const indice = fila.dataset.indice || 0;
         const selectCant = fila.querySelector('.select-cantidad');
 
         if (opcion.value && listaExcl) {
-            const composicion = JSON.parse(opcion.getAttribute('data-composicion') || "[]");
+            const composicion = JSON.parse(opcion.dataset.composicion || "[]");
 
             // 1. Construir HTML solo si el cambio vino del Select (Para no borrar los checkboxes chequeados al hacer click)
             if (elemento.type !== 'checkbox') {
@@ -402,7 +402,12 @@
                     const isBad = mp.stock <= 0 || mp.expired;
                     const labelStyle = isBad ? 'style="border-color: #ef4444; background: #fef2f2;"' : '';
                     const spanStyle = isBad ? 'style="color: #b91c1c; font-weight: bold;"' : '';
-                    const statusText = mp.expired ? '(¡VENCIDO!)' : (mp.stock <= 0 ? '(¡AGOTADO!)' : '');
+                    let statusText = '';
+                    if (mp.expired) {
+                        statusText = '(¡VENCIDO!)';
+                    } else if (mp.stock <= 0) {
+                        statusText = '(¡AGOTADO!)';
+                    }
 
                     html += `
                         <label class="exclusion-item" ${labelStyle}>
@@ -419,10 +424,10 @@
             // 2. Calcular los límites de stock ignorando los ingredientes que estén excluidos
             let stockLimitado = Infinity;
             let agotado = false;
-            const indicesExcluidos = Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`)).map(cb => parseInt(cb.value));
+            const indicesExcluidos = new Set(Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`)).map(cb => Number.parseInt(cb.value, 10)));
 
             composicion.forEach(mp => {
-                if (!indicesExcluidos.includes(mp.id)) {
+                if (!indicesExcluidos.has(mp.id)) {
                     const posible = Math.floor(mp.stock / mp.cantidad_usada);
                     if (posible < stockLimitado) stockLimitado = posible;
                     if (mp.stock <= 0) agotado = true;
@@ -441,7 +446,7 @@
             if (stockLimitado <= 10 && stockLimitado > 0) {
                 // Limitar las opciones de cantidad
                 Array.from(selectCant.options).forEach(opt => {
-                    if (parseInt(opt.value) > stockLimitado) {
+                    if (Number.parseInt(opt.value, 10) > stockLimitado) {
                         opt.disabled = true;
                         opt.style.color = "#ccc";
                     } else {
@@ -450,7 +455,7 @@
                     }
                 });
 
-                if (parseInt(selectCant.value) > stockLimitado) {
+                if (Number.parseInt(selectCant.value, 10) > stockLimitado) {
                     selectCant.value = stockLimitado;
                 }
             } else {
@@ -481,8 +486,8 @@
 
             const seleccionada = select.options[select.selectedIndex];
             if (seleccionada && seleccionada.value) {
-                const precio = parseFloat(seleccionada.getAttribute('data-precio') || 0);
-                const cantidad = parseInt(selectCant.value || 0);
+                const precio = Number.parseFloat(seleccionada.dataset.precio || 0);
+                const cantidad = Number.parseInt(selectCant.value || 0, 10);
                 const totalFila = precio * cantidad;
 
                 subtotalFila.innerText = formatter.format(totalFila);
@@ -520,7 +525,7 @@
             const opcion = select.options[select.selectedIndex];
             if (!opcion || !opcion.value) return;
 
-            const composicion = JSON.parse(opcion.getAttribute('data-composicion') || "[]");
+            const composicion = JSON.parse(opcion.dataset.composicion || "[]");
             const cantidad = parseInt(fila.querySelector('.select-cantidad').value);
             const excluidas = Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`)).map(cb => parseInt(cb.value));
 

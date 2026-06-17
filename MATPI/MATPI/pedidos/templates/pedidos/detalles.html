@@ -14,19 +14,19 @@
     <div class="card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 30px;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
             <div>
-                <label style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Fecha y Hora de Registro</label>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Fecha y Hora de Registro</span>
                 <p style="font-weight: 600; font-size: 1.1rem;">{{ pedido.fecha|date:"d/m/Y H:i" }}</p>
             </div>
             <div>
-                <label style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Cliente</label>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Cliente</span>
                 <p style="font-weight: 600; font-size: 1.1rem;">{{ pedido.cliente.nombre_completo|default:"No aplica" }}</p>
             </div>
             <div>
-                <label style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Método de Pago</label>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Método de Pago</span>
                 <p style="font-weight: 600; font-size: 1.1rem;">{{ pedido.metodo_pago }}</p>
             </div>
             <div>
-                <label style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Cajero responsable</label>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Cajero responsable</span>
                 <p style="font-weight: 600; font-size: 1.1rem;">{{ pedido.usuario.nombre_completo|default:"Sistema" }}</p>
             </div>
         </div>
