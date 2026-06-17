@@ -97,13 +97,13 @@
         const inputUnidadOculto = nuevaFila.querySelector('.input-unidad-texto');
         const unitLabels = nuevaFila.querySelectorAll('.unit-label');
         const msgUnidades = nuevaFila.querySelector('.msg-unidades');
-        
+
         if(select) select.value = "";
         if(inputEquiv) inputEquiv.value = "";
         if(inputUnidadOculto) inputUnidadOculto.value = "";
         if(unitLabels) unitLabels.forEach(l => l.textContent = "");
         if(msgUnidades) msgUnidades.textContent = "";
-        
+
         tbody.appendChild(nuevaFila);
     }
     function eliminarFila(boton) {
@@ -114,18 +114,18 @@
             alert("La comida debe tener al menos un ingrediente.");
         }
     }
-    
+
     function actualizarEquivalencia(selectObj) {
         const tr = selectObj.closest('tr');
         const opcion = selectObj.options[selectObj.selectedIndex];
-        
+
         const equiv = parseFloat(opcion.getAttribute('data-equiv')) || 0;
         const unidad = opcion.getAttribute('data-unidad') || '';
-        
+
         const inputCantidad = tr.querySelector('.input-equiv');
         const inputUnidadOculto = tr.querySelector('.input-unidad-texto');
         const labelsUnidad = tr.querySelectorAll('.unit-label');
-        
+
         if (equiv > 0) {
             inputCantidad.value = equiv;
             inputUnidadOculto.value = unidad;
@@ -138,7 +138,7 @@
             tr.querySelector('.msg-unidades').textContent = "";
         }
     }
-    
+
     function actualizarUnidades(inputObj) {
         const tr = inputObj.closest('tr');
         const select = tr.querySelector('.select-materia');
@@ -149,7 +149,7 @@
         const cantidadActual = parseFloat(inputObj.value) || 0;
         const numUnidades = (cantidadActual / equivBase).toFixed(2);
         const floatUnidades = parseFloat(numUnidades);
-        
+
         const msg = tr.querySelector('.msg-unidades');
         if (equivBase > 0 && cantidadActual > 0) {
             if (floatUnidades > 1) {
@@ -165,32 +165,32 @@
             msg.textContent = "";
         }
     }
-    
+
     function sumarUnidad(btn) {
         const tr = btn.closest('tr');
         const inputObj = tr.querySelector('.input-equiv');
         const select = tr.querySelector('.select-materia');
         const opcion = select.options[select.selectedIndex];
         const equivBase = parseFloat(opcion.getAttribute('data-equiv')) || 0;
-        
+
         if (equivBase > 0) {
             let actual = parseFloat(inputObj.value) || 0;
             inputObj.value = (actual + equivBase).toFixed(2);
             actualizarUnidades(inputObj);
         }
     }
-    
+
     function restarUnidad(btn) {
         const tr = btn.closest('tr');
         const inputObj = tr.querySelector('.input-equiv');
         const select = tr.querySelector('.select-materia');
         const opcion = select.options[select.selectedIndex];
         const equivBase = parseFloat(opcion.getAttribute('data-equiv')) || 0;
-        
+
         if (equivBase > 0) {
             let actual = parseFloat(inputObj.value) || 0;
             let nuevo = actual - equivBase;
-            if (nuevo < 1) { nuevo = 1; } 
+            if (nuevo < 1) { nuevo = 1; }
             inputObj.value = nuevo.toFixed(2);
             actualizarUnidades(inputObj);
         }

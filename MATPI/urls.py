@@ -6,9 +6,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # --- Módulos del Sistema MATPI ---
-    
+
     # 1. Usuarios y Autenticación (Login, Dashboard, Perfiles)
-    path('', include('usuarios.urls')), 
+    path('', include('usuarios.urls')),
 
     # 2. Inventario / Materia Prima
     path('inventario/', include('materia_prima.urls')),
@@ -18,10 +18,10 @@ urlpatterns = [
 
     # 4. Productos (Menú de comida y bebidas)
     path('productos/', include('productos.urls')),
-    
+
     # 5. Reportes (Generales y Específicos)
     path('reportes/', include('reportes.urls')),
-    
+
     # 6. Módulos Adicionales Operativos
     path('clientes/', include('clientes.urls')),
     path('facturas/', include('facturas.urls')),

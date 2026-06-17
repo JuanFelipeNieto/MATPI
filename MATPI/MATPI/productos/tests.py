@@ -46,7 +46,7 @@ class ProductoViewsCompleteTest(TestCase):
         )
         self.lote_carne = Lote.objects.create(
             materia_prima=self.materia_carne,
-            cantidad_inicial=10.0,  
+            cantidad_inicial=10.0,
             cantidad_actual=10.0,
             precio_unidad=2000
         )
@@ -116,7 +116,7 @@ class ProductoViewsCompleteTest(TestCase):
     def get_invalid_gif_image(self):
         return SimpleUploadedFile("test.gif", b"GIF89a...", content_type="image/gif")
 
-    # 1. Listado 
+    # 1. Listado
     def test_listar_productos(self):
         self.login_como_admin()
         response = self.client.get(reverse('listar_productos'))
@@ -144,7 +144,7 @@ class ProductoViewsCompleteTest(TestCase):
         }
         response = self.client.post(reverse('registrar_producto'), datos)
         self.assertRedirects(response, reverse('listar_productos'))
-        
+
         producto = Producto.objects.get(nombre_producto='Hamburguesa Especial Angus')
         self.assertEqual(producto.precio, 18000)
         self.assertTrue(DetalleProductoMateriaP.objects.filter(producto=producto, materia_prima=self.materia_carne).exists())
@@ -154,7 +154,7 @@ class ProductoViewsCompleteTest(TestCase):
     def test_registrar_bebida(self):
         self.login_como_admin()
         datos = {
-            'txt_nombre': '',  
+            'txt_nombre': '',
             'txt_categoria': 'Bebidas',
             'txt_precio': '4000',
             'materia_id[]': [self.materia_coca.id],
@@ -163,7 +163,7 @@ class ProductoViewsCompleteTest(TestCase):
         }
         response = self.client.post(reverse('registrar_producto'), datos)
         self.assertRedirects(response, reverse('listar_productos'))
-        
+
         producto = Producto.objects.filter(categoria='Bebidas', precio=4000).first()
         self.assertIsNotNone(producto)
         self.assertEqual(producto.nombre_producto, self.materia_coca.nombre_materia_prima)
@@ -185,7 +185,7 @@ class ProductoViewsCompleteTest(TestCase):
     # 8.Editar Producto (exitoso)
     def test_editar_producto(self):
         self.login_como_admin()
-        
+
         materia_queso = MateriaPrima.objects.create(
             nombre_materia_prima="Queso Cheddar",
             unidad_medida="und",
@@ -209,7 +209,7 @@ class ProductoViewsCompleteTest(TestCase):
         }
         response = self.client.post(reverse('editar_producto'), datos)
         self.assertRedirects(response, reverse('listar_productos'))
-        
+
         self.producto_comida.refresh_from_db()
         self.assertEqual(self.producto_comida.nombre_producto, 'Hamburguesa Especial de la Casa')
         self.assertEqual(self.producto_comida.precio, 16000)
@@ -233,7 +233,7 @@ class ProductoViewsCompleteTest(TestCase):
         }
         response = self.client.post(reverse('editar_producto'), datos)
         self.assertRedirects(response, reverse('pre_editar_producto', args=[self.producto_comida.id]))
-        
+
         self.producto_comida.refresh_from_db()
         self.assertEqual(self.producto_comida.nombre_producto, 'Hamburguesa Sencilla')
 
@@ -247,12 +247,12 @@ class ProductoViewsCompleteTest(TestCase):
     # 11. Lógica de Recálculo de Stock
     def test_recalcular_stock(self):
         self.assertEqual(self.producto_comida.cantidad, 10)
-        
+
         self.lote_carne.cantidad_actual = 4.0
         self.lote_carne.save()
-        
+
         recalcular_stock_producto(self.producto_comida)
-        
+
         self.assertEqual(self.producto_comida.cantidad, 4)
 
 

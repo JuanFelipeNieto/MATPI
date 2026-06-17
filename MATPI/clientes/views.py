@@ -12,20 +12,20 @@ def check_admin(request):
 def listar_clientes(request):
     buscar = request.GET.get('buscar', '')
     localidad_filtro = request.GET.get('localidad', '')
-    
+
     clientes = Cliente.objects.annotate(total_pedidos=Count('pedidos'))
-    
+
     if buscar:
         clientes = clientes.filter(
-            Q(id__icontains=buscar) | 
+            Q(id__icontains=buscar) |
             Q(nombre_completo__icontains=buscar)
         )
-    
+
     if localidad_filtro:
         clientes = clientes.filter(localidad=localidad_filtro)
-    
+
     localidades = obtener_localidades()
-    
+
     data = {
         'clientes': clientes,
         'buscar': buscar,
@@ -101,8 +101,8 @@ def pre_editar_cliente(request, id):
     localidades = obtener_localidades()
     es_admin = check_admin(request)
     data = {
-        'cliente': cliente, 
-        'cajeros': cajeros, 
+        'cliente': cliente,
+        'cajeros': cajeros,
         'localidades': localidades,
         'es_admin': es_admin
     }
@@ -130,7 +130,7 @@ def editar_cliente(request):
             cliente.telefono = telefono
             cliente.direccion = direccion
             cliente.localidad = localidad
-            
+
             # Solo el administrador puede cambiar el cajero asignado
             if check_admin(request):
                 if usuario_id_post:
@@ -141,7 +141,7 @@ def editar_cliente(request):
                         pass
                 else:
                     cliente.usuario = None
-                    
+
             cliente.save()
             messages.success(request, f"Cliente {nombre} actualizado correctamente.")
             return redirect('listar_clientes')

@@ -58,13 +58,13 @@ class UsuarioViewsCompleteTest(TestCase):
         session['usuario_nombre'] = self.cajero_user.nombre_completo
         session.save()
 
-  
+
     # 1.Vista de inicio de sesion
     def test_login_view_get(self):
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'usuarios/login.html')
-    
+
     # 2. Vista de inicio de sesion (Exitoso)
     def test_login_view_post_success(self):
         datos_login = {
@@ -76,7 +76,7 @@ class UsuarioViewsCompleteTest(TestCase):
         self.assertRedirects(response, reverse('dashboard'))
         self.assertEqual(self.client.session['usuario_id'], self.admin_user.id)
 
-  
+
     # 3. Vista de inicio de sesion (Fallido)
     def test_login_view_post_fail(self):
         datos_login = {
@@ -161,9 +161,9 @@ class UsuarioViewsCompleteTest(TestCase):
 
 
 
-    
-    # 10. PRUEBA: Editar Usuario (POST Exitoso) 
-   
+
+    # 10. PRUEBA: Editar Usuario (POST Exitoso)
+
     def test_editar_usuario_post_success(self):
         self.login_como_admin()
         datos_edicion = {
@@ -185,7 +185,7 @@ class UsuarioViewsCompleteTest(TestCase):
         # En la app, la edición se procesa a través de la URL de procesar_edicion (editar/guardar/) vía POST
         response = self.client.post(reverse('procesar_edicion'), datos_edicion)
         self.assertRedirects(response, reverse('listar_usuarios'))
-        
+
         # Validar cambios
         self.cajero_user.refresh_from_db()
         self.cajero.refresh_from_db()
@@ -193,9 +193,9 @@ class UsuarioViewsCompleteTest(TestCase):
         self.assertEqual(self.cajero.eps, 'Sanitas')
         self.assertEqual(self.cajero.tipo_contrato, 'Fijo')
 
-    
+
     # 11 Eliminar Usuario (Exitoso)
-    
+
     def test_eliminar_usuario_success(self):
         self.login_como_admin()
         cajero_a_eliminar_id = self.cajero_user.id
@@ -203,7 +203,7 @@ class UsuarioViewsCompleteTest(TestCase):
         self.assertRedirects(response, reverse('listar_usuarios'))
         self.assertFalse(Usuario.objects.filter(id=cajero_a_eliminar_id).exists())
 
-    
+
     # 12.Eliminar Usuario (Auto-eliminación bloqueada)
     def test_eliminar_usuario_self_fail(self):
         self.login_como_admin()
@@ -212,9 +212,9 @@ class UsuarioViewsCompleteTest(TestCase):
         # El administrador no debe haber sido eliminado
         self.assertTrue(Usuario.objects.filter(id=self.admin_user.id).exists())
 
- 
+
     # 13.Reporte Módulo PDF (Usuarios)
-    
+
     def test_reporte_modulo_pdf(self):
         self.login_como_admin()
         response = self.client.get(reverse('generar_reporte', kwargs={'modulo': 'usuarios', 'periodo': 'general'}))
@@ -233,7 +233,7 @@ class UsuarioViewsCompleteTest(TestCase):
         }
         response = self.client.post(reverse('actualizar_metas'), datos_metas)
         self.assertRedirects(response, reverse('dashboard'))
-        
+
         self.config.refresh_from_db()
         self.assertEqual(self.config.meta_reservas, 100)
         self.assertEqual(self.config.meta_pedidos, 350)

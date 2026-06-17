@@ -14,11 +14,11 @@ def listar_facturas(request):
 
 def mostrar_registro_factura(request):
     pedidos = Pedido.objects.filter(estado='Registrado')
-    
+
     # Calcular próximo ID de factura
     max_id = Factura.objects.aggregate(Max('id'))['id__max'] or 0
     prox_id = max_id + 1
-    
+
     # Pre-llenado desde Pedido si viene por parámetro
     pedido_id = request.GET.get('pedido_id')
     valor_con_iva = 0
@@ -50,9 +50,9 @@ def registrar_factura(request):
         descripcion = request.POST.get('txt_descripcion')
         iva         = request.POST.get('txt_iva') or None
         pedido_id   = request.POST.get('txt_pedido')
-        
+
         pedido = Pedido.objects.get(pk=pedido_id) if pedido_id else None
-        
+
         factura_obj = Factura.objects.create(
             id=id_factura,
             valor_total=valor_total,
@@ -69,7 +69,7 @@ def registrar_factura(request):
     return redirect('mostrar_registro_factura')
 
 def eliminar_factura(request, id):
-    # Por integridad de datos, las facturas ya no se pueden eliminar. 
+    # Por integridad de datos, las facturas ya no se pueden eliminar.
     # Solo el administrador de la BD podría hacerlo manualmente.
     from django.contrib import messages
     messages.warning(request, "Las facturas no pueden ser eliminadas del sistema por integridad contable.")

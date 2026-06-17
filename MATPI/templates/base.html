@@ -113,7 +113,7 @@
                 <img src="{% static 'img/Logomatpi.png' %}" alt="Matpi" class="topbar-logo">
             </a>
             <span class="topbar-title">Matpi</span>
-            
+
             {% if request.session.usuario_id %}
             <div class="notification-container" style="margin-left: auto; margin-right: 15px; position: relative; display: flex; align-items: center;">
                 <button id="notificationBtn" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: white; position: relative;">
@@ -166,7 +166,7 @@
                 </div>
             </div>
             {% endif %}
-            
+
             <a href="{% url 'logout' %}" class="logout-btn" style="{% if not es_admin %}margin-left: 10px;{% endif %} color: white; text-decoration: none; padding: 8px 15px; font-size: 0.85em; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px;" onclick="return confirm('¿Estás seguro de que deseas cerrar sesión?');">Cerrar Sesión</a>
         </header>
 
@@ -174,9 +174,9 @@
             {% if messages %}
                 <div class="messages-container" style="padding: 15px 20px 0 20px;">
                     {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}" 
-                             style="padding: 12px; margin-bottom: 10px; border-radius: 6px; border-left: 5px solid 
-                                    {% if message.tags == 'error' %} #721c24; background-color: #f8d7da; color: #721c24; 
+                        <div class="alert alert-{{ message.tags }}"
+                             style="padding: 12px; margin-bottom: 10px; border-radius: 6px; border-left: 5px solid
+                                    {% if message.tags == 'error' %} #721c24; background-color: #f8d7da; color: #721c24;
                                     {% elif message.tags == 'success' %} #155724; background-color: #d4edda; color: #155724;
                                     {% else %} #856404; background-color: #fff3cd; color: #856404; {% endif %}">
                             {{ message }}

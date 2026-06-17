@@ -13,7 +13,7 @@ urlpatterns = [
     path('editar/<int:id>/', views.pre_editar_cliente, name='pre_editar_cliente'),
     path('editar/guardar/', views.editar_cliente, name='editar_cliente'),
     path('eliminar/<int:id>/', views.eliminar_cliente, name='eliminar_cliente'),
-    
+
     # Rutas de la API
     path('', include(router.urls)),
 ]

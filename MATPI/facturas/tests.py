@@ -76,7 +76,7 @@ class FacturaViewsTest(TestCase):
 
     def test_registrar_factura_post_success(self):
         self.login_como_cajero()
-        
+
         # Crear otro pedido para facturar
         otro_pedido = Pedido.objects.create(
             estado='Registrado',
@@ -96,7 +96,7 @@ class FacturaViewsTest(TestCase):
         }
         response = self.client.post(reverse('registrar_factura'), datos)
         self.assertRedirects(response, reverse('listar_facturas'))
-        
+
         # Validar persistencia y cambio de estado del pedido
         self.assertTrue(Factura.objects.filter(id=2).exists())
         otro_pedido.refresh_from_db()

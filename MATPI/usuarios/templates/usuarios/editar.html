@@ -18,7 +18,7 @@
         <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
             <div class="form-section">
                 <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px; font-size: 1.1rem;">Información Básica</h3>
-                
+
                 <div class="form-group">
                     <label>Documento de Identidad</label>
                     <input type="text" value="{{ usuario.id }}" disabled style="background: #f0f0f0; font-weight: bold;">
@@ -85,7 +85,7 @@
             {% if usuario.cajero %}
             <div class="form-section">
                 <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px; font-size: 1.1rem;">Información de Salud y Turno</h3>
-                
+
                 <div class="form-group">
                     <label for="txt_eps">EPS</label>
                     <select id="txt_eps" name="txt_eps" {% if not es_admin %}disabled style="background: #f8f9fa;"{% endif %}>
@@ -109,7 +109,7 @@
 
             <div class="form-section">
                 <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px; font-size: 1.1rem;">Detalles de Contrato</h3>
-                
+
                 <div class="form-group">
                     <label for="txt_tipo_contrato">Tipo de Contrato</label>
                     <select id="txt_tipo_contrato" name="txt_tipo_contrato" {% if not es_admin %}disabled style="background: #f8f9fa;"{% endif %}>
@@ -122,7 +122,7 @@
                 <div class="form-group" id="group_fecha_terminacion">
                     <label for="txt_fecha_terminacion">Fecha Terminación</label>
                     {% if es_admin %}
-                    <input type="date" id="txt_fecha_terminacion" name="txt_fecha_terminacion" 
+                    <input type="date" id="txt_fecha_terminacion" name="txt_fecha_terminacion"
                         value="{{ usuario.cajero.fecha_terminacion_contrato|date:'Y-m-d' }}">
                     {% else %}
                     <div style="padding: 10px; background: #f8f9fa; border-radius: 8px;">
@@ -134,7 +134,7 @@
 
             <div class="form-section">
                 <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px; font-size: 1.1rem;">Contacto de Emergencia</h3>
-                
+
                 <div class="form-group">
                     <label for="txt_emergencia_nombre">Nombre Completo</label>
                     <input type="text" id="txt_emergencia_nombre" name="txt_emergencia_nombre" value="{{ usuario.cajero.contacto_emergencia_nombre|default:'' }}" required minlength="3" maxlength="30" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')">
@@ -155,7 +155,7 @@
 
             <div class="form-section">
                 <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px; font-size: 1.1rem;">Información Laboral</h3>
-                
+
                 <div class="form-group">
                     <label>Fecha de Ingreso</label>
                     {% if es_admin %}
@@ -191,7 +191,7 @@
             <button type="submit" class="btn" style="padding: 12px 40px; font-size: 1rem; background: var(--black); color: var(--primary); border: 2px solid var(--primary);">
                 💾 Guardar Cambios
             </button>
-            
+
             <a href="{% url 'ver_perfil' usuario.id %}" class="btn btn-cancelar" style="padding: 12px 30px; font-size: 1rem; display: flex; align-items: center;" onclick="return confirm('¿Está seguro que quiere cancelar la edición?');">
                 🔙 Volver al perfil
             </a>
@@ -206,7 +206,7 @@
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const dd = String(today.getDate()).padStart(2, '0');
         const formattedToday = `${yyyy}-${mm}-${dd}`;
-        
+
         // 1. Fecha de Nacimiento: Máximo hace 18 años.
         const inputFechaNacimiento = document.getElementById('txt_fecha_nacimiento');
         if (inputFechaNacimiento) {

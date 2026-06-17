@@ -73,13 +73,13 @@ class MateriaPrimaViewsCompleteTest(TestCase):
         ws = wb.active
         for row in rows:
             ws.append(row)
-        
+
         excel_file = io.BytesIO()
         wb.save(excel_file)
         excel_file.seek(0)
         return SimpleUploadedFile(
-            "test_import.xlsx", 
-            excel_file.read(), 
+            "test_import.xlsx",
+            excel_file.read(),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
@@ -91,14 +91,14 @@ class MateriaPrimaViewsCompleteTest(TestCase):
         self.assertTemplateUsed(response, 'materia_prima/listar.html')
         self.assertIn('materia_primas', response.context)
 
-    
+
     # 2. Buscar materia prima con el filtro
     def test_listar_materia_prima_buscar(self):
         self.login_como_admin()
         response = self.client.get(reverse('listar_materia_prima') + '?buscar=Pan')
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.materia_pan, response.context['materia_primas'])
-    
+
     # 3.Registro Materia Prima (exitoso)
     def test_registrar_materia_prima_post_success(self):
         self.login_como_admin()
@@ -112,14 +112,14 @@ class MateriaPrimaViewsCompleteTest(TestCase):
         }
         response = self.client.post(reverse('registrar_materia_prima'), datos)
         self.assertRedirects(response, reverse('listar_materia_prima'))
-        
+
         materia = MateriaPrima.objects.get(nombre_materia_prima='Carne Angus')
         self.assertEqual(materia.unidad_medida, 'g')
         self.assertEqual(materia.cantidad_por_unidad, 150)
         self.assertTrue(Lote.objects.filter(materia_prima=materia, cantidad_inicial=50).exists())
 
-  
-  
+
+
     # 4.Pre-Editar Materia Prima Carga el formulario de edición de la materia prima seleccionada.
     def test_pre_editar_materia_prima_get(self):
         self.login_como_admin()
@@ -140,14 +140,14 @@ class MateriaPrimaViewsCompleteTest(TestCase):
         }
         response = self.client.post(reverse('editar_materia_prima'), datos)
         self.assertRedirects(response, reverse('listar_materia_prima'))
-        
+
         self.materia_pan.refresh_from_db()
         self.assertEqual(self.materia_pan.nombre_materia_prima, 'Pan Brioche Premium')
 
     # 5.Eliminar Materia Prima (Exitoso)
     def test_eliminar_materia_prima_success(self):
         self.login_como_admin()
-        
+
         producto = Producto.objects.create(
             nombre_producto="Hamburguesa Clásica",
             precio=15000,
@@ -164,7 +164,7 @@ class MateriaPrimaViewsCompleteTest(TestCase):
 
         response = self.client.post(reverse('eliminar_materia_prima', args=[self.materia_pan.id]))
         self.assertRedirects(response, reverse('listar_materia_prima'))
-        
+
         # La materia prima debe dejar de existir
         self.assertFalse(MateriaPrima.objects.filter(id=self.materia_pan.id).exists())
 
@@ -195,7 +195,7 @@ class MateriaPrimaViewsCompleteTest(TestCase):
         }
         response = self.client.post(reverse('editar_lote'), datos)
         self.assertRedirects(response, reverse('ver_lotes', args=[self.materia_pan.id]))
-        
+
         self.lote_pan.refresh_from_db()
         self.assertEqual(self.lote_pan.cantidad_actual, 95)
 
@@ -209,7 +209,7 @@ class MateriaPrimaViewsCompleteTest(TestCase):
     # 10.  Importar Materia Prima Excel
     def test_importar_materia_prima_excel_post_success(self):
         self.login_como_admin()
-        
+
         # simulación de Excel válido
         filas = [
             ("Nombre Materia Prima", "Unidad de Medida", "Cantidad por Unidad", "Tipo"),
@@ -217,10 +217,10 @@ class MateriaPrimaViewsCompleteTest(TestCase):
             ("Tocineta", "g", 500, "Comida")
         ]
         archivo_excel = self.create_in_memory_excel(filas)
-        
+
         response = self.client.post(reverse('importar_materia_prima_excel'), {'archivo_excel': archivo_excel})
         self.assertRedirects(response, reverse('listar_materia_prima'))
-        
+
         # Deben haberse creado las dos materias primas importadas
         self.assertTrue(MateriaPrima.objects.filter(nombre_materia_prima="Cheddar").exists())
         self.assertTrue(MateriaPrima.objects.filter(nombre_materia_prima="Tocineta").exists())
@@ -228,41 +228,41 @@ class MateriaPrimaViewsCompleteTest(TestCase):
     # 11. Importar Materia Prima Excel (Registro Duplicado)
     def test_importar_materia_prima_excel_duplicate_fail(self):
         self.login_como_admin()
-        
+
         filas = [
             ("Nombre Materia Prima", "Unidad de Medida", "Cantidad por Unidad", "Tipo"),
             ("Pan de Hamburguesa", "und", 1, "Comida")
         ]
         archivo_excel = self.create_in_memory_excel(filas)
-        
+
         response = self.client.post(reverse('importar_materia_prima_excel'), {'archivo_excel': archivo_excel})
         self.assertRedirects(response, reverse('listar_materia_prima'))
 
     # 12. Importar Lotes Excel
     def test_importar_lotes_excel_post_success(self):
         self.login_como_admin()
-        
+
         filas = [
             ("Nombre Materia Prima Completo", "Cantidad Inicial", "Fecha Vencimiento", "Precio Unidad"),
             ("Pan de Hamburguesa", 50, "2026-06-01", 600)
         ]
         archivo_excel = self.create_in_memory_excel(filas)
-        
+
         response = self.client.post(reverse('importar_lotes_excel'), {'archivo_excel': archivo_excel})
         self.assertRedirects(response, reverse('listar_materia_prima'))
-        
+
         self.assertTrue(Lote.objects.filter(materia_prima=self.materia_pan, cantidad_inicial=50, precio_unidad=600).exists())
 
     # 13. PRUEBA: Importar Lotes Excel (Insumo No Encontrado)
     def test_importar_lotes_excel_not_found_fail(self):
         self.login_como_admin()
-        
+
         filas = [
             ("Nombre Materia Prima Completo", "Cantidad Inicial", "Fecha Vencimiento", "Precio Unidad"),
             ("Insumo Fantasma No Existente", 50, "2026-06-01", 600)
         ]
         archivo_excel = self.create_in_memory_excel(filas)
-        
+
         response = self.client.post(reverse('importar_lotes_excel'), {'archivo_excel': archivo_excel})
         self.assertRedirects(response, reverse('importar_lotes_excel'))
 

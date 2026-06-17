@@ -61,10 +61,10 @@ class MateriaPrima(models.Model):
 
 class Lote(models.Model):
     """Lotes individuales de una materia prima recibidos de proveedores."""
-    
+
     materia_prima = models.ForeignKey(
-        MateriaPrima, 
-        on_delete=models.CASCADE, 
+        MateriaPrima,
+        on_delete=models.CASCADE,
         related_name='lotes'
     )
     cantidad_inicial = models.DecimalField('Cantidad Recibida', max_digits=10, decimal_places=2)

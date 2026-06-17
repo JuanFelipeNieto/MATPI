@@ -11,7 +11,7 @@
         <div class="buscador-izq">
             <form method="GET" action="{% url 'listar_clientes' %}" style="display: flex; gap: 10px; align-items: center;">
                 <input type="text" name="buscar" placeholder="Buscar por documento o nombre" value="{{ buscar|default:'' }}">
-                
+
                 <select name="localidad" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
                     <option value="">Todas las localidades</option>
                     {% for loc in localidades %}

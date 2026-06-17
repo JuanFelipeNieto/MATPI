@@ -16,8 +16,8 @@
 
         <div class="form-group">
             <label for="txt_valor_total">Valor Total (incl. 8% IVA)</label>
-            <input type="number" id="txt_valor_total" name="txt_valor_total" 
-                value="{{ valor_con_iva|default:0 }}" 
+            <input type="number" id="txt_valor_total" name="txt_valor_total"
+                value="{{ valor_con_iva|default:0 }}"
                 readonly class="readonly-field" required min="100" max="5000000">
         </div>
 
@@ -75,10 +75,10 @@
         const select = document.getElementById('txt_pedido') || { value: pedidoPreSeleccionadoId };
         const inputValor = document.getElementById('txt_valor_total');
         const btnEditar = document.getElementById('btn_editar_pedido');
-        
+
         const pedidoId = select.value;
         const pedido = pedidosData.find(p => p.id == pedidoId);
-        
+
         if (pedido) {
             const totalConIva = Math.round((pedido.valor * 1.08) / 100) * 100;
             inputValor.value = totalConIva;

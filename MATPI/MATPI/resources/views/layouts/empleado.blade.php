@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Matpi - Empleado')</title>
 
-  
+
     <link rel="icon" href="{{ asset('img/Favicon.png') }}" />
 
-   
+
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
         <link rel="stylesheet" href="{{ asset('css/dropdown.css') }}">
 
@@ -47,12 +47,12 @@
         </form>
     </header>
 
- 
+
     <main>
         @yield('content')
     </main>
 
-   
+
     <footer>
         <p>© 2025 Matpi. Todos los derechos reservados.</p>
         <ul class="footer-links">
@@ -61,7 +61,7 @@
         </ul>
     </footer>
 
-   
+
     <script src="{{ asset('js/dropown.js') }}"></script>
     @yield('scripts')
 </body>

@@ -20,13 +20,13 @@ def generar_reporte_csv(request):
     if request.method == 'GET':
         tipo_reporte = request.GET.get('tipo', 'general')
         periodo = request.GET.get('periodo', 'mensual')
-        
+
         nombre_archivo, contenido = procesar_logica_reporte(tipo_reporte, periodo)
-        
+
         if not nombre_archivo:
             messages.error(request, 'Tipo de reporte inválido.')
             return redirect('dashboard_reportes')
-            
+
         # Preparar la respuesta HTTP
         response = HttpResponse(
             content_type='text/csv; charset=utf-8',
@@ -34,7 +34,7 @@ def generar_reporte_csv(request):
         response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
         response.write(contenido)
         return response
-        
+
     return redirect('dashboard_reportes')
 
 def enviar_reporte_correo(request):
@@ -43,19 +43,19 @@ def enviar_reporte_correo(request):
         tipo_reporte = request.POST.get('tipo', 'general')
         periodo = request.POST.get('periodo', 'mensual')
         destinatario = request.POST.get('correo', 'admin@matpi.com')
-        
+
         nombre_archivo, contenido = procesar_logica_reporte(tipo_reporte, periodo)
-        
+
         if not nombre_archivo:
             messages.error(request, 'Tipo de reporte inválido.')
             return redirect('dashboard_reportes')
-            
+
         try:
             # Crear y enviar correo
             # Verificar si hasattr(settings, 'EMAIL_HOST_USER') and hasattr(settings, 'EMAIL_BACKEND')
             backend = getattr(settings, 'EMAIL_BACKEND', None)
             from_email = getattr(settings, 'EMAIL_HOST_USER', 'no-reply@matpi.com')
-            
+
             email = EmailMessage(
                 subject=f'MATPI: Reporte {tipo_reporte.capitalize()} ({periodo.capitalize()})',
                 body=f'Hola,\n\nAdjunto encontrarás el reporte solicitado ({tipo_reporte.capitalize()} - {periodo.capitalize()}).',
@@ -64,11 +64,11 @@ def enviar_reporte_correo(request):
             )
             email.attach(nombre_archivo, contenido, 'text/csv')
             email.send()
-            
+
             messages.success(request, f'Reporte {tipo_reporte} enviado exitosamente a {destinatario}!')
         except Exception as e:
             messages.error(request, f'Error al enviar correo: {str(e)}')
-            
+
         return redirect('dashboard_reportes')
     return redirect('dashboard_reportes')
 
@@ -76,11 +76,11 @@ def generar_reporte_pdf(request):
     """Endpoint para descargar el PDF de General/Específico."""
     tipo_reporte = request.GET.get('tipo', 'general')
     periodo = request.GET.get('periodo', 'mensual')
-    
+
     from usuarios.views import generar_pdf
     from .services import obtener_contexto_general
     from django.utils import timezone
-    
+
     if tipo_reporte == 'general':
         ctx = obtener_contexto_general(periodo)
         contexto_pdf = {
@@ -90,6 +90,6 @@ def generar_reporte_pdf(request):
             'datos_general': ctx
         }
         return generar_pdf('reportes/pdf_general.html', contexto_pdf, f"reporte_general_{periodo}")
-    
-    
+
+
     return redirect('dashboard_reportes')

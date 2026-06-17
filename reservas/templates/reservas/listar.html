@@ -11,11 +11,11 @@
             <form method="POST" action="{% url 'editar_reserva' %}" style="display: flex; flex-direction: column; flex: 1;">
                 {% csrf_token %}
                 <input type="hidden" name="txt_id" value="{{ reserva_edit.id }}">
-                
+
                 <div class="form-group">
                     <label for="txt_fecha">Fecha y Hora</label>
-                    <input type="datetime-local" id="txt_fecha" name="txt_fecha" 
-                        value="{{ reserva_edit.fecha|date:'Y-m-d' }}T{{ reserva_edit.fecha|time:'H:i' }}" 
+                    <input type="datetime-local" id="txt_fecha" name="txt_fecha"
+                        value="{{ reserva_edit.fecha|date:'Y-m-d' }}T{{ reserva_edit.fecha|time:'H:i' }}"
                         min="{{ ahora|date:'Y-m-d' }}T{{ ahora|time:'H:i' }}" required style="padding: 12px;" onkeydown="return false;">
                 </div>
 
@@ -29,8 +29,8 @@
 
                 <div class="form-group">
                     <label for="txt_cliente">Cliente (Escriba nombre o documento)</label>
-                    <input type="text" id="txt_cliente_search" list="clientes_list" name="txt_cliente_text" 
-                        value="{{ reserva_edit.cliente.nombre_completo }} ({{ reserva_edit.cliente.id }})" 
+                    <input type="text" id="txt_cliente_search" list="clientes_list" name="txt_cliente_text"
+                        value="{{ reserva_edit.cliente.nombre_completo }} ({{ reserva_edit.cliente.id }})"
                         placeholder="Buscar cliente..." required autocomplete="off" style="padding: 12px;" minlength="10" maxlength="40">
                     <datalist id="clientes_list">
                         {% for cliente in clientes %}
@@ -53,7 +53,7 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="txt_fecha">Fecha y Hora</label>
-                    <input type="datetime-local" id="txt_fecha" name="txt_fecha" 
+                    <input type="datetime-local" id="txt_fecha" name="txt_fecha"
                         min="{{ ahora|date:'Y-m-d' }}T{{ ahora|time:'H:i' }}" required style="padding: 12px;" onkeydown="return false;">
                 </div>
 
@@ -149,28 +149,28 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const txtFecha = document.getElementById('txt_fecha');
-    
+
     if (txtFecha) {
         txtFecha.addEventListener('change', function() {
             if (!this.value) return;
-            
+
             const selectedDate = new Date(this.value);
             const hours = selectedDate.getHours();
             const minutes = selectedDate.getMinutes();
-            
+
             // Si está fuera del horario de 11:00 AM a 7:00 PM
             if (hours < 11 || hours > 19 || (hours === 19 && minutes > 0)) {
                 alert('Las reservas solo pueden realizarse entre las 11:00 AM y las 7:00 PM.');
-                
+
                 // Ajustar automáticamente a la hora mínima permitida (11:00 AM) para no perder la fecha
                 selectedDate.setHours(11, 0, 0, 0);
-                
+
                 const year = selectedDate.getFullYear();
                 const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
                 const day = String(selectedDate.getDate()).padStart(2, '0');
                 const hourStr = String(selectedDate.getHours()).padStart(2, '0');
                 const minStr = String(selectedDate.getMinutes()).padStart(2, '0');
-                
+
                 this.value = `${year}-${month}-${day}T${hourStr}:${minStr}`;
             }
         });

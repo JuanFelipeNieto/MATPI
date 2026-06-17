@@ -32,7 +32,7 @@ class Pedido(models.Model):
     valor = models.PositiveIntegerField('Valor Total')
     numero_orden = models.PositiveSmallIntegerField('Número de Orden')
     metodo_pago = models.CharField('Método de Pago', max_length=16, choices=METODOS_PAGO)
-    
+
     usuario = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
@@ -104,7 +104,7 @@ class DetallePedidoProducto(models.Model):
     cantidad = models.PositiveSmallIntegerField('Cantidad')
     precio_unitario = models.PositiveIntegerField('Precio Unitario')
     estado = models.CharField('Estado', max_length=10, choices=ESTADOS, default='preparando')
-    
+
     # Nuevo: Para exclusiones de materias primas por producto específico en el pedido
     materias_excluidas = models.ManyToManyField(
         MateriaPrima,

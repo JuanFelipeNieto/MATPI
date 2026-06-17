@@ -64,12 +64,12 @@ def login_view(request):
         clave = request.POST.get('txt_contrasena')
         try:
             user = Usuario.objects.get(id=documento, contraseña=clave)
-            
+
             # Activación perezosa: Si hoy es su fecha de ingreso y está inactivo, activarlo.
             if user.estado == 'Inactivo' and user.fecha_ingreso <= timezone.now().date():
                 user.estado = 'Activo'
                 user.save()
-                
+
             request.session['usuario_id'] = user.id
             request.session['usuario_nombre'] = user.nombre_completo
             # Guardar solo el primer nombre y primer apellido para mostrar en UI
@@ -92,14 +92,14 @@ def logout_view(request):
 def dashboard(request):
     # Auto-eliminación de reservas pasadas al entrar al dashboard
     Reserva.objects.filter(fecha__lt=timezone.now()).delete()
-    
+
     config, _ = DashboardConfig.objects.get_or_create(id=1)
-    
+
     # Calcular inicio y fin del día en hora local para evitar problemas con MySQL/UTC
     ahora_local = timezone.localtime()
     hoy_inicio = ahora_local.replace(hour=0, minute=0, second=0, microsecond=0)
     hoy_fin = hoy_inicio + timedelta(days=1)
-    
+
     contexto = {
         'es_admin': es_administrador(request),
         'total_clientes': Cliente.objects.count(),
@@ -107,8 +107,8 @@ def dashboard(request):
         'total_pedidos': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin).count(),
         'total_reservas': Reserva.objects.filter(fecha_registro__gte=hoy_inicio, fecha_registro__lt=hoy_fin).count(),
         'ingresos': Pedido.objects.filter(
-            fecha__gte=hoy_inicio, 
-            fecha__lt=hoy_fin, 
+            fecha__gte=hoy_inicio,
+            fecha__lt=hoy_fin,
             estado__in=['Preparacion', 'Completado']
         ).aggregate(total=Sum('valor'))['total'] or 0,
         'pedidos_recientes': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin).order_by('-id')[:5],
@@ -130,7 +130,7 @@ def listar_usuarios(request):
     if not es_administrador(request):
         messages.error(request, "Acceso denegado.")
         return redirect('dashboard')
-    
+
     buscar = request.GET.get('buscar', '')
     usuarios = Usuario.objects.filter(cajero__isnull=False)
     if buscar:
@@ -143,9 +143,9 @@ def listar_usuarios(request):
 def ver_perfil(request, id):
     usuario = get_object_or_404(Usuario, id=id)
     cajero = Cajero.objects.filter(usuario=usuario).first()
-    
+
     es_propio = str(usuario.id) == str(request.session.get('usuario_id'))
-    
+
     if request.method == 'POST' and es_propio:
         tipo_nav = request.POST.get('tipo_navegacion')
         if tipo_nav in ['desplegable', 'fijo']:
@@ -154,9 +154,9 @@ def ver_perfil(request, id):
             request.session['tipo_navegacion'] = tipo_nav
             messages.success(request, "Preferencia de navegación actualizada.")
             return redirect('ver_perfil', id=id)
-            
+
     return render(request, 'usuarios/perfil.html', {
-        'usuario': usuario, 
+        'usuario': usuario,
         'cajero': cajero,
         'es_admin': es_administrador(request),
         'es_propio': es_propio
@@ -173,7 +173,7 @@ def registrar_usuario(request):
                 nombre = request.POST.get('txt_nombre')
                 f_ingreso_str = request.POST.get('txt_fecha_ingreso')
                 telefono = request.POST.get('txt_telefono')
-                
+
                 if len(doc_id) > 10 or len(doc_id) < 10:
                     raise Exception("El documento debe tener exactamente 10 caracteres.")
                 if len(nombre) < 3:
@@ -182,11 +182,11 @@ def registrar_usuario(request):
                     raise Exception("El nombre no puede tener números ni caracteres especiales.")
                 if telefono and len(telefono) < 6:
                     raise Exception("El teléfono no puede tener menos de 6 caracteres.")
-                
+
                 emergencia_nombre = request.POST.get('txt_emergencia_nombre')
                 emergencia_parentesco = request.POST.get('txt_emergencia_parentesco')
                 emergencia_numero = request.POST.get('txt_emergencia_numero')
-                
+
                 if emergencia_nombre and len(emergencia_nombre) < 3:
                     raise Exception("El nombre del contacto de emergencia no puede tener menos de 3 caracteres.")
                 if not validar_nombre(emergencia_nombre):
@@ -223,7 +223,7 @@ def registrar_usuario(request):
                 )
                 fecha_term = request.POST.get('txt_fecha_terminacion')
                 Cajero.objects.create(
-                    usuario=u, 
+                    usuario=u,
                     eps=request.POST.get('txt_eps'),
                     tipo_contrato=request.POST.get('txt_tipo_contrato'),
                     turno=request.POST.get('txt_turno'),
@@ -242,13 +242,13 @@ def registrar_usuario(request):
 @login_requerido
 def editar_usuario(request, id=None):
     if not es_administrador(request): return redirect('dashboard')
-    
+
     if id: # Cargar el formulario con datos
         usuario = get_object_or_404(Usuario, id=id)
         cajero = Cajero.objects.filter(usuario=usuario).first()
         return render(request, 'usuarios/editar.html', {
-            'usuario': usuario, 
-            'eps': cajero.eps if cajero else "", 
+            'usuario': usuario,
+            'eps': cajero.eps if cajero else "",
             'es_admin': True
         })
 
@@ -262,11 +262,11 @@ def editar_usuario(request, id=None):
                     raise Exception("El nombre no puede tener menos de 3 caracteres.")
                 if not validar_nombre(nombre):
                     raise Exception("El nombre no puede tener números ni caracteres especiales.")
-                
+
                 emergencia_nombre = request.POST.get('txt_emergencia_nombre')
                 emergencia_parentesco = request.POST.get('txt_emergencia_parentesco')
                 emergencia_numero = request.POST.get('txt_emergencia_numero')
-                
+
                 if emergencia_nombre and len(emergencia_nombre) < 3:
                     raise Exception("El nombre del contacto de emergencia no puede tener menos de 3 caracteres.")
                 if emergencia_nombre and not validar_nombre(emergencia_nombre):
@@ -289,7 +289,7 @@ def editar_usuario(request, id=None):
                 usuario.telefono = telefono
                 usuario.fecha_nacimiento = request.POST.get('txt_fecha_nacimiento')
                 usuario.direccion = request.POST.get('txt_direccion')
-                
+
                 # Estado Automático si se cambia fecha de ingreso
                 nueva_f_ingreso = request.POST.get('txt_fecha_ingreso')
                 if nueva_f_ingreso:
@@ -299,7 +299,7 @@ def editar_usuario(request, id=None):
                     usuario.estado = 'Activo' if f_date <= hoy else 'Inactivo'
                 else:
                     usuario.estado = request.POST.get('txt_estado')
-                
+
                 if 'txt_experiencia' in request.FILES:
                     experiencia_file = request.FILES.get('txt_experiencia')
                     if experiencia_file and not experiencia_file.name.lower().endswith('.pdf'):
@@ -308,16 +308,16 @@ def editar_usuario(request, id=None):
                 if request.POST.get('txt_contrasena'):
                     usuario.contraseña = request.POST.get('txt_contrasena')
                 usuario.save()
-                
+
                 if usuario.es_cajero:
                     cajero, _ = Cajero.objects.get_or_create(usuario=usuario)
                     if request.POST.get('txt_eps'):
                         cajero.eps = request.POST.get('txt_eps')
-                    
+
                     tipo_c = request.POST.get('txt_tipo_contrato')
                     if tipo_c:
                         cajero.tipo_contrato = tipo_c
-                        
+
                     if request.POST.get('txt_turno'):
                         cajero.turno = request.POST.get('txt_turno')
                     if emergencia_nombre:
@@ -326,16 +326,16 @@ def editar_usuario(request, id=None):
                         cajero.contacto_emergencia_parentesco = emergencia_parentesco
                     if emergencia_numero:
                         cajero.contacto_emergencia_numero = emergencia_numero
-                        
+
                     # Handle empty date or based on fixed contract
                     fecha_term = request.POST.get('txt_fecha_terminacion')
                     if tipo_c == 'Indefinido':
                         cajero.fecha_terminacion_contrato = None
                     elif fecha_term:
                         cajero.fecha_terminacion_contrato = fecha_term
-                        
+
                     cajero.save()
-            
+
             if str(usuario.id) == str(request.session.get('usuario_id')):
                 messages.success(request, "Usuario actualizado correctamente.")
                 return redirect('ver_perfil', id=usuario.id)
@@ -378,7 +378,7 @@ def generar_pdf(template_src, contexto, nombre_archivo):
 def generar_grafica_pedidos(queryset, periodo):
     """Genera una imagen base64 de una gráfica de barras según el periodo."""
     from collections import Counter
-    
+
     # Obtener lista de componentes (hora, día, etc.) en tiempo local
     if periodo == 'diario':
         datos_raw = [timezone.localtime(p.fecha).hour for p in queryset]
@@ -432,11 +432,11 @@ def reporte_modulo_pdf(request, modulo, periodo):
     from reportes.services import obtener_rango_fechas
     ahora = timezone.now()
     fecha_inicio, fecha_fin = obtener_rango_fechas(periodo)
-    
+
     pedidos_completados = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     reservas_periodo = Reserva.objects.filter(fecha__gte=fecha_inicio)
     facturas_periodo = Factura.objects.filter(pedido__fecha__gte=fecha_inicio, pedido__fecha__lte=fecha_fin)
-    
+
     config_reporte = {
         'ventas': (pedidos_completados, 'reportes/pdf_pedidos.html'),
         'pedidos': (pedidos_completados, 'reportes/pdf_pedidos.html'),
@@ -452,20 +452,20 @@ def reporte_modulo_pdf(request, modulo, periodo):
     if modulo == 'usuarios':
         if not es_administrador(request):
             return redirect('dashboard')
-        
+
         cajeros = Cajero.objects.filter(usuario__estado='Activo').annotate(
             pedidos_totales=models.Count('usuario__pedidos', filter=models.Q(usuario__pedidos__estado__in=['Preparacion', 'Completado'])),
             pedidos_periodo=models.Count('usuario__pedidos', filter=models.Q(usuario__pedidos__estado__in=['Preparacion', 'Completado'], usuario__pedidos__fecha__gte=fecha_inicio, usuario__pedidos__fecha__lte=fecha_fin))
         ).select_related('usuario')
-        
+
         qs = cajeros
         template_path = 'reportes/pdf_usuarios.html'
         titulo = "Reporte de Cajeros"
     else:
         qs, template_path = config_reporte.get(modulo, (None, ""))
         titulo = f"Reporte de {modulo.capitalize()}"
-    
-    
+
+
     periodo_map = {
         'diario': 'del Día',
         'semanal': 'de la Semana',

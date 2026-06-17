@@ -12,7 +12,7 @@
         <a href="{% url 'listar_materia_prima' %}" class="btn btn-cancelar">Volver</a>
     </div>
 
-   
+
     <h3 style="margin-bottom: 15px; color: var(--black);">Lotes con Existencias</h3>
     <div class="table-responsive" style="margin-bottom: 40px;">
         <table class="custom-table">
@@ -44,7 +44,7 @@
                     {% if es_admin %}
                     <td class="acciones">
                         <a href="{% url 'pre_editar_lote' lote.id %}" class="btn-editar">Editar</a>
-                        <a href="{% url 'eliminar_lote' lote.id %}" class="btn-danger" 
+                        <a href="{% url 'eliminar_lote' lote.id %}" class="btn-danger"
                            onclick="return confirm('¿Eliminar este lote permanentemente?')">Eliminar</a>
                     </td>
                     {% endif %}

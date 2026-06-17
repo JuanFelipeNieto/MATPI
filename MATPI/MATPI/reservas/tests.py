@@ -32,7 +32,7 @@ class ReservaViewsTest(TestCase):
         )
 
         self.fecha_valida = (timezone.now() + timedelta(days=1)).replace(hour=14, minute=0, second=0, microsecond=0)
-        
+
         self.reserva = Reserva.objects.create(
             fecha=self.fecha_valida,
             estado=True,

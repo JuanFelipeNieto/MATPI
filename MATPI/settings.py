@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-dev-only-placeholde
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*'] 
+ALLOWED_HOSTS = ['*']
 
 # Confiar en los dominios de Railway para formularios POST (Login)
 CSRF_TRUSTED_ORIGINS = ['https://*.railway.app', 'https://*.up.railway.app']
@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'clientes',
     'facturas',
     'materia_prima',
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'reservas',
     'usuarios',
     'reportes',
-    
+
     'rest_framework',
 ]
 
@@ -61,7 +61,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         # Aquí es donde Django busca los archivos base.html y dashboard.html
-        'DIRS': [BASE_DIR / 'templates'], 
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,7 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                
+
                 # Procesador para roles (Matpi personalizado)
                 'usuarios.context_processors.roles_usuario',
             ],
@@ -122,7 +122,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard' 
+LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

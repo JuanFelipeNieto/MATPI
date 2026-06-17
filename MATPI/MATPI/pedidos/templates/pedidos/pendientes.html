@@ -149,7 +149,7 @@
 <script>
     function actualizarTiempos() {
         const ahora = new Date();
-        
+
         // Actualizar reloj general
         document.getElementById('reloj-actual').innerText = ahora.toLocaleTimeString();
 
@@ -157,10 +157,10 @@
         document.querySelectorAll('.tiempo-preparacion').forEach(elemento => {
             const fechaInicio = new Date(elemento.getAttribute('data-inicio'));
             const diferencia = ahora - fechaInicio;
-            
+
             const minutos = Math.floor(diferencia / 60000);
             const segundos = Math.floor((diferencia % 60000) / 1000);
-            
+
             elemento.innerText = `⏱️ ${minutos}m ${segundos}s`;
         });
     }

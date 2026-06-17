@@ -58,7 +58,7 @@
                         {% endif %}
                         {% if detalle.materias_excluidas.exists %}
                             <div style="color: #dc2626; font-size: 0.85rem;">
-                                🚫 Excluye: 
+                                🚫 Excluye:
                                 {% for m in detalle.materias_excluidas.all %}
                                     {{ m.nombre_materia_prima }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}
@@ -84,8 +84,8 @@
         <a href="{% url 'listar_pedidos' %}" class="btn btn-cancelar" style="flex: 1; text-align: center;">🔙 Volver al listado</a>
         {% if es_admin %}
             <!-- El usuario puede querer editar desde aquí también si es admin -->
-             <!-- Pero el usuario pidió quitar el botón de editar del listado. 
-                  Sin embargo, como botón de "Corregir" si es admin podría ser útil. 
+             <!-- Pero el usuario pidió quitar el botón de editar del listado.
+                  Sin embargo, como botón de "Corregir" si es admin podría ser útil.
                   Pero seré estricto con la petición de "quita el boton de editar". -->
         {% endif %}
     </div>

@@ -8,7 +8,7 @@ class Usuario(models.Model):
     ]
     id = models.CharField('Documento', max_length=16, primary_key=True, db_column='id')
     telefono = models.CharField('Teléfono', max_length=14)
-    contraseña = models.CharField('Contraseña', max_length=20, db_column='contraseña') 
+    contraseña = models.CharField('Contraseña', max_length=20, db_column='contraseña')
     correo_electronico = models.EmailField('Correo Electrónico', max_length=35, db_column='correo_electronico')
     estado = models.CharField('Estado', max_length=10, choices=ESTADOS, default='Activo')
     fecha_nacimiento = models.DateField('Fecha de Nacimiento')
@@ -43,7 +43,7 @@ class Administrador(models.Model):
         Usuario,
         on_delete=models.CASCADE,
         primary_key=True,
-        db_column='ID_Usr', 
+        db_column='ID_Usr',
         related_name='administrador'
     )
     ultima_fecha_login = models.DateTimeField('Última Fecha de Login', blank=True, null=True, db_column='Ult_Fecha_login')
@@ -79,7 +79,7 @@ class Cajero(models.Model):
         Usuario,
         on_delete=models.CASCADE,
         primary_key=True,
-        db_column='ID_Usr', 
+        db_column='ID_Usr',
         related_name='cajero'
     )
     eps = models.CharField('EPS', max_length=20, choices=EPS_CHOICES, blank=True, null=True, db_column='EPS')

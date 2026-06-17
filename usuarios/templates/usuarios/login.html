@@ -7,7 +7,7 @@
     <title>Inicio Sesión | Matpi</title>
     <meta name="description" content="Descubre las mejores hamburguesas de Matpi. Calidad y sabor garantizado.">
     <link rel="icon" href="{% static 'img/Favicon.png' %}" />
-    
+
     <style>
         * {
             margin: 0;
@@ -200,7 +200,7 @@
 
             <form method="POST" action="{% url 'login' %}">
                 {% csrf_token %}
-                
+
                 <div class="campo">
                     <label for="txt_id">Numero de documento</label>
                     <input type="text" id="txt_id" name="txt_id" placeholder="Ingresa tu número de documento" required autofocus maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">

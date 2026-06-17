@@ -172,7 +172,7 @@
                     </tbody>
                 </table>
             </div>
-            
+
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button type="button" class="btn btn-azul" onclick="agregarFilaProducto()" style="flex: 1; background: #f8fafc; border: 2px dashed #cbd5e1; color: #64748b;">
                     + Agregar Comida
@@ -273,7 +273,7 @@
         nuevaFila.className = 'fila-producto';
         nuevaFila.setAttribute('data-indice', contadorFilas);
         nuevaFila.setAttribute('data-tipo', datos && datos.tipo === 'bebida' ? 'bebida' : 'producto');
-        
+
         if (nuevaFila.getAttribute('data-tipo') === 'bebida') nuevaFila.classList.add('fila-bebida');
 
         nuevaFila.innerHTML = `
@@ -351,7 +351,7 @@
 
         if (opcion.value && listaExcl) {
             const composicion = JSON.parse(opcion.getAttribute('data-composicion') || "[]");
-            
+
             // 1. Construir HTML solo si el cambio NO vino de un checkbox (Para no borrar los checkboxes chequeados)
             if (elemento.type !== 'checkbox') {
                 let html = "";
@@ -395,7 +395,7 @@
             fila.style.border = "";
             fila.style.backgroundColor = "";
         }
-        
+
         calcularTotal();
     }
 
@@ -414,7 +414,7 @@
                 const precio = parseFloat(seleccionada.getAttribute('data-precio') || 0);
                 const cantidad = parseInt(selectCant.value || 0);
                 const totalFila = precio * cantidad;
-                
+
                 subtotalFila.innerText = formatter.format(totalFila);
                 totalGeneral += totalFila;
                 totalItems += cantidad;
@@ -433,7 +433,7 @@
         // 1. Validar que si se escribió un nombre, este exista en la lista (ID presente)
         const clienteId = document.getElementById('txt_cliente_id').value;
         const clienteNombre = document.getElementById('txt_cliente_search').value;
-        
+
         if (clienteNombre && !clienteId) {
             alert("No se puede actualizar el pedido: El cliente '" + clienteNombre + "' no existe. Selecciónelo de la lista o regístrelo primero.");
             e.preventDefault();

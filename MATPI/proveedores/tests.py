@@ -21,7 +21,7 @@ class ProveedorViewsTest(TestCase):
             estado="Activo"
         )
         self.admin = Administrador.objects.create(usuario=self.admin_user)
-        
+
         self.cajero_user = Usuario.objects.create(
             id="0987654321",
             nombre_completo="Cajero Proveedores",

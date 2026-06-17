@@ -166,8 +166,8 @@
                                     <option value="">— Seleccione Producto —</option>
                                     {% for producto in productos %}
                                         {% if producto.categoria != 'Bebidas' %}
-                                        <option value="{{ producto.id }}" 
-                                                data-precio="{{ producto.precio }}" 
+                                        <option value="{{ producto.id }}"
+                                                data-precio="{{ producto.precio }}"
                                                 data-composicion='{{ producto.composicion_json|safe }}'
                                                 {% if producto.tiene_vencidos %}disabled style="color: #e74c3c;"{% endif %}>
                                             {{ producto.nombre_producto }} {% if producto.tiene_vencidos %}(Insumo Vencido 🔴){% endif %}
@@ -205,7 +205,7 @@
                     </tbody>
                 </table>
             </div>
-            
+
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button type="button" class="btn btn-azul" onclick="agregarFilaProducto()" style="flex: 1; background: #f8fafc; border: 2px dashed #cbd5e1; color: #64748b;">
                     + Agregar Comida
@@ -239,8 +239,8 @@
     <select name="producto_id[]" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
         <option value="">— Seleccione Bebida —</option>
         {% for bebida in bebidas %}
-        <option value="{{ bebida.id }}" 
-                data-precio="{{ bebida.precio }}" 
+        <option value="{{ bebida.id }}"
+                data-precio="{{ bebida.precio }}"
                 data-composicion='[]'
                 {% if bebida.tiene_vencidos %}disabled style="color: #e74c3c;"{% endif %}>
             {{ bebida.nombre_producto }} {% if bebida.tiene_vencidos %}(Insumo Vencido 🔴){% endif %}
@@ -290,7 +290,7 @@
 
         // Resetear select
         selectReserva.value = "";
-        
+
         if (!clienteId) {
             selectReserva.disabled = true;
             for (let i = 1; i < opciones.length; i++) {
@@ -323,7 +323,7 @@
         const tbody = document.getElementById('body-productos');
         const filasProds = tbody.querySelectorAll('.fila-producto[data-tipo="producto"]');
         if (filasProds.length === 0) return;
-        
+
         const nuevaFila = filasProds[0].cloneNode(true);
         resetearFila(nuevaFila, "producto");
         tbody.appendChild(nuevaFila);
@@ -337,11 +337,11 @@
         const nuevaFila = filasProds[0].cloneNode(true);
         nuevaFila.classList.add('fila-bebida');
         nuevaFila.setAttribute('data-tipo', 'bebida');
-        
+
         const tdDesc = nuevaFila.querySelector('td:first-child');
         tdDesc.innerHTML = document.getElementById('select-bebidas-html').innerHTML;
         nuevaFila.querySelector('.btn-detalles').style.display = "none";
-        
+
         resetearFila(nuevaFila, "bebida");
         tbody.appendChild(nuevaFila);
     }
@@ -359,12 +359,12 @@
         subtotal.innerText = "$0";
         if(listaExcl) listaExcl.innerHTML = "";
         if(divDetalles) divDetalles.style.display = "none";
-        
+
         const nuevoIndice = contadorFilas++;
         fila.setAttribute('data-indice', nuevoIndice);
         fila.querySelector('textarea')?.setAttribute('name', `producto_notas_${nuevoIndice}`);
         if(notas) notas.value = "";
-        
+
         calcularTotal();
     }
 
@@ -394,7 +394,7 @@
 
         if (opcion.value && listaExcl) {
             const composicion = JSON.parse(opcion.getAttribute('data-composicion') || "[]");
-            
+
             // 1. Construir HTML solo si el cambio vino del Select (Para no borrar los checkboxes chequeados al hacer click)
             if (elemento.type !== 'checkbox') {
                 let html = "";
@@ -449,7 +449,7 @@
                         opt.style.color = "inherit";
                     }
                 });
-                
+
                 if (parseInt(selectCant.value) > stockLimitado) {
                     selectCant.value = stockLimitado;
                 }
@@ -465,7 +465,7 @@
             fila.style.border = "";
             fila.style.backgroundColor = "";
         }
-        
+
         calcularTotal();
     }
 
@@ -484,7 +484,7 @@
                 const precio = parseFloat(seleccionada.getAttribute('data-precio') || 0);
                 const cantidad = parseInt(selectCant.value || 0);
                 const totalFila = precio * cantidad;
-                
+
                 subtotalFila.innerText = formatter.format(totalFila);
                 totalGeneral += totalFila;
                 totalItems += cantidad;
@@ -503,7 +503,7 @@
         // 1. Validar que si se escribió un nombre, este exista en la lista (ID presente)
         const clienteId = document.getElementById('txt_cliente_id').value;
         const clienteNombre = document.getElementById('txt_cliente_search').value;
-        
+
         if (clienteNombre && !clienteId) {
             alert("No se puede registrar el pedido: El cliente '" + clienteNombre + "' no existe. Selecciónelo de la lista o regístrelo primero.");
             e.preventDefault();

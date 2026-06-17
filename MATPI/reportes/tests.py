@@ -75,7 +75,7 @@ class ReporteViewsTest(TestCase):
         }
         response = self.client.post(reverse('enviar_reporte_correo'), datos)
         self.assertRedirects(response, reverse('dashboard_reportes'))
-        
+
         # Verificar que el correo fue enviado (colocado en el outbox de pruebas de Django)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, ['test_admin@matpi.com'])

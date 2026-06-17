@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
 from .models import MateriaPrima, Lote
-from usuarios.models import Administrador 
+from usuarios.models import Administrador
 import openpyxl
 from datetime import datetime
 import re
@@ -53,16 +53,16 @@ def listar_materia_prima(request):
 
     es_admin = check_admin(request)
     query = request.GET.get('buscar')
-    
+
     if query:
         materia_primas = MateriaPrima.objects.filter(nombre_materia_prima__icontains=query)
     else:
         materia_primas = MateriaPrima.objects.all()
-    
+
     return render(request, 'materia_prima/listar.html', {
         'materia_primas': materia_primas,
         'es_admin': es_admin,
-        'buscar': query 
+        'buscar': query
     })
 
 # --- GESTIÓN DE MATERIA PRIMA (CREACIÓN ABIERTA A CAJERO Y ADMIN) ---
@@ -71,13 +71,13 @@ def mostrar_registro_materia_prima(request):
     id_sesion = request.session.get('usuario_id')
     if not id_sesion:
         return redirect('login')
-    
+
     # Solo el administrador puede registrar materia prima
     es_admin = check_admin(request)
     if not es_admin:
         messages.error(request, "Solo el administrador puede registrar materia prima.")
         return redirect('listar_materia_prima')
-        
+
     return render(request, 'materia_prima/registrar.html', {
         'es_admin': es_admin,
         'fecha_actual': timezone.now()
@@ -101,7 +101,7 @@ def registrar_materia_prima(request):
                     cantidad_por_unidad=cantidad_unidad,
                     tipo=tipo,
                 )
-                
+
                 if cantidad > 0:
                     Lote.objects.create(
                         materia_prima=materia,
@@ -110,11 +110,11 @@ def registrar_materia_prima(request):
                         fecha_ingreso=f_ingreso or timezone.now(),
                         fecha_vencimiento=None
                     )
-                
+
                 messages.success(request, f"Materia prima '{nombre}' registrada exitosamente.")
         except Exception as e:
             messages.error(request, f"Error al registrar: {str(e)}")
-            
+
         return redirect('listar_materia_prima')
     return redirect('mostrar_registro_materia_prima')
 
@@ -124,7 +124,7 @@ def pre_editar_materia_prima(request, id):
     if not es_admin:
         messages.error(request, "Acceso denegado. Solo el administrador puede editar registros.")
         return redirect('listar_materia_prima')
-        
+
     materia_prima = get_object_or_404(MateriaPrima, pk=id)
     return render(request, 'materia_prima/editar.html', {
         'materia_prima': materia_prima,
@@ -138,15 +138,15 @@ def editar_materia_prima(request):
 
     if request.method == 'POST':
         materia = get_materia_prima_from_post(request.POST)
-        
+
         materia.nombre_materia_prima = request.POST.get('txt_nombre')
         materia.unidad_medida        = request.POST.get('txt_unidad')
         materia.cantidad_por_unidad  = int(request.POST.get('txt_cantidad_unidad', 1))
         materia.tipo                 = request.POST.get('txt_tipo', 'Comida')
         materia.save()
-        
+
         messages.success(request, "Información de la materia prima actualizada correctamente.")
-        
+
     return redirect('listar_materia_prima')
 
 def eliminar_materia_prima(request, id):
@@ -155,17 +155,17 @@ def eliminar_materia_prima(request, id):
         return redirect('listar_materia_prima')
 
     materia = get_object_or_404(MateriaPrima, pk=id)
-    
+
     # Identificar productos afectados antes de eliminar
     productos_afectados = [detalle.producto for detalle in materia.detalles_producto.all()]
-    
+
     materia.delete()
-    
+
     # Recalcular cada producto afectado para actualizar stock y descripción automática
     from productos.views import recalcular_stock_producto
     for producto in productos_afectados:
         recalcular_stock_producto(producto)
-        
+
     messages.success(request, "Materia prima eliminada correctamente y productos actualizados.")
     return redirect('listar_materia_prima')
 
@@ -173,13 +173,13 @@ def eliminar_materia_prima(request, id):
 def ver_lotes(request, id_materia):
     id_sesion = request.session.get('usuario_id')
     if not id_sesion: return redirect('login')
-    
+
     es_admin = check_admin(request)
     materia = get_object_or_404(MateriaPrima, pk=id_materia)
     # Lotes con stock disponible primero, luego por vencimiento
     lotes = materia.lotes.filter(cantidad_actual__gt=0).order_by('fecha_vencimiento')
     lotes_agotados = materia.lotes.filter(cantidad_actual=0).order_by('-fecha_ingreso')[:10]
-    
+
     return render(request, 'materia_prima/lotes.html', {
         'materia': materia,
         'lotes': lotes,
@@ -192,7 +192,7 @@ def pre_editar_lote(request, id_lote):
     if not check_admin(request):
         messages.error(request, "Acceso denegado. Solo administradores pueden editar lotes.")
         return redirect('listar_materia_prima')
-        
+
     lote = get_lote_or_404(id_lote)
     return render(request, 'materia_prima/editar_lote.html', {
         'lote': lote,
@@ -207,14 +207,14 @@ def editar_lote(request):
     if request.method == 'POST':
         id_lote = request.POST.get('txt_id')
         lote = get_lote_or_404(id_lote)
-        
+
         lote.cantidad_actual = int(request.POST.get('txt_cantidad', 0))
         lote.fecha_vencimiento = request.POST.get('txt_fecha_vencimiento') or None
         lote.save()
-        
+
         messages.success(request, f"Lote #{lote.id} actualizado correctamente.")
         return redirect('ver_lotes', id_materia=lote.materia_prima.id)
-    
+
     return redirect('listar_materia_prima')
 
 def eliminar_lote(request, id_lote):
@@ -225,7 +225,7 @@ def eliminar_lote(request, id_lote):
     lote = get_lote_or_404(id_lote)
     id_materia = lote.materia_prima.id
     lote.delete()
-    
+
     messages.success(request, "Lote eliminado correctamente.")
     return redirect('ver_lotes', id_materia=id_materia)
 
@@ -238,7 +238,7 @@ def importar_materia_prima_excel(request):
 
     if request.method == 'POST' and request.FILES.get('archivo_excel'):
         archivo = request.FILES['archivo_excel']
-        
+
         # Validar extensión
         if not archivo.name.endswith('.xlsx'):
             messages.error(request, "Solo se permiten archivos .xlsx")
@@ -247,25 +247,25 @@ def importar_materia_prima_excel(request):
         try:
             wb = openpyxl.load_workbook(archivo)
             sheet = wb.active
-            
+
             rows = list(sheet.iter_rows(min_row=2, values_only=True))
-            
+
             # 1. Verificar si hay datos válidos y duplicados
             for row in rows:
                 if len(row) < 4:
                     messages.error(request, "Los datos no son válidos")
                     return redirect('importar_materia_prima_excel')
-                
+
                 nombre, unidad, cant_unidad, tipo = row[:4]
                 if not nombre: continue
-                
+
                 # Validar tipos de datos
                 try:
                     cant_unidad = int(cant_unidad or 1)
                 except (ValueError, TypeError):
                     messages.error(request, "Los datos no son válidos")
                     return redirect('importar_materia_prima_excel')
-                
+
                 unidad = unidad or 'und'
                 tipo = tipo or 'Comida'
 
@@ -284,7 +284,7 @@ def importar_materia_prima_excel(request):
                 for row in rows:
                     nombre, unidad, cant_unidad, tipo = row[:4]
                     if not nombre: continue
-                    
+
                     MateriaPrima.objects.create(
                         nombre_materia_prima=nombre,
                         unidad_medida=unidad or 'und',
@@ -292,15 +292,15 @@ def importar_materia_prima_excel(request):
                         tipo=tipo or 'Comida'
                     )
                     creados += 1
-            
+
             if creados > 0:
                 messages.success(request, f"Se importaron {creados} materias primas correctamente.")
-                
+
         except Exception as e:
             messages.error(request, f"Error al procesar el archivo: {str(e)}")
-            
+
         return redirect('listar_materia_prima')
-        
+
     return render(request, 'materia_prima/importar_materia_prima.html')
 
 
@@ -320,7 +320,7 @@ def importar_lotes_excel(request):
         try:
             wb = openpyxl.load_workbook(archivo)
             sheet = wb.active
-            
+
             rows = list(sheet.iter_rows(min_row=2, values_only=True))
             lotes_a_crear = []
 
@@ -332,7 +332,7 @@ def importar_lotes_excel(request):
 
                 nombre_completo, cantidad, f_vencimiento, precio = row[:4]
                 if not nombre_completo or cantidad is None: continue
-                
+
                 # Validar tipos numéricos
                 try:
                     cantidad = float(cantidad)
@@ -344,7 +344,7 @@ def importar_lotes_excel(request):
 
                 nombre_completo = str(nombre_completo).strip()
                 materia = None
-                
+
                 materia = MateriaPrima.objects.filter(nombre_materia_prima__iexact=nombre_completo).first()
                 if not materia:
                     if match := re.match(r"^(.*?)\s*\(([\d.,]+)\s+(.*)\)$", nombre_completo):
@@ -359,7 +359,7 @@ def importar_lotes_excel(request):
                                 unidad_medida__iexact=unidad_str
                             ).first()
                         except: pass
-                
+
                 if not materia:
                     messages.error(request, f"Error en fila {row_idx}: Materia prima '{nombre_completo}' no encontrada.")
                     return redirect('importar_lotes_excel')
@@ -403,11 +403,11 @@ def importar_lotes_excel(request):
                             precio_unidad=data['precio_unidad']
                         )
                 messages.success(request, f"Se importaron {len(lotes_a_crear)} lotes correctamente.")
-                
+
         except Exception as e:
             messages.error(request, f"Error al procesar el archivo: {str(e)}")
-            
+
         return redirect('listar_materia_prima')
-        
+
     return render(request, 'materia_prima/importar_lotes.html')
 

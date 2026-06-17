@@ -140,12 +140,12 @@
         const inputEquiv = nuevaFila.querySelector('.input-equiv');
         const inputUnidad = nuevaFila.querySelector('.input-unidad-texto');
         const msgUnidades = nuevaFila.querySelector('.msg-unidades');
-        
+
         if(select) select.value = "";
         if(inputEquiv) inputEquiv.value = "";
         if(inputUnidad) inputUnidad.value = "-";
         if(msgUnidades) msgUnidades.textContent = "";
-        
+
         tbody.appendChild(nuevaFila);
     }
     function eliminarFila(boton) {
@@ -157,18 +157,18 @@
             alert("El producto debe tener al menos una materia prima.");
         }
     }
-    
+
     function actualizarEquivalencia(selectObj) {
         const tr = selectObj.closest('tr');
         const opcion = selectObj.options[selectObj.selectedIndex];
-        
+
         const equiv = parseFloat(opcion.getAttribute('data-equiv')) || 0;
         const unidad = opcion.getAttribute('data-unidad') || '';
-        
+
         const inputCantidad = tr.querySelector('.input-equiv');
         const inputUnidadOculto = tr.querySelector('.input-unidad-texto');
         const labelsUnidad = tr.querySelectorAll('.unit-label');
-        
+
         if (equiv > 0) {
             inputCantidad.value = equiv;
             inputUnidadOculto.value = unidad;
@@ -181,18 +181,18 @@
             tr.querySelector('.msg-unidades').textContent = "";
         }
     }
-    
+
     function actualizarUnidades(inputObj) {
         const tr = inputObj.closest('tr');
         const select = tr.querySelector('.select-materia');
         const opcion = select.options[select.selectedIndex];
         if (!opcion || !opcion.value) return;
- 
+
         const equivBase = parseFloat(opcion.getAttribute('data-equiv')) || 1;
         const cantidadActual = parseFloat(inputObj.value) || 0;
         const numUnidades = (cantidadActual / equivBase).toFixed(2);
         const floatUnidades = parseFloat(numUnidades);
-        
+
         const msg = tr.querySelector('.msg-unidades');
         if (equivBase > 0 && cantidadActual > 0) {
             if (floatUnidades > 1) {
@@ -208,28 +208,28 @@
             msg.textContent = "";
         }
     }
-    
+
     function sumarUnidad(btn) {
         const tr = btn.closest('tr');
         const inputObj = tr.querySelector('.input-equiv');
         const select = tr.querySelector('.select-materia');
         const opcion = select.options[select.selectedIndex];
         const equivBase = parseFloat(opcion.getAttribute('data-equiv')) || 0;
-        
+
         if (equivBase > 0) {
             let actual = parseFloat(inputObj.value) || 0;
             inputObj.value = (actual + equivBase).toFixed(2);
             actualizarUnidades(inputObj);
         }
     }
-    
+
     function restarUnidad(btn) {
         const tr = btn.closest('tr');
         const inputObj = tr.querySelector('.input-equiv');
         const select = tr.querySelector('.select-materia');
         const opcion = select.options[select.selectedIndex];
         const equivBase = parseFloat(opcion.getAttribute('data-equiv')) || 0;
-        
+
         if (equivBase > 0) {
             let actual = parseFloat(inputObj.value) || 0;
             let nuevo = actual - equivBase;
@@ -238,7 +238,7 @@
             actualizarUnidades(inputObj);
         }
     }
- 
+
     // Inicializar los indicadores de unidades al cargar la página para los datos preexistentes
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.input-equiv').forEach(input => {

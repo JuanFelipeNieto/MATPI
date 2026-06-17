@@ -11,39 +11,39 @@ def check_admin(request):
     return Administrador.objects.filter(usuario_id=id_sesion).exists()
 
 def recalcular_stock_producto(producto):
-   
+
     detalles = producto.detalles_materia.all()
     if not detalles:
         producto.cantidad = 0
         producto.descripcion = "Sin composición definida"
         producto.save()
         return 0
-    
+
     cantidades_posibles = []
     componentes_desc = []
-    
+
     for detalle in detalles:
         stock_mp = detalle.materia_prima.stock_total
         equivalencia = detalle.materia_prima.cantidad_por_unidad
         stock_base = stock_mp * equivalencia
-        
+
         # La cantidad usada ahora siempre viene en medida base desde el frontend
         cantidad_base = detalle.cantidad_usada
-        
-        # Retrocompatibilidad con registros antiguos donde unidad era 'und' (seleccionado por el usuario) 
+
+        # Retrocompatibilidad con registros antiguos donde unidad era 'und' (seleccionado por el usuario)
         # y la materia prima no era 'und' propiamente.
         if detalle.unidad_medida == 'und' and detalle.materia_prima.unidad_medida != 'und':
             cantidad_base = detalle.cantidad_usada * equivalencia
-        
+
         if cantidad_base > 0:
             posible = math.floor(stock_base / cantidad_base)
             cantidades_posibles.append(posible)
         else:
             cantidades_posibles.append(0)
-            
+
         # Construcción de descripción
         componentes_desc.append(f"{detalle.materia_prima.nombre_materia_prima} (x{detalle.cantidad_usada})")
-            
+
     producto.cantidad = min(cantidades_posibles) if cantidades_posibles else 0
     producto.descripcion = ", ".join(componentes_desc)
     producto.save()
@@ -58,12 +58,12 @@ def listar_productos(request):
 
     es_admin = check_admin(request)
     query = request.GET.get('buscar')
-    
+
     if query:
         productos = Producto.objects.filter(nombre_producto__icontains=query).prefetch_related('detalles_materia__materia_prima')
     else:
         productos = Producto.objects.all().prefetch_related('detalles_materia__materia_prima')
-    
+
     return render(request, 'productos/listar.html', {
         'productos': productos,
         'es_admin': es_admin,
@@ -77,7 +77,7 @@ def mostrar_registro_comida(request):
     if not es_admin:
         messages.error(request, "Solo el administrador puede registrar productos.")
         return redirect('listar_productos')
-        
+
     materias_primas = MateriaPrima.objects.filter(tipo='Comida')
     return render(request, 'productos/registrar_comida.html', {
         'es_admin': es_admin,
@@ -90,16 +90,16 @@ def mostrar_registro_bebida(request):
     if not es_admin:
         messages.error(request, "Solo el administrador puede registrar productos.")
         return redirect('listar_productos')
-        
+
     # Obtenemos los IDs y nombres de bebidas ya registradas para excluirlas de la lista
     materias_usadas_ids = DetalleProductoMateriaP.objects.filter(
         producto__categoria='Bebidas'
     ).values_list('materia_prima_id', flat=True)
-    
+
     nombres_bebidas = Producto.objects.filter(categoria='Bebidas').values_list('nombre_producto', flat=True)
 
     materias_primas = MateriaPrima.objects.filter(tipo='Bebida').exclude(id__in=materias_usadas_ids).exclude(nombre_materia_prima__in=nombres_bebidas)
-    
+
     return render(request, 'productos/registrar_bebida.html', {
         'es_admin': es_admin,
         'materias_primas': materias_primas
@@ -125,7 +125,7 @@ def registrar_producto(request):
         # 1. Obtener datos básicos
         nombre = request.POST.get('txt_nombre')
         categoria = request.POST.get('txt_categoria')
-        
+
         # 2. Si es Bebida y no tiene nombre manual, lo tomamos de la Materia Prima
         if not nombre and categoria == 'Bebidas':
             materia_id = request.POST.getlist('materia_id[]')[0] # Usamos la primera (y única) seleccionada
@@ -172,18 +172,18 @@ def pre_editar_producto(request, id):
     if not es_admin:
         messages.error(request, "Acceso denegado. Solo el administrador puede modificar productos.")
         return redirect('listar_productos')
-        
+
     producto = get_object_or_404(Producto, pk=id)
-    
+
     if producto.categoria == 'Bebidas':
         materias_primas = MateriaPrima.objects.filter(tipo='Bebida')
         # Obtenemos el link actual para la selección
         current_materia = producto.detalles_materia.first().materia_prima if producto.detalles_materia.exists() else None
-        
+
         # Fallback para bebidas antiguas
         if not current_materia:
             current_materia = MateriaPrima.objects.filter(nombre_materia_prima=producto.nombre_producto, tipo='Bebida').first()
-        
+
         return render(request, 'productos/editar_bebida.html', {
             'producto': producto,
             'es_admin': es_admin,
@@ -193,7 +193,7 @@ def pre_editar_producto(request, id):
     else:
         materias_primas = MateriaPrima.objects.all()
         composicion = producto.detalles_materia.all()
-        
+
         return render(request, 'productos/editar.html', {
             'producto': producto,
             'es_admin': es_admin,
@@ -210,10 +210,10 @@ def editar_producto(request):
     if request.method == 'POST':
         id_prod = request.POST.get('txt_id')
         producto = get_object_or_404(Producto, pk=id_prod)
-        
+
         nombre = request.POST.get('txt_nombre')
         categoria = request.POST.get('txt_categoria')
-        
+
         if not nombre and categoria == 'Bebidas':
             materia_id = request.POST.getlist('materia_id[]')
             if materia_id and materia_id[0]:
@@ -224,7 +224,7 @@ def editar_producto(request):
         producto.nombre_producto = nombre or producto.nombre_producto
         producto.precio          = request.POST.get('txt_precio')
         producto.categoria       = categoria
-        
+
         imagen = request.FILES.get('txt_imagen')
         if imagen:
             ext = imagen.name.split('.')[-1].lower()
@@ -232,12 +232,12 @@ def editar_producto(request):
                 messages.error(request, "Solo se permiten imágenes en formato JPG o PNG.")
                 return redirect('pre_editar_producto', id=producto.id)
             producto.imagen = imagen
-            
+
         producto.save()
 
         # Actualizar composición: borrar anterior y guardar nueva
         producto.detalles_materia.all().delete()
-        
+
         materias_ids = request.POST.getlist('materia_id[]')
         materias_cantidades = request.POST.getlist('materia_cantidad[]')
         materias_unidades = request.POST.getlist('materia_unidad[]')
@@ -254,9 +254,9 @@ def editar_producto(request):
 
         # Recalcular stock
         recalcular_stock_producto(producto)
-        
+
         messages.success(request, "Producto actualizado correctamente y stock recalculado.")
-        
+
     return redirect('listar_productos')
 
 def eliminar_producto(request, id):

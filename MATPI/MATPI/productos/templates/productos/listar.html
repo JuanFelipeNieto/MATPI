@@ -14,7 +14,7 @@
                 <button type="submit" class="btn btn-guardar">Buscar</button>
             </form>
         </div>
-        
+
         {% if es_admin %}
         <div style="display: flex; gap: 10px;">
             <a href="{% url 'mostrar_registro_comida' %}" class="btn btn-guardar">+ Nueva Comida</a>
@@ -62,7 +62,7 @@
                     </td>
                     <td>{{ producto.cantidad }}</td>
                     <td>${{ producto.precio }}</td>
-                    
+
                     {# Mantenemos los botones de Editar/Eliminar solo para el Admin #}
                     {% if es_admin %}
                     <td class="acciones">

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Matpi - Administrador')</title>
 
- 
+
     <link rel="icon" href="{{ asset('img/Favicon.png') }}" />
 
 
@@ -16,7 +16,7 @@
     @yield('head')
 </head>
 <body class="@yield('body-class')">
-   
+
     <header class="header">
         <img src="{{ asset('img/Logomatpi.png') }}" alt="Logo Matpi" class="logo">
 
@@ -53,7 +53,7 @@
         @yield('content')
     </main>
 
-  
+
     <footer>
         <p>© 2025 Matpi. Todos los derechos reservados.</p>
         <ul class="footer-links">

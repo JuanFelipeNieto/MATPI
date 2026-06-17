@@ -34,7 +34,7 @@ def obtener_rango_fechas(periodo):
 def obtener_contexto_general(periodo):
     """Retorna un diccionario con los datos agregados y detallados para el reporte general."""
     fecha_inicio, fecha_fin = obtener_rango_fechas(periodo)
-    
+
     pedidos = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     total_ingresos = pedidos.aggregate(Sum('valor'))['valor__sum'] or 0
     total_pedidos = pedidos.count()
@@ -54,7 +54,7 @@ def obtener_contexto_general(periodo):
         'periodo': periodo,
         'fecha_generada': timezone.localtime(),
         'periodo_str': periodo_map.get(periodo, 'del Periodo'),
-        
+
         # Desglose detallado
         'pedidos': pedidos.order_by('-fecha'),
         'productos': Producto.objects.all(),
@@ -72,30 +72,30 @@ def obtener_contexto_general(periodo):
 def generar_csv_general(periodo):
     """Genera el reporte general masivo consolidado en formato CSV."""
     ctx = obtener_contexto_general(periodo)
-    
+
     output = StringIO()
     writer = csv.writer(output)
-    
+
     writer.writerow(['Reporte General', f"Periodo: {ctx['periodo'].capitalize()}"])
     writer.writerow(['Generado el:', ctx['fecha_generada'].strftime('%Y-%m-%d %H:%M')])
     writer.writerow([])
-    
+
     # 1. Resumen
     writer.writerow(['--- RESUMEN GENERAL ---'])
     writer.writerow(['Total Pedidos Atendidos', ctx['total_pedidos']])
     writer.writerow(['Ingresos Totales', f"${ctx['total_ingresos']:,.2f}"])
     writer.writerow([])
-    
+
     # El desglose por método de pago ha sido eliminado por solicitud del usuario
 
-    
+
     # 2. Pedidos
     writer.writerow(['--- DETALLE DE PEDIDOS ---'])
     writer.writerow(['ID', 'Fecha', 'Método Pago', 'Valor', 'Usuario Nombre'])
     for p in ctx['pedidos']:
         writer.writerow([p.id, p.fecha.strftime('%Y-%m-%d %H:%M'), p.metodo_pago, p.valor, p.usuario.nombre_completo])
     writer.writerow([])
-        
+
     # 3. Productos
     writer.writerow(['--- DETALLE DE PRODUCTOS ---'])
     writer.writerow(['ID', 'Nombre', 'Precio', 'Stock', 'Categoría'])

@@ -18,7 +18,7 @@ def listar_proveedores(request):
     id_sesion = request.session.get('usuario_id')
     if not id_sesion:
         return redirect('login')
-    
+
     es_admin = check_admin(request)
     proveedores = Proveedor.objects.all()
     return render(request, 'proveedores/listar.html', {
@@ -31,7 +31,7 @@ def mostrar_registro_proveedor(request):
     if not check_admin(request):
         messages.error(request, "Solo el administrador puede registrar proveedores.")
         return redirect('listar_proveedores')
-        
+
     return render(request, 'proveedores/registrar.html', {'es_admin': True})
 
 
@@ -55,7 +55,7 @@ def registrar_proveedor(request):
             messages.success(request, "Proveedor registrado exitosamente.")
         except Exception as e:
             messages.error(request, f"Error al registrar: {str(e)}")
-            
+
         return redirect('listar_proveedores')
     return redirect('mostrar_registro_proveedor')
 
@@ -64,10 +64,10 @@ def pre_editar_proveedor(request, id):
     if not check_admin(request):
         messages.error(request, "No tienes permisos para editar proveedores.")
         return redirect('listar_proveedores')
-        
+
     proveedor = get_object_or_404(Proveedor, pk=id)
     return render(request, 'proveedores/editar.html', {
-        'proveedor': proveedor, 
+        'proveedor': proveedor,
         'es_admin': True
     })
 
@@ -92,7 +92,7 @@ def editar_proveedor(request):
             messages.success(request, "Proveedor actualizado correctamente.")
         except Exception as e:
             messages.error(request, f"Error al actualizar: {str(e)}")
-            
+
     return redirect('listar_proveedores')
 
 
@@ -113,7 +113,7 @@ def mostrar_registro_suministro(request, id):
     id_sesion = request.session.get('usuario_id')
     if not id_sesion:
         return redirect('login')
-    
+
     es_admin = check_admin(request)
     proveedor = get_object_or_404(Proveedor, pk=id)
     materias_primas = MateriaPrima.objects.all()
@@ -125,7 +125,7 @@ def mostrar_registro_suministro(request, id):
         ultimo_lote = Lote.objects.filter(materia_prima=mp).order_by('-id').first()
         if ultimo_lote:
             precios_dict[mp.id] = float(ultimo_lote.precio_unidad or 0)
-    
+
     return render(request, 'proveedores/registrar_suministro.html', {
         'proveedor': proveedor,
         'materias_primas': materias_primas,
@@ -142,16 +142,16 @@ def registrar_suministro_materia(request):
         precio       = request.POST.get('txt_precio')
         fecha        = request.POST.get('txt_fecha')
         vencimiento = request.POST.get('txt_vencimiento')
-        
+
         try:
             with transaction.atomic():
                 proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
                 materia   = get_object_or_404(MateriaPrima, pk=materia_id)
-                
-                # Import Lote from materia_prima.models (locally to avoid circularity if needed, 
+
+                # Import Lote from materia_prima.models (locally to avoid circularity if needed,
                 # but views already imports Proveedor, MateriaPrima, etc. so we should check imports)
                 from materia_prima.models import Lote
-                
+
                 # Crear el registro del suministro
                 DetalleProveedorMateriaP.objects.create(
                     proveedor=proveedor,
@@ -160,7 +160,7 @@ def registrar_suministro_materia(request):
                     fecha_suministro=fecha or timezone.now(),
                     fecha_vencimiento=vencimiento or None
                 )
-                
+
                 # Crear el nuevo lote funcional
                 Lote.objects.create(
                     materia_prima=materia,
@@ -169,10 +169,10 @@ def registrar_suministro_materia(request):
                     fecha_vencimiento=vencimiento or None,
                     precio_unidad=precio or 0
                 )
-                
+
                 messages.success(request, f"Se han registrado {cantidad} unidades de {materia.nombre_materia_prima} como un nuevo lote.")
         except Exception as e:
             messages.error(request, f"Error al registrar suministro: {str(e)}")
-            
+
         return redirect('listar_proveedores')
     return redirect('listar_proveedores')
