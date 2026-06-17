@@ -7,16 +7,16 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Cargar variables de entorno desde el archivo .env
+# Cargar variables de entorno desde el archivo .env en la raíz
+# Como esta es la configuración en la raíz, BASE_DIR apunta a la carpeta contenedora del proyecto, por lo que buscamos en la carpeta MATPI
+load_dotenv(os.path.join(BASE_DIR, 'MATPI', '.env'))
 load_dotenv(os.path.join(BASE_DIR, '.env'))
-load_dotenv(os.path.join(BASE_DIR.parent, '.env'))
-load_dotenv(os.path.join(BASE_DIR.parent.parent, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-dev-only-placeholder-key-for-local-use')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('true', '1')
 
 ALLOWED_HOSTS = ['*']
 

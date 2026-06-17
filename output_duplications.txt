@@ -1,0 +1,376 @@
+Found 17 distinct duplicated blocks of length >= 10
+================================================================================
+Match #1: 27 lines duplicated
+File A: productos/templates/productos/editar.html (lines 68 to 94)
+File B: productos/templates/productos/registrar_comida.html (lines 32 to 58)
+--------------------------------------------------------------------------------
+  1:                             <tr class="fila-materia">
+  2:                                 <td>
+  3:                                     <label class="sr-only label-select" for="select_materia_1">Seleccione Materia Prima</label>
+  4:                                     <select name="materia_id[]" id="select_materia_1" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
+  5:                                         <option value="" data-equiv="" data-unidad="">Seleccione Materia Prima</option>
+  6:                                         {% for materia in materias_primas %}
+  7:                                             <option value="{{ materia.id }}" data-equiv="{{ materia.cantidad_por_unidad|unlocalize }}" data-unidad="{{ materia.unidad_medida }}">{{ materia.nombre_materia_prima }}</option>
+  8:                                         {% endfor %}
+  9:                                     </select>
+ 10:                                 </td>
+ 11: 
+ 12:                                 <td>
+ 13:                                     <div class="input-group" style="display: flex; gap: 5px; align-items: center;">
+ 14:                                         <button type="button" class="btn btn-outline-secondary btn-restar" onclick="restarUnidad(this)" title="Restar 1 unidad" style="padding: 2px 8px;">-</button>
+ 15:                                         <label class="sr-only label-input" for="materia_cantidad_1">Cantidad Total Usada</label>
+ 16:                                         <input type="number" id="materia_cantidad_1" name="materia_cantidad[]" class="form-control input-equiv" value="" min="0.01" step="0.01" required oninput="actualizarUnidades(this)" placeholder="0" style="text-align: center;">
+ 17:                                         <button type="button" class="btn btn-outline-secondary btn-sumar" onclick="sumarUnidad(this)" title="Sumar 1 unidad" style="padding: 2px 8px;">+</button>
+ 18:                                         <label class="sr-only label-unidad" for="materia_unidad_1">Unidad de medida</label>
+ 19:                                         <input type="hidden" id="materia_unidad_1" name="materia_unidad[]" class="input-unidad-texto" value="">
+ 20:                                         <span class="unit-label"></span>
+ 21:                                     </div>
+ 22:                                     <small class="msg-unidades text-success" style="display: block; margin-top: 5px; font-weight: bold;"></small>
+ 23:                                 </td>
+ 24:                                 <td>
+ 25:                                     <button type="button" class="btn btn-cancelar btn-sm" onclick="eliminarFila(this)">Eliminar</button>
+ 26:                                 </td>
+ 27:                             </tr>
+================================================================================
+
+================================================================================
+Match #2: 19 lines duplicated
+File A: clientes/tests.py (lines 13 to 31)
+File B: reportes/tests.py (lines 15 to 33)
+--------------------------------------------------------------------------------
+  1:             contraseña="adminpass123",
+  2:             correo_electronico="admin@matpi.com",
+  3:             telefono="3001234567",
+  4:             fecha_nacimiento="1990-01-01",
+  5:             direccion="Calle 123",
+  6:             fecha_ingreso=timezone.now().date(),
+  7:             estado="Activo"
+  8:         )
+  9:         self.admin = Administrador.objects.create(usuario=self.admin_user)
+ 10: 
+ 11:         self.cliente = Cliente.objects.create(
+ 12:             id=1020304050,
+ 13:             nombre_completo="Juan Perez",
+ 14:             telefono="3009876543",
+ 15:             direccion="Calle Falsa 123",
+ 16:             localidad="Usaquén",
+ 17:             usuario=self.admin_user
+ 18:         )
+ 19: 
+================================================================================
+
+================================================================================
+Match #3: 19 lines duplicated
+File A: facturas/tests.py (lines 15 to 33)
+File B: pedidos/tests.py (lines 18 to 36)
+--------------------------------------------------------------------------------
+  1:             contraseña="cajeropass123",
+  2:             correo_electronico="cajero@matpi.com",
+  3:             telefono="3001234567",
+  4:             fecha_nacimiento="1990-01-01",
+  5:             direccion="Calle 123",
+  6:             fecha_ingreso=timezone.now().date(),
+  7:             estado="Activo"
+  8:         )
+  9:         self.cajero = Cajero.objects.create(usuario=self.cajero_user)
+ 10: 
+ 11:         self.cliente = Cliente.objects.create(
+ 12:             id=1020304050,
+ 13:             nombre_completo="Juan Perez",
+ 14:             telefono="3009876543",
+ 15:             direccion="Calle Falsa 123",
+ 16:             localidad="Usaquén",
+ 17:             usuario=self.cajero_user
+ 18:         )
+ 19: 
+================================================================================
+
+================================================================================
+Match #4: 19 lines duplicated
+File A: facturas/tests.py (lines 15 to 33)
+File B: reservas/tests.py (lines 15 to 33)
+--------------------------------------------------------------------------------
+  1:             contraseña="cajeropass123",
+  2:             correo_electronico="cajero@matpi.com",
+  3:             telefono="3001234567",
+  4:             fecha_nacimiento="1990-01-01",
+  5:             direccion="Calle 123",
+  6:             fecha_ingreso=timezone.now().date(),
+  7:             estado="Activo"
+  8:         )
+  9:         self.cajero = Cajero.objects.create(usuario=self.cajero_user)
+ 10: 
+ 11:         self.cliente = Cliente.objects.create(
+ 12:             id=1020304050,
+ 13:             nombre_completo="Juan Perez",
+ 14:             telefono="3009876543",
+ 15:             direccion="Calle Falsa 123",
+ 16:             localidad="Usaquén",
+ 17:             usuario=self.cajero_user
+ 18:         )
+ 19: 
+================================================================================
+
+================================================================================
+Match #5: 19 lines duplicated
+File A: pedidos/tests.py (lines 18 to 36)
+File B: reservas/tests.py (lines 15 to 33)
+--------------------------------------------------------------------------------
+  1:             contraseña="cajeropass123",
+  2:             correo_electronico="cajero@matpi.com",
+  3:             telefono="3001234567",
+  4:             fecha_nacimiento="1990-01-01",
+  5:             direccion="Calle 123",
+  6:             fecha_ingreso=timezone.now().date(),
+  7:             estado="Activo"
+  8:         )
+  9:         self.cajero = Cajero.objects.create(usuario=self.cajero_user)
+ 10: 
+ 11:         self.cliente = Cliente.objects.create(
+ 12:             id=1020304050,
+ 13:             nombre_completo="Juan Perez",
+ 14:             telefono="3009876543",
+ 15:             direccion="Calle Falsa 123",
+ 16:             localidad="Usaquén",
+ 17:             usuario=self.cajero_user
+ 18:         )
+ 19: 
+================================================================================
+
+================================================================================
+Match #6: 18 lines duplicated
+File A: pedidos/templates/pedidos/editar.html (lines 73 to 90)
+File B: pedidos/templates/pedidos/registrar.html (lines 65 to 82)
+--------------------------------------------------------------------------------
+  1:             </div>
+  2:         </div>
+  3: 
+  4:         <!-- Productos -->
+  5:         <div class="products-section">
+  6:             <h3 style="margin-bottom: 20px; font-weight: bold;">Detalle del Pedido</h3>
+  7:             <div class="table-responsive">
+  8:                 <table class="custom-table" id="tabla-productos">
+  9:                     <thead>
+ 10:                         <tr style="background: #f8fafc;">
+ 11:                             <th>Descripción</th>
+ 12:                             <th style="width: 120px;">Cantidad</th>
+ 13:                             <th style="width: 150px;">Subtotal</th>
+ 14:                             <th>Personalizar</th>
+ 15:                             <th style="width: 50px;"></th>
+ 16:                         </tr>
+ 17:                     </thead>
+ 18:                     <tbody id="body-productos">
+================================================================================
+
+================================================================================
+Match #7: 15 lines duplicated
+File A: materia_prima/templates/materia_prima/editar.html (lines 59 to 73)
+File B: materia_prima/templates/materia_prima/registrar.html (lines 67 to 81)
+--------------------------------------------------------------------------------
+  1:         const inputEquivalencia = document.getElementById('txt_cantidad_unidad');
+  2:         const fieldEquivalencia = inputEquivalencia.closest('.form-group');
+  3: 
+  4:         function toggleEquivalencia() {
+  5:             if (selectUnidad.value === 'und') {
+  6:                 fieldEquivalencia.style.display = 'none';
+  7:                 inputEquivalencia.value = 1;
+  8:                 inputEquivalencia.required = false;
+  9:             } else {
+ 10:                 fieldEquivalencia.style.display = 'block';
+ 11:                 inputEquivalencia.required = true;
+ 12:             }
+ 13:         }
+ 14: 
+ 15:         selectUnidad.addEventListener('change', toggleEquivalencia);
+================================================================================
+
+================================================================================
+Match #8: 14 lines duplicated
+File A: materia_prima/tests.py (lines 57 to 70)
+File B: usuarios/tests.py (lines 47 to 60)
+--------------------------------------------------------------------------------
+  1:         )
+  2: 
+  3:     def login_como_admin(self):
+  4:         session = self.client.session
+  5:         session['usuario_id'] = self.admin_user.id
+  6:         session['usuario_nombre'] = self.admin_user.nombre_completo
+  7:         session.save()
+  8: 
+  9:     def login_como_cajero(self):
+ 10:         session = self.client.session
+ 11:         session['usuario_id'] = self.cajero_user.id
+ 12:         session['usuario_nombre'] = self.cajero_user.nombre_completo
+ 13:         session.save()
+ 14: 
+================================================================================
+
+================================================================================
+Match #9: 14 lines duplicated
+File A: usuarios/templates/reportes/pdf_clientes.html (lines 1 to 14)
+File B: usuarios/templates/reportes/pdf_proveedores.html (lines 1 to 14)
+--------------------------------------------------------------------------------
+  1: ﻿{% extends "reportes/base_pdf.html" %}
+  2: 
+  3: {% block content %}
+  4: {% if grafica_base64 %}
+  5: <div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
+  6:     <h3 style="font-size: 14px; color: #333; margin-bottom: 5px;">Visualización de Datos - {{ periodo_str }}</h3>
+  7:     <img src="{{ grafica_base64 }}" alt="Gráfico estadístico" style="width: 500px; height: auto; border: 1px solid #eee; border-radius: 8px;">
+  8: </div>
+  9: <br>
+ 10: {% endif %}
+ 11: 
+ 12: <table class="table-data">
+ 13:     <thead>
+ 14:         <tr>
+================================================================================
+
+================================================================================
+Match #10: 13 lines duplicated
+File A: materia_prima/tests.py (lines 58 to 70)
+File B: productos/tests.py (lines 99 to 111)
+--------------------------------------------------------------------------------
+  1: 
+  2:     def login_como_admin(self):
+  3:         session = self.client.session
+  4:         session['usuario_id'] = self.admin_user.id
+  5:         session['usuario_nombre'] = self.admin_user.nombre_completo
+  6:         session.save()
+  7: 
+  8:     def login_como_cajero(self):
+  9:         session = self.client.session
+ 10:         session['usuario_id'] = self.cajero_user.id
+ 11:         session['usuario_nombre'] = self.cajero_user.nombre_completo
+ 12:         session.save()
+ 13: 
+================================================================================
+
+================================================================================
+Match #11: 13 lines duplicated
+File A: materia_prima/tests.py (lines 18 to 30)
+File B: usuarios/tests.py (lines 17 to 29)
+--------------------------------------------------------------------------------
+  1:             contraseña="adminpass123",
+  2:             correo_electronico="admin@matpi.com",
+  3:             telefono="3001234567",
+  4:             fecha_nacimiento="1990-01-01",
+  5:             direccion="Calle Falsa 123",
+  6:             fecha_ingreso=timezone.now().date(),
+  7:             estado="Activo"
+  8:         )
+  9:         self.admin = Administrador.objects.create(
+ 10:             usuario=self.admin_user,
+ 11:             formacion_educativa="Ingeniería"
+ 12:         )
+ 13: 
+================================================================================
+
+================================================================================
+Match #12: 13 lines duplicated
+File A: productos/tests.py (lines 99 to 111)
+File B: usuarios/tests.py (lines 48 to 60)
+--------------------------------------------------------------------------------
+  1: 
+  2:     def login_como_admin(self):
+  3:         session = self.client.session
+  4:         session['usuario_id'] = self.admin_user.id
+  5:         session['usuario_nombre'] = self.admin_user.nombre_completo
+  6:         session.save()
+  7: 
+  8:     def login_como_cajero(self):
+  9:         session = self.client.session
+ 10:         session['usuario_id'] = self.cajero_user.id
+ 11:         session['usuario_nombre'] = self.cajero_user.nombre_completo
+ 12:         session.save()
+ 13: 
+================================================================================
+
+================================================================================
+Match #13: 12 lines duplicated
+File A: usuarios/templates/usuarios/editar.html (lines 200 to 211)
+File B: usuarios/templates/usuarios/registrar.html (lines 139 to 150)
+--------------------------------------------------------------------------------
+  1:         </div>
+  2:     </form>
+  3: </div>
+  4: 
+  5: <script>
+  6:     document.addEventListener("DOMContentLoaded", function() {
+  7:         const today = new Date();
+  8:         const yyyy = today.getFullYear();
+  9:         const mm = String(today.getMonth() + 1).padStart(2, '0');
+ 10:         const dd = String(today.getDate()).padStart(2, '0');
+ 11:         const formattedToday = `${yyyy}-${mm}-${dd}`;
+ 12: 
+================================================================================
+
+================================================================================
+Match #14: 11 lines duplicated
+File A: productos/templates/productos/editar.html (lines 24 to 34)
+File B: productos/templates/productos/registrar_comida.html (lines 21 to 31)
+--------------------------------------------------------------------------------
+  1:             <div class="table-container">
+  2:                 <table class="table" id="tabla-composicion">
+  3:                     <thead>
+  4:                         <tr>
+  5:                             <th style="width: 35%;">Materia Prima</th>
+  6: 
+  7:                             <th style="width: 30%;">Cantidad Total Usada</th>
+  8:                             <th style="width: 15%;">Acciones</th>
+  9:                         </tr>
+ 10:                     </thead>
+ 11:                     <tbody id="body-composicion">
+================================================================================
+
+================================================================================
+Match #15: 10 lines duplicated
+File A: clientes/tests.py (lines 13 to 22)
+File B: proveedores/tests.py (lines 15 to 24)
+--------------------------------------------------------------------------------
+  1:             contraseña="adminpass123",
+  2:             correo_electronico="admin@matpi.com",
+  3:             telefono="3001234567",
+  4:             fecha_nacimiento="1990-01-01",
+  5:             direccion="Calle 123",
+  6:             fecha_ingreso=timezone.now().date(),
+  7:             estado="Activo"
+  8:         )
+  9:         self.admin = Administrador.objects.create(usuario=self.admin_user)
+ 10: 
+================================================================================
+
+================================================================================
+Match #16: 10 lines duplicated
+File A: materia_prima/templates/materia_prima/importar_lotes.html (lines 23 to 32)
+File B: materia_prima/templates/materia_prima/importar_materia_prima.html (lines 23 to 32)
+--------------------------------------------------------------------------------
+  1:     </div>
+  2: 
+  3:     <form method="POST" enctype="multipart/form-data">
+  4:         {% csrf_token %}
+  5:         <div class="form-group">
+  6:             <label for="archivo_excel">Seleccionar Archivo Excel</label>
+  7:             <input type="file" id="archivo_excel" name="archivo_excel" accept=".xlsx" required>
+  8:         </div>
+  9: 
+ 10:         <div style="margin-top: 20px;">
+================================================================================
+
+================================================================================
+Match #17: 10 lines duplicated
+File A: proveedores/tests.py (lines 15 to 24)
+File B: reportes/tests.py (lines 15 to 24)
+--------------------------------------------------------------------------------
+  1:             contraseña="adminpass123",
+  2:             correo_electronico="admin@matpi.com",
+  3:             telefono="3001234567",
+  4:             fecha_nacimiento="1990-01-01",
+  5:             direccion="Calle 123",
+  6:             fecha_ingreso=timezone.now().date(),
+  7:             estado="Activo"
+  8:         )
+  9:         self.admin = Administrador.objects.create(usuario=self.admin_user)
+ 10: 
+================================================================================
+

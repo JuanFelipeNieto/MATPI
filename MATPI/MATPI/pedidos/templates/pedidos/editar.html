@@ -1,90 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Editar Pedido #{{ pedido.id }} — Matpi{% endblock %}
 
 {% block extra_css %}
-<style>
-    .order-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .order-card {
-        background: #fff;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: var(--shadow);
-        border: 1px solid #eee;
-    }
-    .order-card h3 {
-        font-size: 1.1rem;
-        margin-bottom: 15px;
-        color: var(--primary);
-        border-bottom: 2px solid #f0f0f0;
-        padding-bottom: 8px;
-    }
-    .products-section {
-        background: #fff;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: var(--shadow);
-        margin-bottom: 30px;
-    }
-    .total-banner {
-        background: var(--black);
-        color: var(--white);
-        padding: 25px;
-        border-radius: 12px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-    }
-    .total-banner h2 {
-        margin: 0;
-        color: var(--primary);
-        font-size: 2.2rem;
-    }
-    .btn-detalles {
-        background: #eef2f7;
-        color: #334155;
-    }
-    .btn-detalles:hover {
-        background: #e2e8f0;
-    }
-    .exclusion-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 10px;
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        margin-bottom: 4px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .exclusion-item:hover {
-        border-color: var(--primary);
-    }
-    .exclusion-item input {
-        width: auto !important;
-        margin: 0;
-    }
-    .fila-bebida {
-        background-color: #fff9f0 !important;
-    }
-    .subtotal-fila {
-        color: var(--primary);
-        font-weight: 700;
-    }
-    .readonly-field {
-        background-color: #f8fafc !important;
-        font-weight: bold;
-        color: var(--primary) !important;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/pedidos.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -226,45 +146,10 @@
     </select>
 </div>
 
+<script src="{% static 'js/pedidos.js' %}"></script>
 <script>
     let contadorFilas = 0;
     const detallesIniciales = {{ detalles_json|safe }};
-    const formatter = new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0
-    });
-
-    function sincronizarClienteId(valor) {
-        const datalist = document.getElementById('clientes_list');
-        const hiddenInput = document.getElementById('txt_cliente_id');
-        const opciones = datalist.options;
-        let clienteId = null;
-
-        for (let i = 0; i < opciones.length; i++) {
-            if (opciones[i].value === valor) {
-                clienteId = opciones[i].dataset.id;
-                break;
-            }
-        }
-
-        hiddenInput.value = clienteId || "";
-        // Nota: El filtrado de reservas en edición ya viene pre-renderizado, pero si cambia el cliente, podríamos querer filtrarlas
-        filtrarReservas(clienteId);
-    }
-
-    function filtrarReservas(clienteId) {
-        const selectReserva = document.getElementById('txt_reserva');
-        const opciones = selectReserva.options;
-        if (!clienteId) {
-            for (let i = 1; i < opciones.length; i++) opciones[i].style.display = 'none';
-            return;
-        }
-        for (let i = 1; i < opciones.length; i++) {
-            const idC = opciones[i].dataset.cliente;
-            opciones[i].style.display = (idC === clienteId) ? 'block' : 'none';
-        }
-    }
 
     function agregarFilaProducto(datos = null) {
         const tbody = document.getElementById('body-productos');
@@ -337,150 +222,8 @@
         return html;
     }
 
-    function eliminarFilaProducto(boton) {
-        const tbody = document.getElementById('body-productos');
-        if (tbody.rows.length > 1) {
-            boton.closest('tr').remove();
-            calcularTotal();
-        } else {
-            alert("El pedido debe tener al menos un item.");
-        }
-    }
-
-    function toggleDetalles(boton) {
-        const div = boton.nextElementSibling;
-        div.style.display = (div.style.display === "none") ? "block" : "none";
-        boton.innerText = (div.style.display === "none") ? "⚙️ Personalizar" : "🔼 Cerrar";
-    }
-
-    function actualizarComposicion_y_Precio(elemento, excluidasPreseleccionadas = []) {
-        const fila = elemento.closest('tr');
-        const selectElement = fila.querySelector('.select-producto');
-        const opcion = selectElement.options[selectElement.selectedIndex];
-        const listaExcl = fila.querySelector('.lista-exclusiones');
-        const indice = fila.getAttribute('data-indice');
-
-        if (opcion.value && listaExcl) {
-            const composicion = JSON.parse(opcion.dataset.composicion || "[]");
-
-            // 1. Construir HTML solo si el cambio NO vino de un checkbox (Para no borrar los checkboxes chequeados)
-            if (elemento.type !== 'checkbox') {
-                let html = "";
-                composicion.forEach(mp => {
-                    const checked = excluidasPreseleccionadas.includes(mp.id) ? 'checked' : '';
-                    html += `
-                        <label class="exclusion-item" ${mp.stock <= 0 ? 'style="border-color: #ef4444; background: #fef2f2;"' : ''}>
-                            <input type="checkbox" name="producto_exclusiones_${indice}[]" value="${mp.id}" ${checked} onchange="actualizarComposicion_y_Precio(this)">
-                            <span ${mp.stock <= 0 ? 'style="color: #b91c1c; font-weight: bold;"' : ''}>
-                                Sin ${mp.nombre} ${mp.stock <= 0 ? '(¡AGOTADO!)' : ''}
-                            </span>
-                        </label>
-                    `;
-                });
-                listaExcl.innerHTML = html || "<p style='font-size: 0.8rem; color: #94a3b8;'>Sin ingredientes modificables.</p>";
-            }
-
-            // 2. Calcular límites
-            let stockLimitado = Infinity;
-            let agotado = false;
-            const checkedIds = new Set(Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`)).map(cb => Number.parseInt(cb.value, 10)));
-
-            composicion.forEach(mp => {
-                if (!checkedIds.has(mp.id)) {
-                    const posible = Math.floor(mp.stock / mp.cantidad_usada);
-                    if (posible < stockLimitado) stockLimitado = posible;
-                    if (mp.stock <= 0) agotado = true;
-                }
-            });
-
-            // 3. Visual
-            if (agotado) {
-                fila.style.border = "2px solid #ef4444";
-                fila.style.backgroundColor = "#fff5f5";
-            } else {
-                fila.style.border = "";
-                fila.style.backgroundColor = "";
-            }
-        } else if(listaExcl) {
-            listaExcl.innerHTML = "";
-            fila.style.border = "";
-            fila.style.backgroundColor = "";
-        }
-
-        calcularTotal();
-    }
-
-    function calcularTotal() {
-        let totalGeneral = 0;
-        let totalItems = 0;
-        const filas = document.querySelectorAll('.fila-producto');
-
-        filas.forEach(fila => {
-            const select = fila.querySelector('.select-producto');
-            const selectCant = fila.querySelector('.select-cantidad');
-            const subtotalFila = fila.querySelector('.subtotal-fila');
-
-            const seleccionada = select.options[select.selectedIndex];
-            if (seleccionada && seleccionada.value) {
-                const precio = Number.parseFloat(seleccionada.dataset.precio || 0);
-                const cantidad = Number.parseInt(selectCant.value || 0, 10);
-                const totalFila = precio * cantidad;
-
-                subtotalFila.innerText = formatter.format(totalFila);
-                totalGeneral += totalFila;
-                totalItems += cantidad;
-            } else {
-                subtotalFila.innerText = "$0";
-            }
-        });
-
-        const displayTotal = document.getElementById('valor-total-display');
-        displayTotal.innerText = formatter.format(totalGeneral);
-        document.getElementById('txt_valor').value = totalGeneral;
-        document.getElementById('span-total-items').innerText = totalItems;
-    }
-
     document.getElementById('order-form').onsubmit = function(e) {
-        // 1. Validar que si se escribió un nombre, este exista en la lista (ID presente)
-        const clienteId = document.getElementById('txt_cliente_id').value;
-        const clienteNombre = document.getElementById('txt_cliente_search').value;
-
-        if (clienteNombre && !clienteId) {
-            alert("No se puede actualizar el pedido: El cliente '" + clienteNombre + "' no existe. Selecciónelo de la lista o regístrelo primero.");
-            e.preventDefault();
-            return false;
-        }
-
-        const filas = document.querySelectorAll('.fila-producto');
-        let error = false;
-        let msg = "";
-
-        filas.forEach(fila => {
-            const select = fila.querySelector('.select-producto');
-            const opcion = select.options[select.selectedIndex];
-            if (!opcion || !opcion.value) return;
-
-            const composicion = JSON.parse(opcion.dataset.composicion || "[]");
-            const cantidad = Number.parseInt(fila.querySelector('.select-cantidad').value, 10);
-            const excluidas = new Set(Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`)).map(cb => Number.parseInt(cb.value, 10)));
-
-            composicion.forEach(mp => {
-                if (!excluidas.has(mp.id)) {
-                    // Nota: En edición, mp.stock es el stock neto actual.
-                    // El backend restará y validará con mayor precisión.
-                    if (mp.stock < (mp.cantidad_usada * cantidad)) {
-                        error = true;
-                        msg += `- ${opcion.text.trim()}: Insumo "${mp.nombre}" insuficiente (Disponible: ${mp.stock})\n`;
-                    }
-                }
-            });
-        });
-
-        if (error) {
-            alert("No se puede guardar el pedido por falta de stock:\n\n" + msg);
-            e.preventDefault();
-            return false;
-        }
+        return validarStockYSubmit(e, "guardar");
     };
 
     window.onload = () => {
@@ -489,7 +232,6 @@
         } else {
             agregarFilaProducto();
         }
-        // Inicializar filtro de reservas para el cliente actual
         filtrarReservas(document.getElementById('txt_cliente_id').value);
     };
 </script>

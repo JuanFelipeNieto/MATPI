@@ -196,7 +196,8 @@ def _validar_emergencia(emergencia_nombre, emergencia_parentesco, emergencia_num
 
 @login_requerido
 @require_http_methods(["GET", "POST"])
-def ver_perfil(request, usuario_id):
+def ver_perfil(request, id):
+    usuario_id = id
     usuario = get_object_or_404(Usuario, id=usuario_id)
     cajero = Cajero.objects.filter(usuario=usuario).first()
 
@@ -359,7 +360,8 @@ def _editar_usuario_post(request):
 
 @login_requerido
 @require_http_methods(["GET", "POST"])
-def editar_usuario(request, usuario_id=None):
+def editar_usuario(request, id=None):
+    usuario_id = id
     if not es_administrador(request):
         return redirect('dashboard')
 
@@ -370,9 +372,9 @@ def editar_usuario(request, usuario_id=None):
     return redirect('listar_usuarios')
 
 @login_requerido
-@login_requerido
 @require_http_methods(["GET", "POST"])
-def eliminar_usuario(request, usuario_id):
+def eliminar_usuario(request, id):
+    usuario_id = id
     if not es_administrador(request): return redirect('dashboard')
     usuario = get_object_or_404(Usuario, id=usuario_id)
     if str(usuario.id) == str(request.session.get('usuario_id')):
