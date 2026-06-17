@@ -1,4 +1,10 @@
-
 **/__pycache__/
 *.pyc
 *.pyo
+
+# Environment variables
+.env
+
+# Local history
+.history/
+**/.history/

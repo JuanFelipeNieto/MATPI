@@ -2,13 +2,16 @@
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Cargar variables de entorno desde el archivo .env
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8y5t1(=$gafy3)1@4_!@p=)&1(42v!-1mp%cfk2%8)g_i2uczb'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-dev-only-placeholder-key-for-local-use')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
