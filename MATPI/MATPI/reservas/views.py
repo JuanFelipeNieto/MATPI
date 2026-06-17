@@ -115,8 +115,8 @@ def registrar_reserva(request):
 
 
 @require_GET
-def pre_editar_reserva(request, reserva_id):
-    return listar_reservas(request, edit_id=reserva_id)
+def pre_editar_reserva(request, id):
+    return listar_reservas(request, edit_id=id)
 
 
 @require_http_methods(["GET", "POST"])
@@ -130,10 +130,10 @@ def editar_reserva(request):
     try:
         fecha_dt = _validar_fecha_reserva(fecha_str)
         if not fecha_dt:
-            return redirect('pre_editar_reserva', reserva_id=reserva_id)
+            return redirect('pre_editar_reserva', id=reserva_id)
     except ValueError as e:
         messages.error(request, str(e))
-        return redirect('pre_editar_reserva', reserva_id=reserva_id)
+        return redirect('pre_editar_reserva', id=reserva_id)
 
     estado        = request.POST.get('txt_estado', '1') == '1'
     observaciones = request.POST.get('txt_observaciones')
@@ -153,6 +153,6 @@ def editar_reserva(request):
 
 
 @require_http_methods(["GET", "POST"])
-def eliminar_reserva(request, reserva_id):
-    Reserva.objects.get(pk=reserva_id).delete()
+def eliminar_reserva(request, id):
+    Reserva.objects.get(pk=id).delete()
     return redirect('listar_reservas')

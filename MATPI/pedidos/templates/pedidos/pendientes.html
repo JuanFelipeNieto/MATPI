@@ -155,7 +155,7 @@
 
         // Actualizar contadores de cada tarjeta
         document.querySelectorAll('.tiempo-preparacion').forEach(elemento => {
-            const fechaInicio = new Date(elemento.getAttribute('data-inicio'));
+            const fechaInicio = new Date(elemento.dataset.inicio);
             const diferencia = ahora - fechaInicio;
 
             const minutos = Math.floor(diferencia / 60000);

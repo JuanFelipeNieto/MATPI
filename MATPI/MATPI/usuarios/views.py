@@ -143,9 +143,8 @@ def listar_usuarios(request):
     return render(request, 'usuarios/listar.html', {'usuarios': usuarios, 'buscar': buscar})
 
 def _validar_usuario_base(doc_id, nombre, telefono, experiencia_file=None):
-    if doc_id is not None:
-        if len(doc_id) != 10:
-            raise ValueError("El documento debe tener exactamente 10 caracteres.")
+    if doc_id is not None and len(doc_id) != 10:
+        raise ValueError("El documento debe tener exactamente 10 caracteres.")
     if nombre:
         if len(nombre) < 3:
             raise ValueError("El nombre no puede tener menos de 3 caracteres.")
@@ -156,36 +155,44 @@ def _validar_usuario_base(doc_id, nombre, telefono, experiencia_file=None):
     if experiencia_file and not experiencia_file.name.lower().endswith('.pdf'):
         raise ValueError("El archivo de experiencia laboral debe ser en formato PDF.")
 
-def _validar_emergencia(emergencia_nombre, emergencia_parentesco, emergencia_numero, required=True):
-    if required:
-        if emergencia_nombre and len(emergencia_nombre) < 3:
+def _validar_emergencia_requerido(emergencia_nombre, emergencia_parentesco, emergencia_numero):
+    if not (emergencia_nombre and emergencia_parentesco and emergencia_numero):
+        raise ValueError("Todos los campos de contacto de emergencia son requeridos.")
+    if len(emergencia_nombre) < 3:
+        raise ValueError("El nombre del contacto de emergencia no puede tener menos de 3 caracteres.")
+    if not validar_nombre(emergencia_nombre):
+        raise ValueError("El nombre del contacto de emergencia no puede tener números.")
+    if len(emergencia_parentesco) > 15:
+        raise ValueError("El parentesco no puede tener más de 15 caracteres.")
+    if not validar_nombre(emergencia_parentesco):
+        raise ValueError("El parentesco no puede tener números.")
+    if len(emergencia_numero) < 6:
+        raise ValueError("El teléfono de emergencia no puede tener menos de 6 caracteres.")
+    if not validar_solo_numeros(emergencia_numero):
+        raise ValueError("El teléfono de emergencia solo puede tener números.")
+
+def _validar_emergencia_opcional(emergencia_nombre, emergencia_parentesco, emergencia_numero):
+    if emergencia_nombre:
+        if len(emergencia_nombre) < 3:
             raise ValueError("El nombre del contacto de emergencia no puede tener menos de 3 caracteres.")
         if not validar_nombre(emergencia_nombre):
             raise ValueError("El nombre del contacto de emergencia no puede tener números.")
-        if emergencia_parentesco and len(emergencia_parentesco) > 15:
+    if emergencia_parentesco:
+        if len(emergencia_parentesco) > 15:
             raise ValueError("El parentesco no puede tener más de 15 caracteres.")
         if not validar_nombre(emergencia_parentesco):
             raise ValueError("El parentesco no puede tener números.")
-        if emergencia_numero and len(emergencia_numero) < 6:
+    if emergencia_numero:
+        if len(emergencia_numero) < 6:
             raise ValueError("El teléfono de emergencia no puede tener menos de 6 caracteres.")
         if not validar_solo_numeros(emergencia_numero):
             raise ValueError("El teléfono de emergencia solo puede tener números.")
+
+def _validar_emergencia(emergencia_nombre, emergencia_parentesco, emergencia_numero, required=True):
+    if required:
+        _validar_emergencia_requerido(emergencia_nombre, emergencia_parentesco, emergencia_numero)
     else:
-        if emergencia_nombre:
-            if len(emergencia_nombre) < 3:
-                raise ValueError("El nombre del contacto de emergencia no puede tener menos de 3 caracteres.")
-            if not validar_nombre(emergencia_nombre):
-                raise ValueError("El nombre del contacto de emergencia no puede tener números.")
-        if emergencia_parentesco:
-            if len(emergencia_parentesco) > 15:
-                raise ValueError("El parentesco no puede tener más de 15 caracteres.")
-            if not validar_nombre(emergencia_parentesco):
-                raise ValueError("El parentesco no puede tener números.")
-        if emergencia_numero:
-            if len(emergencia_numero) < 6:
-                raise ValueError("El teléfono de emergencia no puede tener menos de 6 caracteres.")
-            if not validar_solo_numeros(emergencia_numero):
-                raise ValueError("El teléfono de emergencia solo puede tener números.")
+        _validar_emergencia_opcional(emergencia_nombre, emergencia_parentesco, emergencia_numero)
 
 @login_requerido
 @require_http_methods(["GET", "POST"])
@@ -267,22 +274,42 @@ def registrar_usuario(request):
 
 @login_requerido
 @require_http_methods(["GET", "POST"])
-def editar_usuario(request, usuario_id=None):
-    if not es_administrador(request): return redirect('dashboard')
+def _editar_usuario_get(request, usuario_id):
+    usuario = get_object_or_404(Usuario, id=usuario_id)
+    cajero = Cajero.objects.filter(usuario=usuario).first()
+    return render(request, 'usuarios/editar.html', {
+        'usuario': usuario,
+        'eps': cajero.eps if cajero else "",
+        'es_admin': True
+    })
 
-    if usuario_id:
-        usuario = get_object_or_404(Usuario, id=usuario_id)
-        cajero = Cajero.objects.filter(usuario=usuario).first()
-        return render(request, 'usuarios/editar.html', {
-            'usuario': usuario,
-            'eps': cajero.eps if cajero else "",
-            'es_admin': True
-        })
+def _actualizar_cajero_datos(cajero, request, emergencia_nombre, emergencia_parentesco, emergencia_numero):
+    if request.POST.get('txt_eps'):
+        cajero.eps = request.POST.get('txt_eps')
 
-    if request.method != 'POST':
-        return redirect('listar_usuarios')
+    tipo_c = request.POST.get('txt_tipo_contrato')
+    if tipo_c:
+        cajero.tipo_contrato = tipo_c
+    if request.POST.get('txt_turno'):
+        cajero.turno = request.POST.get('txt_turno')
+    if emergencia_nombre:
+        cajero.contacto_emergencia_nombre = emergencia_nombre
+    if emergencia_parentesco:
+        cajero.contacto_emergencia_parentesco = emergencia_parentesco
+    if emergencia_numero:
+        cajero.contacto_emergencia_numero = emergencia_numero
 
-    usuario = get_object_or_404(Usuario, id=request.POST.get('txt_id'))
+    fecha_term = request.POST.get('txt_fecha_terminacion')
+    if tipo_c == 'Indefinido':
+        cajero.fecha_terminacion_contrato = None
+    elif fecha_term:
+        cajero.fecha_terminacion_contrato = fecha_term
+
+    cajero.save()
+
+def _editar_usuario_post(request):
+    usuario_id = request.POST.get('txt_id')
+    usuario = get_object_or_404(Usuario, id=usuario_id)
     try:
         with transaction.atomic():
             nombre = request.POST.get('txt_nombre')
@@ -318,28 +345,7 @@ def editar_usuario(request, usuario_id=None):
 
             if usuario.es_cajero:
                 cajero, _ = Cajero.objects.get_or_create(usuario=usuario)
-                if request.POST.get('txt_eps'):
-                    cajero.eps = request.POST.get('txt_eps')
-
-                tipo_c = request.POST.get('txt_tipo_contrato')
-                if tipo_c:
-                    cajero.tipo_contrato = tipo_c
-                if request.POST.get('txt_turno'):
-                    cajero.turno = request.POST.get('txt_turno')
-                if emergencia_nombre:
-                    cajero.contacto_emergencia_nombre = emergencia_nombre
-                if emergencia_parentesco:
-                    cajero.contacto_emergencia_parentesco = emergencia_parentesco
-                if emergencia_numero:
-                    cajero.contacto_emergencia_numero = emergencia_numero
-
-                fecha_term = request.POST.get('txt_fecha_terminacion')
-                if tipo_c == 'Indefinido':
-                    cajero.fecha_terminacion_contrato = None
-                elif fecha_term:
-                    cajero.fecha_terminacion_contrato = fecha_term
-
-                cajero.save()
+                _actualizar_cajero_datos(cajero, request, emergencia_nombre, emergencia_parentesco, emergencia_numero)
 
         if str(usuario.id) == str(request.session.get('usuario_id')):
             messages.success(request, "Usuario actualizado correctamente.")
@@ -349,7 +355,18 @@ def editar_usuario(request, usuario_id=None):
             return redirect('listar_usuarios')
     except ValueError as e:
         messages.error(request, f"Error al editar: {e}")
-        return redirect('editar_usuario', usuario_id=request.POST.get('txt_id'))
+        return redirect('editar_usuario', usuario_id=usuario_id)
+
+@login_requerido
+@require_http_methods(["GET", "POST"])
+def editar_usuario(request, usuario_id=None):
+    if not es_administrador(request):
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        return _editar_usuario_post(request)
+    elif usuario_id:
+        return _editar_usuario_get(request, usuario_id)
     return redirect('listar_usuarios')
 
 @login_requerido

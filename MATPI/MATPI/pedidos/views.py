@@ -135,6 +135,18 @@ def _descontar_stock_pedido(pedido):
     for p in Producto.objects.all():
         recalcular_stock_producto(p)
 
+def _acumular_materia_prima_necesidad(det, cantidad, excluidas_ids, necesidades_mp):
+    if det.materia_prima.id in excluidas_ids:
+        return
+    from decimal import Decimal
+    mp_id = det.materia_prima.id
+    equiv = Decimal(det.materia_prima.cantidad_por_unidad or 1)
+    cant_base_item = Decimal(det.cantidad_usada)
+    if det.unidad_medida == 'und' and getattr(det.materia_prima, 'unidad_medida', '') != 'und':
+        cant_base_item = Decimal(det.cantidad_usada) * equiv
+    cant_total_base = cant_base_item * Decimal(cantidad)
+    necesidades_mp[mp_id] = necesidades_mp.get(mp_id, Decimal(0)) + cant_total_base
+
 def _acumular_necesidades_detalle(p_id, p_cant, excluidas_ids, necesidades_prod, necesidades_mp):
     if not p_id or not p_cant:
         return
@@ -146,15 +158,7 @@ def _acumular_necesidades_detalle(p_id, p_cant, excluidas_ids, necesidades_prod,
         necesidades_prod[p_id] = necesidades_prod.get(p_id, 0) + cantidad
     else:
         for det in detalles_mp:
-            if det.materia_prima.id not in excluidas_ids:
-                from decimal import Decimal
-                mp_id = det.materia_prima.id
-                equiv = Decimal(det.materia_prima.cantidad_por_unidad or 1)
-                cant_base_item = Decimal(det.cantidad_usada)
-                if det.unidad_medida == 'und' and getattr(det.materia_prima, 'unidad_medida', '') != 'und':
-                    cant_base_item = Decimal(det.cantidad_usada) * equiv
-                cant_total_base = cant_base_item * Decimal(cantidad)
-                necesidades_mp[mp_id] = necesidades_mp.get(mp_id, Decimal(0)) + cant_total_base
+            _acumular_materia_prima_necesidad(det, cantidad, excluidas_ids, necesidades_mp)
 
 def _verificar_necesidades_stock(necesidades_prod, necesidades_mp):
     for p_id, cant_req in necesidades_prod.items():

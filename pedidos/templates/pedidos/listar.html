@@ -83,7 +83,7 @@
     function actualizarTiemposListar() {
         const ahora = new Date();
         document.querySelectorAll('.tiempo-prep').forEach(elemento => {
-            const fechaInicio = new Date(elemento.getAttribute('data-inicio'));
+            const fechaInicio = new Date(elemento.dataset.inicio);
             const diferencia = ahora - fechaInicio;
             const minutos = Math.floor(diferencia / 60000);
             elemento.innerText = `${minutos}m`;

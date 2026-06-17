@@ -64,12 +64,12 @@ def registrar_proveedor(request):
 
 
 @require_GET
-def pre_editar_proveedor(request, proveedor_id):
+def pre_editar_proveedor(request, id):
     if not check_admin(request):
         messages.error(request, "No tienes permisos para editar proveedores.")
         return redirect('listar_proveedores')
 
-    proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
+    proveedor = get_object_or_404(Proveedor, pk=id)
     return render(request, 'proveedores/editar.html', {
         'proveedor': proveedor,
         'es_admin': True
@@ -102,12 +102,12 @@ def editar_proveedor(request):
 
 
 @require_http_methods(["GET", "POST"])
-def eliminar_proveedor(request, proveedor_id):
+def eliminar_proveedor(request, id):
     if not check_admin(request):
         messages.error(request, "No tienes permisos para eliminar proveedores.")
         return redirect('listar_proveedores')
 
-    proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
+    proveedor = get_object_or_404(Proveedor, pk=id)
     proveedor.delete()
     messages.success(request, "Proveedor eliminado.")
     return redirect('listar_proveedores')
@@ -115,14 +115,14 @@ def eliminar_proveedor(request, proveedor_id):
 # --- NUEVAS VISTAS PARA SUMINISTROS ---
 
 @require_GET
-def mostrar_registro_suministro(request, proveedor_id):
+def mostrar_registro_suministro(request, id):
     import json
     id_sesion = request.session.get('usuario_id')
     if not id_sesion:
         return redirect('login')
 
     es_admin = check_admin(request)
-    proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
+    proveedor = get_object_or_404(Proveedor, pk=id)
     materias_primas = MateriaPrima.objects.all()
 
     # Obtener el precio más reciente de cada materia prima
