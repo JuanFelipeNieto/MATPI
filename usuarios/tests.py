@@ -237,3 +237,34 @@ class UsuarioViewsCompleteTest(TestCase):
         self.config.refresh_from_db()
         self.assertEqual(self.config.meta_reservas, 100)
         self.assertEqual(self.config.meta_pedidos, 350)
+
+    # 17. PRUEBA: Intentar editar campos de fecha inmutables (nacimiento y ingreso)
+    def test_editar_usuario_fechas_inmutables(self):
+        self.login_como_admin()
+        # Intentamos enviar fechas diferentes en la petición POST
+        datos_edicion = {
+            'txt_id': self.cajero_user.id,
+            'txt_nombre': 'Cajero Pruebas Modificado',
+            'txt_correo': 'cajero@matpi.com',
+            'txt_telefono': '3007654321',
+            'txt_fecha_nacimiento': '1980-01-01',  # Original '1995-05-05'
+            'txt_fecha_ingreso': '2010-01-01',     # Original timezone.now().date()
+            'txt_direccion': 'Carrera Falsa 321',
+            'txt_estado': 'Activo',
+            'txt_eps': 'SURA',
+            'txt_tipo_contrato': 'Indefinido',
+            'txt_turno': 'Mañana',
+            'txt_emergencia_nombre': 'Contacto Auxiliar',
+            'txt_emergencia_parentesco': 'Hermano',
+            'txt_emergencia_numero': '3159876543'
+        }
+        response = self.client.post(reverse('procesar_edicion'), datos_edicion)
+        self.assertRedirects(response, reverse('listar_usuarios'))
+
+        # Refrescar desde DB
+        self.cajero_user.refresh_from_db()
+        # Verificar que el nombre cambió
+        self.assertEqual(self.cajero_user.nombre_completo, 'Cajero Pruebas Modificado')
+        # Verificar que las fechas NO cambiaron (deben seguir siendo las originales)
+        self.assertEqual(str(self.cajero_user.fecha_nacimiento), '1995-05-05')
+        self.assertNotEqual(str(self.cajero_user.fecha_ingreso), '2010-01-01')

@@ -336,17 +336,8 @@ def _editar_usuario_post(request):
             usuario.nombre_completo = nombre
             usuario.correo_electronico = request.POST.get('txt_correo')
             usuario.telefono = telefono
-            usuario.fecha_nacimiento = request.POST.get('txt_fecha_nacimiento')
             usuario.direccion = request.POST.get('txt_direccion')
-
-            nueva_f_ingreso = request.POST.get('txt_fecha_ingreso')
-            if nueva_f_ingreso:
-                usuario.fecha_ingreso = nueva_f_ingreso
-                f_date = datetime.strptime(nueva_f_ingreso, '%Y-%m-%d').date()
-                hoy = timezone.now().date()
-                usuario.estado = 'Activo' if f_date <= hoy else 'Inactivo'
-            else:
-                usuario.estado = request.POST.get('txt_estado')
+            usuario.estado = request.POST.get('txt_estado')
 
             if experiencia_file:
                 usuario.experiencia_laboral = experiencia_file
