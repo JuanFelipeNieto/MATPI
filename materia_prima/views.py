@@ -226,7 +226,12 @@ def editar_lote(request):
         id_lote = request.POST.get('txt_id')
         lote = get_lote_or_404(id_lote)
 
-        lote.cantidad_actual = int(request.POST.get('txt_cantidad', 0))
+        from decimal import Decimal
+        try:
+            lote.cantidad_actual = Decimal(request.POST.get('txt_cantidad', 0))
+        except (ValueError, TypeError):
+            lote.cantidad_actual = Decimal(0)
+
         lote.fecha_vencimiento = request.POST.get('txt_fecha_vencimiento') or None
         lote.save()
 

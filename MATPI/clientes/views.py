@@ -145,7 +145,6 @@ def editar_cliente(request):
         telefono = request.POST.get('txt_telefono')
         direccion = request.POST.get('txt_direccion')
         localidad = request.POST.get('txt_localidad')
-        usuario_id_post = request.POST.get('txt_cajero')
 
         _validar_datos_cliente(None, nombre, telefono)
 
@@ -154,10 +153,6 @@ def editar_cliente(request):
         cliente.telefono = telefono
         cliente.direccion = direccion
         cliente.localidad = localidad
-
-        # Solo el administrador puede cambiar el cajero asignado
-        if check_admin(request):
-            _actualizar_usuario_cajero(cliente, usuario_id_post)
 
         cliente.save()
         messages.success(request, f"Cliente {nombre} actualizado correctamente.")
