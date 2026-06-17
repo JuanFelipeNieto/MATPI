@@ -213,6 +213,7 @@ def pre_editar_lote(request, id_lote):
     lote = get_lote_or_404(id_lote)
     return render(request, 'materia_prima/editar_lote.html', {
         'lote': lote,
+        'cantidad_actual_str': "{:.2f}".format(lote.cantidad_actual),
         'es_admin': True
     })
 

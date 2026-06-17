@@ -17,7 +17,7 @@
 
         <div class="form-group">
             <label for="txt_cantidad">Cantidad Actual (Disponible)</label>
-            <input type="number" id="txt_cantidad" name="txt_cantidad" value="{{ lote.cantidad_actual|stringformat:'.2f' }}" required min="0" step="0.01">
+            <input type="number" id="txt_cantidad" name="txt_cantidad" value="{{ cantidad_actual_str }}" required min="0" step="0.01">
             <small style="color: #888;">Cantidad recibida originalmente: {{ lote.cantidad_inicial }}</small>
         </div>
 
@@ -29,7 +29,7 @@
 
         <div class="form-acciones" style="margin-top: 30px; display: flex; gap: 15px;">
             <button type="submit" class="btn btn-guardar">💾 Guardar Cambios</button>
-            <a href="{% url 'ver_lotes' lote.materia_prima.id %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro de que desea volver? Los cambios no guardados se perderán.');">🔙 Volver a Lotes</a>
+            <a href="{% url 'ver_lotes' lote.materia_prima.id %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro de que desea volver a lotes? Los cambios no guardados se perderán.');">🔙 Volver a Lotes</a>
         </div>
     </form>
 </div>

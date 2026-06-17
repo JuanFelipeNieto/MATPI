@@ -90,14 +90,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
-    <div>
-        <h1 style="margin:0;">Generación de Reportes</h1>
-        <p class="info-text" style="margin-top:5px; margin-bottom: 0;">Descarga en formato PDF los reportes generales y específicos de ventas.</p>
-    </div>
-    <a href="{% url 'dashboard' %}" class="btn" style="background-color: #4b5563; color: white; flex: 0 1 auto; padding: 10px 20px; text-decoration: none;">
-        ⬅️ Volver al Dashboard
-    </a>
+<div class="content-header">
+    <h1 style="margin:0;">Generación de Reportes</h1>
+    <p class="info-text" style="margin-top:5px; margin-bottom: 0;">Descarga en formato PDF los reportes generales y específicos de ventas.</p>
 </div>
 
 <div class="reportes-container">

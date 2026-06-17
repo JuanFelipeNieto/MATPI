@@ -41,7 +41,7 @@
 
                 <div class="form-group" style="flex: 1; display: flex; flex-direction: column; margin-bottom: 20px;">
                     <label for="txt_observaciones">Observaciones</label>
-                    <textarea id="txt_observaciones" name="txt_observaciones" placeholder="Opcional" style="flex: 1; resize: none; padding: 12px;" required minlength="5" maxlength="100">{{ reserva_edit.observaciones|default:'' }}</textarea>
+                    <textarea id="txt_observaciones" name="txt_observaciones" placeholder="Opcional" style="flex: 1; resize: none; padding: 12px;" maxlength="100">{{ reserva_edit.observaciones|default:'' }}</textarea>
                 </div>
 
                 <button type="submit" class="btn btn-guardar" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-top: auto;">💾 Actualizar Reserva</button>
@@ -69,7 +69,7 @@
 
                 <div class="form-group" style="flex: 1; display: flex; flex-direction: column; margin-bottom: 20px;">
                     <label for="txt_observaciones">Observaciones</label>
-                    <textarea id="txt_observaciones" name="txt_observaciones" placeholder="Opcional" style="flex: 1; resize: none; padding: 12px;" required minlength="5" maxlength="100"></textarea>
+                    <textarea id="txt_observaciones" name="txt_observaciones" placeholder="Opcional" style="flex: 1; resize: none; padding: 12px;" maxlength="100"></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-guardar" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-top: auto;">Guardar Reserva</button>

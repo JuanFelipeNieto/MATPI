@@ -107,14 +107,15 @@ def dashboard(request):
         'es_admin': es_administrador(request),
         'total_clientes': Cliente.objects.count(),
         'total_productos': Producto.objects.count(),
-        'total_pedidos': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin).count(),
+        'total_pedidos': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin, facturas__isnull=False).count(),
         'total_reservas': Reserva.objects.filter(fecha_registro__gte=hoy_inicio, fecha_registro__lt=hoy_fin).count(),
         'ingresos': Pedido.objects.filter(
             fecha__gte=hoy_inicio,
             fecha__lt=hoy_fin,
-            estado__in=['Preparacion', 'Completado']
+            estado__in=['Preparacion', 'Completado'],
+            facturas__isnull=False
         ).aggregate(total=Sum('valor'))['total'] or 0,
-        'pedidos_recientes': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin).order_by('-id')[:5],
+        'pedidos_recientes': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin, facturas__isnull=False).order_by('-id')[:5],
         'config': config,
         'usuario_nombre': request.session.get('usuario_nombre'),
         'usuario_nombre_corto': (' '.join([

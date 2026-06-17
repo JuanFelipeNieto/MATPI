@@ -109,3 +109,17 @@ class ReservaViewsTest(TestCase):
         response = self.client.post(reverse('eliminar_reserva', args=[self.reserva.id]))
         self.assertRedirects(response, reverse('listar_reservas'))
         self.assertFalse(Reserva.objects.filter(id=self.reserva.id).exists())
+
+    def test_registrar_reserva_observaciones_opcionales(self):
+        self.login_como_cajero()
+        nueva_fecha = (timezone.now() + timedelta(days=2)).replace(hour=15, minute=30, second=0, microsecond=0)
+        datos = {
+            'txt_fecha': nueva_fecha.strftime('%Y-%m-%dT%H:%M'),
+            'txt_estado': '1',
+            'txt_observaciones': '',  # Vacío para probar opcionalidad
+            'txt_cliente_text': f"{self.cliente.nombre_completo} ({self.cliente.id})"
+        }
+        response = self.client.post(reverse('registrar_reserva'), datos)
+        self.assertRedirects(response, reverse('listar_reservas'))
+        # La reserva debe haberse guardado exitosamente con observaciones vacías o nulas
+        self.assertTrue(Reserva.objects.filter(observaciones='').exists() or Reserva.objects.filter(observaciones__isnull=True).exists())
