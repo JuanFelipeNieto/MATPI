@@ -36,7 +36,7 @@
                             <tr class="fila-materia">
                                 <td>
                                     <label class="sr-only label-select" for="select_materia_{{ forloop.counter }}">Seleccione Materia Prima</label>
-                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" class="form-control select-materia" aria-label="Seleccione Materia Prima" required onchange="actualizarEquivalencia(this)">
+                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
                                         <option value="" data-equiv="" data-unidad="">Seleccione Materia Prima</option>
                                         {% for materia in materias_primas %}
                                             <option value="{{ materia.id }}" data-equiv="{{ materia.cantidad_por_unidad|unlocalize }}" data-unidad="{{ materia.unidad_medida }}" {% if materia.id == item.materia_prima.id %}selected{% endif %}>
@@ -67,7 +67,7 @@
                             <tr class="fila-materia">
                                 <td>
                                     <label class="sr-only label-select" for="select_materia_1">Seleccione Materia Prima</label>
-                                    <select name="materia_id[]" id="select_materia_1" class="form-control select-materia" aria-label="Seleccione Materia Prima" required onchange="actualizarEquivalencia(this)">
+                                    <select name="materia_id[]" id="select_materia_1" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
                                         <option value="" data-equiv="" data-unidad="">Seleccione Materia Prima</option>
                                         {% for materia in materias_primas %}
                                             <option value="{{ materia.id }}" data-equiv="{{ materia.cantidad_por_unidad|unlocalize }}" data-unidad="{{ materia.unidad_medida }}">{{ materia.nombre_materia_prima }}</option>
@@ -149,7 +149,6 @@
         if(select) {
             select.value = "";
             select.id = `select_materia_${index}`;
-            select.setAttribute('aria-label', 'Seleccione Materia Prima');
         }
         if(labelSelect) {
             labelSelect.setAttribute('for', `select_materia_${index}`);

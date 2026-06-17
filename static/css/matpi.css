@@ -51,7 +51,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); over
     position: absolute;
     top: 15px;
     right: 15px;
-    background: rgba(255,255,255,0.05);
+    background: #0d0d0d;
     border: none;
     color: #ffffff;
     width: 32px;

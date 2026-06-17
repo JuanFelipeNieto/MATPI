@@ -200,7 +200,8 @@
         </div>
 <!-- Template Oculto para Productos -->
 <div id="select-productos-html" style="display: none;">
-    <select name="producto_id[]" class="form-control select-producto" aria-label="Seleccione Producto" required onchange="actualizarComposicion_y_Precio(this)">
+    <label class="sr-only label-producto" for="select_producto_template_prod">Seleccione Producto</label>
+    <select id="select_producto_template_prod" name="producto_id[]" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
         <option value="">Seleccione Producto</option>
         {% for producto in productos %}
             {% if producto.categoria != 'Bebidas' %}
@@ -214,7 +215,8 @@
 
 <!-- Template Oculto para Bebidas -->
 <div id="select-bebidas-html" style="display: none;">
-    <select name="producto_id[]" class="form-control select-producto" aria-label="Seleccione Bebida" required onchange="actualizarComposicion_y_Precio(this)">
+    <label class="sr-only label-producto" for="select_bebida_template_bev">Seleccione Bebida</label>
+    <select id="select_bebida_template_bev" name="producto_id[]" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
         <option value="">Seleccione Bebida</option>
         {% for bebida in bebidas %}
         <option value="{{ bebida.id }}" data-precio="{{ bebida.precio }}" data-composicion='[]'>
@@ -273,15 +275,13 @@
 
         if (nuevaFila.getAttribute('data-tipo') === 'bebida') nuevaFila.classList.add('fila-bebida');
 
-        const labelText = datos && datos.tipo === 'bebida' ? 'Seleccione Bebida' : 'Seleccione Producto';
         nuevaFila.innerHTML = `
             <td>
-                <label class="sr-only label-producto" for="select_producto_${contadorFilas}">${labelText}</label>
                 ${document.getElementById(datos && datos.tipo === 'bebida' ? 'select-bebidas-html' : 'select-productos-html').innerHTML}
             </td>
             <td>
                 <label class="sr-only label-cantidad" for="select_cantidad_${contadorFilas}">Cantidad</label>
-                <select name="producto_cantidad[]" id="select_cantidad_${contadorFilas}" class="form-control select-cantidad" aria-label="Cantidad" onchange="calcularTotal()" required>
+                <select name="producto_cantidad[]" id="select_cantidad_${contadorFilas}" class="form-control select-cantidad" onchange="calcularTotal()" required>
                     ${generarOpcionesCantidad(datos ? datos.cantidad : 1)}
                 </select>
             </td>
@@ -306,8 +306,13 @@
         tbody.appendChild(nuevaFila);
 
         const select = nuevaFila.querySelector('.select-producto');
+        const label = nuevaFila.querySelector('.label-producto');
         if (select) {
             select.id = `select_producto_${contadorFilas}`;
+        }
+        if (label) {
+            label.setAttribute('for', `select_producto_${contadorFilas}`);
+            label.textContent = datos && datos.tipo === 'bebida' ? 'Seleccione Bebida' : 'Seleccione Producto';
         }
 
         if (datos) {
