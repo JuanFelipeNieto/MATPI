@@ -1,9 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.views.decorators.http import require_http_methods, require_GET
 from .models import Producto
 from materia_prima.models import MateriaPrima, DetalleProductoMateriaP
 from usuarios.models import Administrador
 import math
+
+MATERIA_ID_KEY = 'materia_id[]'
+MATERIA_CANTIDAD_KEY = 'materia_cantidad[]'
+MATERIA_UNIDAD_KEY = 'materia_unidad[]'
 
 # Función rápida para verificar si es admin desde la sesión
 def check_admin(request):
@@ -11,7 +16,6 @@ def check_admin(request):
     return Administrador.objects.filter(usuario_id=id_sesion).exists()
 
 def recalcular_stock_producto(producto):
-
     detalles = producto.detalles_materia.all()
     if not detalles:
         producto.cantidad = 0
@@ -28,29 +32,25 @@ def recalcular_stock_producto(producto):
         stock_base = stock_mp * equivalencia
 
         # La cantidad usada ahora siempre viene en medida base desde el frontend
-        cantidad_base = detalle.cantidad_usada
+        cantidad_usada_base = detalle.cantidad_usada
 
-        # Retrocompatibilidad con registros antiguos donde unidad era 'und' (seleccionado por el usuario)
-        # y la materia prima no era 'und' propiamente.
-        if detalle.unidad_medida == 'und' and detalle.materia_prima.unidad_medida != 'und':
-            cantidad_base = detalle.cantidad_usada * equivalencia
-
-        if cantidad_base > 0:
-            posible = math.floor(stock_base / cantidad_base)
+        if cantidad_usada_base > 0:
+            posible = int(stock_base / cantidad_usada_base)
             cantidades_posibles.append(posible)
-        else:
-            cantidades_posibles.append(0)
+            # Para visualización legible
+            cant_legible = float(cantidad_usada_base / equivalencia) if equivalencia > 0 else float(cantidad_usada_base)
+            componentes_desc.append(f"{detalle.materia_prima.nombre_materia_prima} ({cant_legible} {detalle.unidad_medida})")
 
-        # Construcción de descripción
-        componentes_desc.append(f"{detalle.materia_prima.nombre_materia_prima} (x{detalle.cantidad_usada})")
-
-    producto.cantidad = min(cantidades_posibles) if cantidades_posibles else 0
+    # El stock del producto es el limitante (mínimo de los ingredientes)
+    stock_final = min(cantidades_posibles) if cantidades_posibles else 0
+    producto.cantidad = stock_final
     producto.descripcion = ", ".join(componentes_desc)
     producto.save()
     return producto.cantidad
 
 # --- VISTA PRINCIPAL (LISTADO) ---
 
+@require_GET
 def listar_productos(request):
     id_sesion = request.session.get('usuario_id')
     if not id_sesion:
@@ -71,6 +71,7 @@ def listar_productos(request):
     })
 
 
+@require_GET
 def mostrar_registro_comida(request):
     if not request.session.get('usuario_id'): return redirect('login')
     es_admin = check_admin(request)
@@ -84,6 +85,7 @@ def mostrar_registro_comida(request):
         'materias_primas': materias_primas
     })
 
+@require_GET
 def mostrar_registro_bebida(request):
     if not request.session.get('usuario_id'): return redirect('login')
     es_admin = check_admin(request)
@@ -105,70 +107,76 @@ def mostrar_registro_bebida(request):
         'materias_primas': materias_primas
     })
 
+
+def _validar_imagen_y_obtener_extension(imagen):
+    if imagen:
+        ext = imagen.name.split('.')[-1].lower()
+        if ext not in ['png', 'jpg', 'jpeg']:
+            raise ValueError("Solo se permiten imágenes en formato JPG o PNG.")
+
+def _guardar_composicion_producto(producto, materias_ids, materias_cantidades, materias_unidades):
+    for m_id, m_cant, m_uni in zip(materias_ids, materias_cantidades, materias_unidades):
+        if m_id and m_cant:
+            from decimal import Decimal
+            DetalleProductoMateriaP.objects.create(
+                producto=producto,
+                materia_prima_id=m_id,
+                cantidad_usada=Decimal(m_cant),
+                unidad_medida=m_uni
+            )
+
+@require_http_methods(["GET", "POST"])
 def registrar_producto(request):
-    # Verificamos que sea administrador
     if not check_admin(request):
         messages.error(request, "No tienes permisos para realizar esta acción.")
         return redirect('listar_productos')
 
-    if request.method == 'POST':
-        imagen = request.FILES.get('txt_imagen')
-        if imagen:
-            ext = imagen.name.split('.')[-1].lower()
-            if ext not in ['png', 'jpg', 'jpeg']:
-                messages.error(request, "Solo se permiten imágenes en formato JPG o PNG.")
-                if request.POST.get('txt_categoria') == 'Bebidas':
-                    return redirect('mostrar_registro_bebida')
-                else:
-                    return redirect('mostrar_registro_comida')
+    if request.method != 'POST':
+        return redirect('mostrar_registro_comida')
 
-        # 1. Obtener datos básicos
-        nombre = request.POST.get('txt_nombre')
-        categoria = request.POST.get('txt_categoria')
+    imagen = request.FILES.get('txt_imagen')
+    try:
+        _validar_imagen_y_obtener_extension(imagen)
+    except ValueError as e:
+        messages.error(request, str(e))
+        if request.POST.get('txt_categoria') == 'Bebidas':
+            return redirect('mostrar_registro_bebida')
+        else:
+            return redirect('mostrar_registro_comida')
 
-        # 2. Si es Bebida y no tiene nombre manual, lo tomamos de la Materia Prima
-        if not nombre and categoria == 'Bebidas':
-            materia_id = request.POST.getlist('materia_id[]')[0] # Usamos la primera (y única) seleccionada
-            if materia_id:
-                from materia_prima.models import MateriaPrima
-                mp = MateriaPrima.objects.get(pk=materia_id)
-                nombre = mp.nombre_materia_prima
+    nombre = request.POST.get('txt_nombre')
+    categoria = request.POST.get('txt_categoria')
 
-        # 3. Crear el product base
-        producto = Producto.objects.create(
-            nombre_producto=nombre or "Sin nombre",
-            precio=request.POST.get('txt_precio'),
-            categoria=categoria,
-            imagen=imagen,
-        )
+    if not nombre and categoria == 'Bebidas':
+        materia_id = request.POST.getlist(MATERIA_ID_KEY)[0] if request.POST.getlist(MATERIA_ID_KEY) else None
+        if materia_id:
+            from materia_prima.models import MateriaPrima
+            mp = MateriaPrima.objects.get(pk=materia_id)
+            nombre = mp.nombre_materia_prima
 
-        # 2. Guardar composición (materias primas, cantidades y unidades)
-        materias_ids = request.POST.getlist('materia_id[]')
-        materias_cantidades = request.POST.getlist('materia_cantidad[]')
-        materias_unidades = request.POST.getlist('materia_unidad[]')
+    producto = Producto.objects.create(
+        nombre_producto=nombre or "Sin nombre",
+        precio=request.POST.get('txt_precio'),
+        categoria=categoria,
+        imagen=imagen,
+    )
 
-        for m_id, m_cant, m_uni in zip(materias_ids, materias_cantidades, materias_unidades):
-            if m_id and m_cant:
-                from decimal import Decimal
-                DetalleProductoMateriaP.objects.create(
-                    producto=producto,
-                    materia_prima_id=m_id,
-                    cantidad_usada=Decimal(m_cant),
-                    unidad_medida=m_uni
-                )
+    materias_ids = request.POST.getlist(MATERIA_ID_KEY)
+    materias_cantidades = request.POST.getlist(MATERIA_CANTIDAD_KEY)
+    materias_unidades = request.POST.getlist(MATERIA_UNIDAD_KEY)
 
-        # 3. Calcular stock automático
-        recalcular_stock_producto(producto)
+    _guardar_composicion_producto(producto, materias_ids, materias_cantidades, materias_unidades)
+    recalcular_stock_producto(producto)
 
-        messages.success(request, f"Producto '{producto.nombre_producto}' registrado exitosamente con stock calculado.")
-        return redirect('listar_productos')
-    return redirect('mostrar_registro_producto')
+    messages.success(request, f"Producto '{producto.nombre_producto}' registrado exitosamente con stock calculado.")
+    return redirect('listar_productos')
+
 
 # --- EDICIÓN Y ELIMINACIÓN (SOLO ADMIN) ---
 
+@require_GET
 def pre_editar_producto(request, id):
     es_admin = check_admin(request)
-    # Aquí sí mantenemos el bloqueo estricto
     if not es_admin:
         messages.error(request, "Acceso denegado. Solo el administrador puede modificar productos.")
         return redirect('listar_productos')
@@ -177,10 +185,8 @@ def pre_editar_producto(request, id):
 
     if producto.categoria == 'Bebidas':
         materias_primas = MateriaPrima.objects.filter(tipo='Bebida')
-        # Obtenemos el link actual para la selección
         current_materia = producto.detalles_materia.first().materia_prima if producto.detalles_materia.exists() else None
 
-        # Fallback para bebidas antiguas
         if not current_materia:
             current_materia = MateriaPrima.objects.filter(nombre_materia_prima=producto.nombre_producto, tipo='Bebida').first()
 
@@ -201,66 +207,56 @@ def pre_editar_producto(request, id):
             'composicion': composicion
         })
 
+@require_http_methods(["GET", "POST"])
 def editar_producto(request):
-    # Bloqueo de seguridad para el proceso de guardado de edición
     if not check_admin(request):
         messages.error(request, "No tienes permisos para editar.")
         return redirect('listar_productos')
 
-    if request.method == 'POST':
-        id_prod = request.POST.get('txt_id')
-        producto = get_object_or_404(Producto, pk=id_prod)
+    if request.method != 'POST':
+        return redirect('listar_productos')
 
-        nombre = request.POST.get('txt_nombre')
-        categoria = request.POST.get('txt_categoria')
+    id_prod = request.POST.get('txt_id')
+    producto = get_object_or_404(Producto, pk=id_prod)
 
-        if not nombre and categoria == 'Bebidas':
-            materia_id = request.POST.getlist('materia_id[]')
-            if materia_id and materia_id[0]:
-                from materia_prima.models import MateriaPrima
-                mp = MateriaPrima.objects.get(pk=materia_id[0])
-                nombre = mp.nombre_materia_prima
+    nombre = request.POST.get('txt_nombre')
+    categoria = request.POST.get('txt_categoria')
 
-        producto.nombre_producto = nombre or producto.nombre_producto
-        producto.precio          = request.POST.get('txt_precio')
-        producto.categoria       = categoria
+    if not nombre and categoria == 'Bebidas':
+        materia_id = request.POST.getlist(MATERIA_ID_KEY)
+        if materia_id and materia_id[0]:
+            from materia_prima.models import MateriaPrima
+            mp = MateriaPrima.objects.get(pk=materia_id[0])
+            nombre = mp.nombre_materia_prima
 
-        imagen = request.FILES.get('txt_imagen')
+    producto.nombre_producto = nombre or producto.nombre_producto
+    producto.precio          = request.POST.get('txt_precio')
+    producto.categoria       = categoria
+
+    imagen = request.FILES.get('txt_imagen')
+    try:
+        _validar_imagen_y_obtener_extension(imagen)
         if imagen:
-            ext = imagen.name.split('.')[-1].lower()
-            if ext not in ['png', 'jpg', 'jpeg']:
-                messages.error(request, "Solo se permiten imágenes en formato JPG o PNG.")
-                return redirect('pre_editar_producto', id=producto.id)
             producto.imagen = imagen
+    except ValueError as e:
+        messages.error(request, str(e))
+        return redirect('pre_editar_producto', id=producto.id)
 
-        producto.save()
+    producto.save()
+    producto.detalles_materia.all().delete()
 
-        # Actualizar composición: borrar anterior y guardar nueva
-        producto.detalles_materia.all().delete()
+    materias_ids = request.POST.getlist(MATERIA_ID_KEY)
+    materias_cantidades = request.POST.getlist(MATERIA_CANTIDAD_KEY)
+    materias_unidades = request.POST.getlist(MATERIA_UNIDAD_KEY)
 
-        materias_ids = request.POST.getlist('materia_id[]')
-        materias_cantidades = request.POST.getlist('materia_cantidad[]')
-        materias_unidades = request.POST.getlist('materia_unidad[]')
+    _guardar_composicion_producto(producto, materias_ids, materias_cantidades, materias_unidades)
+    recalcular_stock_producto(producto)
 
-        for m_id, m_cant, m_uni in zip(materias_ids, materias_cantidades, materias_unidades):
-            if m_id and m_cant:
-                from decimal import Decimal
-                DetalleProductoMateriaP.objects.create(
-                    producto=producto,
-                    materia_prima_id=m_id,
-                    cantidad_usada=Decimal(m_cant),
-                    unidad_medida=m_uni
-                )
-
-        # Recalcular stock
-        recalcular_stock_producto(producto)
-
-        messages.success(request, "Producto actualizado correctamente y stock recalculado.")
-
+    messages.success(request, "Producto actualizado correctamente y stock recalculado.")
     return redirect('listar_productos')
 
+@require_http_methods(["GET", "POST"])
 def eliminar_producto(request, id):
-    # Bloqueo de seguridad para eliminación
     if not check_admin(request):
         messages.error(request, "No tienes permisos para eliminar productos.")
         return redirect('listar_productos')

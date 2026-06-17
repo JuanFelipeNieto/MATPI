@@ -44,59 +44,73 @@ def mostrar_registro_cliente(request):
     return render(request, 'clientes/registrar.html', {'localidades': localidades})
 
 
+def _validar_datos_cliente(cliente_id, nombre, telefono):
+    if cliente_id and len(cliente_id) != 10:
+        raise ValueError("El número de documento debe tener exactamente 10 caracteres.")
+    if nombre and len(nombre) < 3:
+        raise ValueError("El nombre no puede tener menos de 3 caracteres.")
+    if telefono and len(telefono) < 6:
+        raise ValueError("El teléfono no puede tener menos de 6 caracteres.")
+
+def _obtener_usuario_registrador(usuario_id):
+    if not usuario_id:
+        return None
+    from usuarios.models import Usuario
+    try:
+        return Usuario.objects.get(pk=usuario_id)
+    except Usuario.DoesNotExist:
+        return None
+
+def _actualizar_usuario_cajero(cliente, usuario_id_post):
+    if usuario_id_post:
+        from usuarios.models import Usuario
+        try:
+            cliente.usuario = Usuario.objects.get(pk=usuario_id_post)
+        except Usuario.DoesNotExist:
+            pass
+    else:
+        cliente.usuario = None
+
 @require_http_methods(["GET", "POST"])
 def registrar_cliente(request):
-    if request.method == 'POST':
-        cliente_id = request.POST.get('txt_id', '')
-        nombre = request.POST.get('txt_nombre', '')
-        telefono = request.POST.get('txt_telefono', '')
-        direccion = request.POST.get('txt_direccion', '')
-        localidad = request.POST.get('txt_localidad', '')
-        try:
-            from django.contrib import messages
-            if cliente_id and len(cliente_id) != 10:
-                raise ValueError("El número de documento debe tener exactamente 10 caracteres.")
-            if nombre and len(nombre) < 3:
-                raise ValueError("El nombre no puede tener menos de 3 caracteres.")
-            if telefono and len(telefono) < 6:
-                raise ValueError("El teléfono no puede tener menos de 6 caracteres.")
+    if request.method != 'POST':
+        return redirect('mostrar_registro_cliente')
 
-            # Asignación automática del usuario basada en la sesión del usuario actual
-            usuario_id = request.session.get('usuario_id')
-            usuario_registrador = None
-            if usuario_id:
-                from usuarios.models import Usuario
-                try:
-                    usuario_registrador = Usuario.objects.get(pk=usuario_id)
-                except Usuario.DoesNotExist:
-                    pass
+    cliente_id = request.POST.get('txt_id', '')
+    nombre = request.POST.get('txt_nombre', '')
+    telefono = request.POST.get('txt_telefono', '')
+    direccion = request.POST.get('txt_direccion', '')
+    localidad = request.POST.get('txt_localidad', '')
+    try:
+        from django.contrib import messages
+        _validar_datos_cliente(cliente_id, nombre, telefono)
+        usuario_registrador = _obtener_usuario_registrador(request.session.get('usuario_id'))
 
-            Cliente.objects.create(
-                id=cliente_id,
-                nombre_completo=nombre,
-                telefono=telefono,
-                direccion=direccion,
-                localidad=localidad,
-                usuario=usuario_registrador,
-            )
-            messages.success(request, f"Cliente {nombre} registrado correctamente.")
-            return redirect('listar_clientes')
-        except ValueError as e:
-            from django.contrib import messages
-            messages.error(request, str(e))
-            localidades = obtener_localidades()
-            datos = {
-                'id': cliente_id,
-                'nombre': nombre,
-                'telefono': telefono,
-                'direccion': direccion,
-                'localidad': localidad,
-            }
-            return render(request, 'clientes/registrar.html', {
-                'localidades': localidades,
-                'datos': datos
-            })
-    return redirect('mostrar_registro_cliente')
+        Cliente.objects.create(
+            id=cliente_id,
+            nombre_completo=nombre,
+            telefono=telefono,
+            direccion=direccion,
+            localidad=localidad,
+            usuario=usuario_registrador,
+        )
+        messages.success(request, f"Cliente {nombre} registrado correctamente.")
+        return redirect('listar_clientes')
+    except ValueError as e:
+        from django.contrib import messages
+        messages.error(request, str(e))
+        localidades = obtener_localidades()
+        datos = {
+            'id': cliente_id,
+            'nombre': nombre,
+            'telefono': telefono,
+            'direccion': direccion,
+            'localidad': localidad,
+        }
+        return render(request, 'clientes/registrar.html', {
+            'localidades': localidades,
+            'datos': datos
+        })
 
 
 @require_GET
@@ -116,45 +130,36 @@ def pre_editar_cliente(request, id):
 
 @require_http_methods(["GET", "POST"])
 def editar_cliente(request):
-    if request.method == 'POST':
-        try:
-            from django.contrib import messages
-            cliente_id = request.POST.get('txt_id')
-            nombre = request.POST.get('txt_nombre')
-            telefono = request.POST.get('txt_telefono')
-            direccion = request.POST.get('txt_direccion')
-            localidad = request.POST.get('txt_localidad')
-            usuario_id_post = request.POST.get('txt_cajero')
+    if request.method != 'POST':
+        return redirect('listar_clientes')
 
-            if nombre and len(nombre) < 3:
-                raise ValueError("El nombre no puede tener menos de 3 caracteres.")
-            if telefono and len(telefono) < 6:
-                raise ValueError("El teléfono no puede tener menos de 6 caracteres.")
+    try:
+        from django.contrib import messages
+        cliente_id = request.POST.get('txt_id')
+        nombre = request.POST.get('txt_nombre')
+        telefono = request.POST.get('txt_telefono')
+        direccion = request.POST.get('txt_direccion')
+        localidad = request.POST.get('txt_localidad')
+        usuario_id_post = request.POST.get('txt_cajero')
 
-            cliente = Cliente.objects.get(pk=cliente_id)
-            cliente.nombre_completo = nombre
-            cliente.telefono = telefono
-            cliente.direccion = direccion
-            cliente.localidad = localidad
+        _validar_datos_cliente(None, nombre, telefono)
 
-            # Solo el administrador puede cambiar el cajero asignado
-            if check_admin(request):
-                if usuario_id_post:
-                    from usuarios.models import Usuario
-                    try:
-                        cliente.usuario = Usuario.objects.get(pk=usuario_id_post)
-                    except Usuario.DoesNotExist:
-                        pass
-                else:
-                    cliente.usuario = None
+        cliente = Cliente.objects.get(pk=cliente_id)
+        cliente.nombre_completo = nombre
+        cliente.telefono = telefono
+        cliente.direccion = direccion
+        cliente.localidad = localidad
 
-            cliente.save()
-            messages.success(request, f"Cliente {nombre} actualizado correctamente.")
-            return redirect('listar_clientes')
-        except ValueError as e:
-            messages.error(request, str(e))
-            return redirect('pre_editar_cliente', id=request.POST.get('txt_id'))
-    return redirect('listar_clientes')
+        # Solo el administrador puede cambiar el cajero asignado
+        if check_admin(request):
+            _actualizar_usuario_cajero(cliente, usuario_id_post)
+
+        cliente.save()
+        messages.success(request, f"Cliente {nombre} actualizado correctamente.")
+        return redirect('listar_clientes')
+    except ValueError as e:
+        messages.error(request, str(e))
+        return redirect('pre_editar_cliente', id=request.POST.get('txt_id'))
 
 
 @require_http_methods(["GET", "POST"])

@@ -90,94 +90,73 @@ def detalles_pedido(request, id):
         'pedido': pedido
     }))
 
-def _descontar_stock_pedido(pedido):
-    from productos.views import recalcular_stock_producto # Import local para evitar circularidad
+def _descontar_lotes(comp, cantidad_detalle):
+    from decimal import Decimal
+    equivalencia = Decimal(comp.materia_prima.cantidad_por_unidad or 1)
+    cantidad_base_item = Decimal(comp.cantidad_usada)
+    if comp.unidad_medida == 'und' and getattr(comp.materia_prima, 'unidad_medida', '') != 'und':
+        cantidad_base_item = Decimal(comp.cantidad_usada) * equivalencia
 
-    for detalle in pedido.detalles.all():
-        producto = detalle.producto
-        # 1. Descontar cantidad del producto (stock directo)
-        if producto.cantidad >= detalle.cantidad:
-            producto.cantidad -= detalle.cantidad
-            producto.save()
+    total_base_necesario = cantidad_base_item * Decimal(cantidad_detalle)
+    unidades_a_descontar = total_base_necesario / equivalencia
+
+    lotes = Lote.objects.filter(materia_prima=comp.materia_prima, cantidad_actual__gt=0).order_by('fecha_vencimiento')
+    for lote in lotes:
+        if unidades_a_descontar <= 0:
+            break
+        if lote.cantidad_actual >= unidades_a_descontar:
+            lote.cantidad_actual -= unidades_a_descontar
+            unidades_a_descontar = 0
         else:
-            producto.cantidad = 0
-            producto.save()
+            unidades_a_descontar -= lote.cantidad_actual
+            lote.cantidad_actual = 0
+        lote.save()
 
-        # 2. Descontar materias primas de los lotes
-        # Obtenemos la composición base del producto
-        composicion_base = DetalleProductoMateriaP.objects.filter(producto=producto).select_related('materia_prima')
-        excluidas = detalle.materias_excluidas.all()
+def _descontar_stock_detalle(detalle):
+    producto = detalle.producto
+    if producto.cantidad >= detalle.cantidad:
+        producto.cantidad -= detalle.cantidad
+    else:
+        producto.cantidad = 0
+    producto.save()
 
-        for comp in composicion_base:
-            if comp.materia_prima in excluidas:
-                continue # No se consume si fue excluida
+    composicion_base = DetalleProductoMateriaP.objects.filter(producto=producto).select_related('materia_prima')
+    excluidas = set(detalle.materias_excluidas.all())
 
-            # Conversión a unidades para el lote
-            from decimal import Decimal
-            equivalencia = Decimal(comp.materia_prima.cantidad_por_unidad or 1)
+    for comp in composicion_base:
+        if comp.materia_prima in excluidas:
+            continue
+        _descontar_lotes(comp, detalle.cantidad)
 
-
-            cantidad_base_item = Decimal(comp.cantidad_usada)
-            if comp.unidad_medida == 'und' and getattr(comp.materia_prima, 'unidad_medida', '') != 'und':
-                cantidad_base_item = Decimal(comp.cantidad_usada) * equivalencia
-
-            total_base_necesario = cantidad_base_item * Decimal(detalle.cantidad)
-            unidades_a_descontar = total_base_necesario / equivalencia
-
-            # Descontar de lotes (FEFO: Primero los que vencen antes)
-            lotes = Lote.objects.filter(materia_prima=comp.materia_prima, cantidad_actual__gt=0).order_by('fecha_vencimiento')
-
-            for lote in lotes:
-                if unidades_a_descontar <= 0:
-                    break
-
-                if lote.cantidad_actual >= unidades_a_descontar:
-                    lote.cantidad_actual -= unidades_a_descontar
-                    unidades_a_descontar = 0
-                else:
-                    unidades_a_descontar -= lote.cantidad_actual
-                    lote.cantidad_actual = 0
-                lote.save()
-
-    # 3. Recalcular stock de TODOS los productos (opcionalmente)
-    # o al menos los afectados. Por ahora, de todos para ser precisos.
-    todos_los_productos = Producto.objects.all()
-    for p in todos_los_productos:
+def _descontar_stock_pedido(pedido):
+    from productos.views import recalcular_stock_producto
+    for detalle in pedido.detalles.all():
+        _descontar_stock_detalle(detalle)
+    for p in Producto.objects.all():
         recalcular_stock_producto(p)
 
-def _validar_stock_pedido(productos_ids, cantidades, exclusiones_por_producto):
+def _acumular_necesidades_detalle(p_id, p_cant, excluidas_ids, necesidades_prod, necesidades_mp):
+    if not p_id or not p_cant:
+        return
+    producto = Producto.objects.get(pk=p_id)
+    cantidad = int(p_cant)
+    detalles_mp = producto.detalles_materia.all()
 
-    necesidades_mp = {} # ID Materia Prima -> Cantidad Total Necesaria
-    necesidades_prod = {} # ID Producto -> Cantidad Total Necesaria (para productos sin insumos/bebidas)
+    if not detalles_mp or producto.categoria == 'Bebidas':
+        necesidades_prod[p_id] = necesidades_prod.get(p_id, 0) + cantidad
+    else:
+        for det in detalles_mp:
+            if det.materia_prima.id not in excluidas_ids:
+                from decimal import Decimal
+                mp_id = det.materia_prima.id
+                equiv = Decimal(det.materia_prima.cantidad_por_unidad or 1)
+                cant_base_item = Decimal(det.cantidad_usada)
+                if det.unidad_medida == 'und' and getattr(det.materia_prima, 'unidad_medida', '') != 'und':
+                    cant_base_item = Decimal(det.cantidad_usada) * equiv
+                cant_total_base = cant_base_item * Decimal(cantidad)
+                necesidades_mp[mp_id] = necesidades_mp.get(mp_id, Decimal(0)) + cant_total_base
 
-    for i, (p_id, p_cant) in enumerate(zip(productos_ids, cantidades)):
-        if not p_id or not p_cant: continue
-        producto = Producto.objects.get(pk=p_id)
-        cantidad = int(p_cant)
-        excluidas_ids = [int(eid) for eid in exclusiones_por_producto[i]]
-
-        # 1. Comprobar si el producto tiene insumos definidos
-        detalles_mp = producto.detalles_materia.all()
-        if not detalles_mp or producto.categoria == 'Bebidas':
-            # Si no tiene insumos o es bebida, se descuenta del stock directo del producto
-            necesidades_prod[p_id] = necesidades_prod.get(p_id, 0) + cantidad
-        else:
-            # Si tiene insumos, sumar necesidades de cada materia prima no excluida
-            for det in detalles_mp:
-                if det.materia_prima.id not in excluidas_ids:
-                    from decimal import Decimal
-                    mp_id = det.materia_prima.id
-                    equiv = Decimal(det.materia_prima.cantidad_por_unidad or 1)
-
-                    # Convertimos la cantidad usada a medida base
-                    cant_base_item = Decimal(det.cantidad_usada)
-                    if det.unidad_medida == 'und' and getattr(det.materia_prima, 'unidad_medida', '') != 'und':
-                        cant_base_item = Decimal(det.cantidad_usada) * equiv
-
-                    cant_total_base = cant_base_item * Decimal(cantidad)
-                    necesidades_mp[mp_id] = necesidades_mp.get(mp_id, Decimal(0)) + cant_total_base
-
-    # 2. Verificar contra stock real en DB
+def _verificar_necesidades_stock(necesidades_prod, necesidades_mp):
     for p_id, cant_req in necesidades_prod.items():
         prod = Producto.objects.get(pk=p_id)
         if prod.cantidad < cant_req:
@@ -186,12 +165,22 @@ def _validar_stock_pedido(productos_ids, cantidades, exclusiones_por_producto):
     for mp_id, cant_req in necesidades_mp.items():
         from decimal import Decimal
         mp = MateriaPrima.objects.get(pk=mp_id)
-        # Comparar stock total en medida base (unidades * equivalencia)
         stock_en_base = Decimal(mp.stock_total) * Decimal(mp.cantidad_por_unidad or 1)
         if stock_en_base < cant_req:
             return False, f"Insumo insuficiente: '{mp.nombre_materia_prima}'. Disponible: {stock_en_base} {mp.unidad_medida or ''}, Requerido para este pedido: {cant_req} {mp.unidad_medida or ''}."
 
     return True, None
+
+def _validar_stock_pedido(productos_ids, cantidades, exclusiones_por_producto):
+    necesidades_mp = {}
+    necesidades_prod = {}
+    for i, (p_id, p_cant) in enumerate(zip(productos_ids, cantidades)):
+        if not p_id or not p_cant:
+            continue
+        excluidas_ids = [int(eid) for eid in exclusiones_por_producto[i]]
+        _acumular_necesidades_detalle(p_id, p_cant, excluidas_ids, necesidades_prod, necesidades_mp)
+
+    return _verificar_necesidades_stock(necesidades_prod, necesidades_mp)
 
 @require_GET
 def mostrar_registro_pedido(request):
@@ -227,51 +216,80 @@ def mostrar_registro_pedido(request):
     }
     return render(request, 'pedidos/registrar.html', _obtener_contexto_rol(request, datos))
 
+def _validar_cliente_y_vencidos(request, productos_ids):
+    cliente_id = request.POST.get('txt_cliente_id')
+    cliente_nombre_typed = request.POST.get('txt_cliente_search')
+
+    if cliente_nombre_typed and not cliente_id:
+        raise ValueError(f"No se puede registrar el pedido: El cliente '{cliente_nombre_typed}' no existe. Por favor regístrelo primero.")
+
+    for p_id in productos_ids:
+        if p_id:
+            prod = Producto.objects.get(pk=p_id)
+            if any(d.materia_prima.is_insumo_vencido for d in prod.detalles_materia.all()):
+                raise ValueError(f"No se puede registrar el pedido: El producto '{prod.nombre_producto}' tiene ingredientes con lotes vencidos.")
+
+def _crear_detalles_pedido(pedido, request, productos_ids, cantidades):
+    total_valor = 0
+    for i, (p_id, p_cant) in enumerate(zip(productos_ids, cantidades)):
+        if not p_id:
+            continue
+
+        producto = Producto.objects.get(pk=p_id)
+        cantidad = int(p_cant)
+        precio_u = producto.precio
+        total_valor += precio_u * cantidad
+
+        detalle = DetallePedidoProducto.objects.create(
+            pedido=pedido,
+            producto=producto,
+            cantidad=cantidad,
+            precio_unitario=precio_u
+        )
+
+        exclusiones_key = f'producto_exclusiones_{i}[]'
+        excluidas_ids = request.POST.getlist(exclusiones_key)
+        if excluidas_ids:
+            detalle.materias_excluidas.set(excluidas_ids)
+
+        notas_key = f'producto_notas_{i}'
+        detalle.notas = request.POST.get(notas_key)
+        detalle.save()
+    return total_valor
+
+@require_http_methods(["GET", "POST"])
 def registrar_pedido(request):
-    if request.method == 'POST':
-        fecha = timezone.now()
-        usuario_id = request.session.get('usuario_id')
-        usuario_registrador = Usuario.objects.filter(pk=usuario_id).first() if usuario_id else None
+    if request.method != 'POST':
+        return redirect('mostrar_registro_pedido')
 
-        reserva_id = request.POST.get('txt_reserva')
-        reserva = Reserva.objects.filter(pk=reserva_id).first() if reserva_id else None
+    fecha = timezone.now()
+    usuario_id = request.session.get('usuario_id')
+    usuario_registrador = Usuario.objects.filter(pk=usuario_id).first() if usuario_id else None
 
-        # 0. Validar Cliente (Opcional, pero si se escribe debe existir)
-        cliente_id = request.POST.get('txt_cliente_id')
-        cliente_nombre_typed = request.POST.get('txt_cliente_search')
+    reserva_id = request.POST.get('txt_reserva')
+    reserva = Reserva.objects.filter(pk=reserva_id).first() if reserva_id else None
 
-        # Si escribió algo pero no hay ID, el cliente no existe en la DB
-        if cliente_nombre_typed and not cliente_id:
-            messages.error(request, f"No se puede registrar el pedido: El cliente '{cliente_nombre_typed}' no existe. Por favor regístrelo primero.")
-            return redirect('mostrar_registro_pedido')
+    cliente_id = request.POST.get('txt_cliente_id')
+    cliente = Cliente.objects.filter(pk=cliente_id).first() if cliente_id else None
 
-        cliente = Cliente.objects.filter(pk=cliente_id).first() if cliente_id else None
+    productos_ids = request.POST.getlist(PRODUCTO_ID_KEY)
+    cantidades = request.POST.getlist(PRODUCTO_CANTIDAD_KEY)
 
-        # 0.1 Validar Stock antes de proceder
-        productos_ids = request.POST.getlist(PRODUCTO_ID_KEY)
-        cantidades = request.POST.getlist(PRODUCTO_CANTIDAD_KEY)
+    try:
+        _validar_cliente_y_vencidos(request, productos_ids)
+
         exclusiones_data = []
         for i in range(len(productos_ids)):
             exclusiones_data.append(request.POST.getlist(f'producto_exclusiones_{i}[]'))
 
         es_valido, error_msg = _validar_stock_pedido(productos_ids, cantidades, exclusiones_data)
         if not es_valido:
-            messages.error(request, f"No se puede registrar el pedido: {error_msg}")
-            return redirect('mostrar_registro_pedido')
+            raise ValueError(f"No se puede registrar el pedido: {error_msg}")
 
-        # 0.2 Validar que no haya productos con insumos vencidos (Seguridad contra manipulaciones)
-        for p_id in productos_ids:
-            if p_id:
-                prod = Producto.objects.get(pk=p_id)
-                if any(d.materia_prima.is_insumo_vencido for d in prod.detalles_materia.all()):
-                    messages.error(request, f"No se puede registrar el pedido: El producto '{prod.nombre_producto}' tiene ingredientes con lotes vencidos.")
-                    return redirect('mostrar_registro_pedido')
-
-        # 1. Crear el Pedido con estado 'Registrado' (No visible en cocina hasta facturar)
         pedido = Pedido.objects.create(
             fecha=fecha,
             estado='Registrado',
-            valor=0, # Se calculará abajo
+            valor=0,
             numero_orden=request.POST.get('txt_numero_orden'),
             metodo_pago=request.POST.get('txt_metodo_pago'),
             usuario=usuario_registrador,
@@ -279,53 +297,19 @@ def registrar_pedido(request):
             cliente=cliente,
         )
 
-        # 2. Procesar Productos y sus Exclusiones
-        productos_ids = request.POST.getlist('producto_id[]')
-        cantidades = request.POST.getlist('producto_cantidad[]')
-        total_valor = 0
-
-        for i, (p_id, p_cant) in enumerate(zip(productos_ids, cantidades)):
-            if not p_id: continue
-
-            producto = Producto.objects.get(pk=p_id)
-            cantidad = int(p_cant)
-            precio_u = producto.precio
-            total_valor += precio_u * cantidad
-
-            detalle = DetallePedidoProducto.objects.create(
-                pedido=pedido,
-                producto=producto,
-                cantidad=cantidad,
-                precio_unitario=precio_u
-            )
-
-            # Manejar exclusiones (vienen como producto_exclusiones_0[], producto_exclusiones_1[], etc.)
-            exclusiones_key = f'producto_exclusiones_{i}[]'
-            excluidas_ids = request.POST.getlist(exclusiones_key)
-            if excluidas_ids:
-                detalle.materias_excluidas.set(excluidas_ids)
-
-            # Notas opcionales
-            notas_key = f'producto_notas_{i}'
-            detalle.notas = request.POST.get(notas_key)
-            detalle.save()
-
-            # Notas opcionales
-            notas_key = f'producto_notas_{i}'
-            detalle.notas = request.POST.get(notas_key)
-            detalle.save()
-
-        # 3. Actualizar valor total
+        total_valor = _crear_detalles_pedido(pedido, request, productos_ids, cantidades)
         pedido.valor = total_valor
         pedido.save()
 
-        # 4. Descontar stock
         _descontar_stock_pedido(pedido)
-
         _generar_factura_si_necesario(pedido)
+
         messages.success(request, f"Pedido #{pedido.id} registrado con éxito. Procede a generar la factura.")
         return redirect(f'/facturas/registrar/?pedido_id={pedido.id}')
-    return redirect('mostrar_registro_pedido')
+
+    except ValueError as e:
+        messages.error(request, str(e))
+        return redirect('mostrar_registro_pedido')
 
 def _restaurar_stock_pedido(pedido):
 
@@ -425,85 +409,59 @@ def editar_pedido(request):
     if not contexto['puede_editar']:
         return redirect('listar_pedidos')
 
-    if request.method == 'POST':
-        pedido_id = request.POST.get('txt_id')
-        pedido = Pedido.objects.get(pk=pedido_id)
+    if request.method != 'POST':
+        return redirect('listar_pedidos')
 
-        # 1. Restaurar stock antiguo temporalmente para validar disponibilidad total
-        _restaurar_stock_pedido(pedido)
+    pedido_id = request.POST.get('txt_id')
+    pedido = Pedido.objects.get(pk=pedido_id)
 
-        # 1.1 Validar nuevo stock antes de borrar detalles y aplicar cambios
-        productos_ids_nuevos = request.POST.getlist(PRODUCTO_ID_KEY)
-        cantidades_nuevas = request.POST.getlist(PRODUCTO_CANTIDAD_KEY)
-        exclusiones_data_nuevas = []
-        for i in range(len(productos_ids_nuevos)):
-            exclusiones_data_nuevas.append(request.POST.getlist(f'producto_exclusiones_{i}[]'))
+    # 1. Restaurar stock antiguo temporalmente para validar disponibilidad total
+    _restaurar_stock_pedido(pedido)
 
-        es_valido, error_msg = _validar_stock_pedido(productos_ids_nuevos, cantidades_nuevas, exclusiones_data_nuevas)
-        if not es_valido:
+    # 1.1 Validar nuevo stock antes de borrar detalles y aplicar cambios
+    productos_ids_nuevos = request.POST.getlist(PRODUCTO_ID_KEY)
+    cantidades_nuevas = request.POST.getlist(PRODUCTO_CANTIDAD_KEY)
+    exclusiones_data_nuevas = []
+    for i in range(len(productos_ids_nuevos)):
+        exclusiones_data_nuevas.append(request.POST.getlist(f'producto_exclusiones_{i}[]'))
+
+    es_valido, error_msg = _validar_stock_pedido(productos_ids_nuevos, cantidades_nuevas, exclusiones_data_nuevas)
+    if not es_valido:
         # REVERTIR: Si no hay stock para el nuevo pedido, volvemos a descontar el stock original
-            _descontar_stock_pedido(pedido)
-            messages.error(request, f"No se pudo actualizar el pedido: {error_msg}")
-            return redirect(f'/pedidos/editar/{pedido.id}/')
-
-        # 2. Actualizar datos básicos (Nota: El estado es inmutable en edición general)
-        pedido.metodo_pago = request.POST.get('txt_metodo_pago')
-
-        usuario_id_post = request.POST.get('txt_cajero')
-        if usuario_id_post:
-            pedido.usuario = Usuario.objects.get(pk=usuario_id_post)
-
-        pedido.reserva = Reserva.objects.get(pk=request.POST.get('txt_reserva')) if request.POST.get('txt_reserva') else None
-
-        # Validar Cliente en edición (Opcional, pero si se escribe debe existir)
-        cliente_id = request.POST.get('txt_cliente')
-        cliente = Cliente.objects.filter(pk=cliente_id).first() if cliente_id else None
-        pedido.cliente = cliente
-
-        # 3. Borrar detalles antiguos (el stock ya se restauró en el paso 1 y validamos el nuevo)
-        pedido.detalles.all().delete()
-
-        # 4. Procesar nuevos Productos y sus Exclusiones
-        productos_ids = request.POST.getlist('producto_id[]')
-        cantidades = request.POST.getlist('producto_cantidad[]')
-        total_valor = 0
-
-        for i, (p_id, p_cant) in enumerate(zip(productos_ids, cantidades)):
-            if not p_id: continue
-
-            producto = Producto.objects.get(pk=p_id)
-            cantidad = int(p_cant)
-            precio_u = producto.precio
-            total_valor += precio_u * cantidad
-
-            detalle = DetallePedidoProducto.objects.create(
-                pedido=pedido,
-                producto=producto,
-                cantidad=cantidad,
-                precio_unitario=precio_u
-            )
-
-            exclusiones_key = f'producto_exclusiones_{i}[]'
-            excluidas_ids = request.POST.getlist(exclusiones_key)
-            if excluidas_ids:
-                detalle.materias_excluidas.set(excluidas_ids)
-
-            notas_key = f'producto_notas_{i}'
-            detalle.notas = request.POST.get(notas_key)
-            detalle.save()
-
-        # 5. Actualizar valor total
-        pedido.valor = total_valor
-        pedido.save()
-
-        # 6. Descontar nuevo stock
         _descontar_stock_pedido(pedido)
+        messages.error(request, f"No se pudo actualizar el pedido: {error_msg}")
+        return redirect(f'/pedidos/editar/{pedido.id}/')
 
-        _generar_factura_si_necesario(pedido)
-        messages.success(request, f"Pedido #{pedido.id} actualizado correctamente.")
-        return redirect(f'/facturas/registrar/?pedido_id={pedido.id}')
+    # 2. Actualizar datos básicos (Nota: El estado es inmutable en edición general)
+    pedido.metodo_pago = request.POST.get('txt_metodo_pago')
 
-    return redirect('listar_pedidos')
+    usuario_id_post = request.POST.get('txt_cajero')
+    if usuario_id_post:
+        pedido.usuario = Usuario.objects.get(pk=usuario_id_post)
+
+    pedido.reserva = Reserva.objects.get(pk=request.POST.get('txt_reserva')) if request.POST.get('txt_reserva') else None
+
+    # Validar Cliente en edición (Opcional, pero si se escribe debe existir)
+    cliente_id = request.POST.get('txt_cliente')
+    cliente = Cliente.objects.filter(pk=cliente_id).first() if cliente_id else None
+    pedido.cliente = cliente
+
+    # 3. Borrar detalles antiguos (el stock ya se restauró en el paso 1 y validamos el nuevo)
+    pedido.detalles.all().delete()
+
+    # 4. Procesar nuevos Productos y sus Exclusiones
+    total_valor = _crear_detalles_pedido(pedido, request, productos_ids_nuevos, cantidades_nuevas)
+
+    # 5. Actualizar valor total
+    pedido.valor = total_valor
+    pedido.save()
+
+    # 6. Descontar nuevo stock
+    _descontar_stock_pedido(pedido)
+
+    _generar_factura_si_necesario(pedido)
+    messages.success(request, f"Pedido #{pedido.id} actualizado correctamente.")
+    return redirect(f'/facturas/registrar/?pedido_id={pedido.id}')
 
 @require_GET
 def pedidos_pendientes(request):

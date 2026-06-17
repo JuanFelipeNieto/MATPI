@@ -162,7 +162,7 @@
                     <tbody id="body-productos">
                         <tr class="fila-producto" data-indice="0" data-tipo="producto">
                             <td>
-                                <select name="producto_id[]" id="select_producto_0" aria-label="Seleccionar Producto" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
+                                <select name="producto_id[]" id="select_producto_0" aria-label="Seleccione Producto" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
                                     <option value="">— Seleccione Producto —</option>
                                     {% for producto in productos %}
                                         {% if producto.categoria != 'Bebidas' %}
@@ -236,7 +236,7 @@
 
 <!-- Template Oculto para Bebidas -->
 <div id="select-bebidas-html" style="display: none;">
-    <select name="producto_id[]" id="select_producto_0" aria-label="Seleccionar Producto" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
+    <select name="producto_id[]" id="select_producto_0" aria-label="Seleccione Producto" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
         <option value="">— Seleccione Bebida —</option>
         {% for bebida in bebidas %}
         <option value="{{ bebida.id }}"
@@ -362,8 +362,18 @@
 
         const nuevoIndice = contadorFilas++;
         fila.dataset.indice = nuevoIndice;
-        fila.querySelector('textarea')?.setAttribute('name', `producto_notas_${nuevoIndice}`);
-        if(notas) notas.value = "";
+        
+        // Asignar IDs únicos para evitar duplicados en el DOM y mejorar accesibilidad
+        select.id = `select_producto_${nuevoIndice}`;
+        selectCant.id = `select_cantidad_${nuevoIndice}`;
+        
+        const labelNotes = fila.querySelector('label[for^="producto_notes_"]');
+        if (labelNotes) labelNotes.setAttribute('for', `producto_notes_${nuevoIndice}`);
+        if (notas) {
+            notas.id = `producto_notes_${nuevoIndice}`;
+            notas.setAttribute('name', `producto_notas_${nuevoIndice}`);
+            notas.value = "";
+        }
 
         calcularTotal();
     }

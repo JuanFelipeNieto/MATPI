@@ -28,7 +28,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="txt_cliente">Cliente (Escriba nombre o documento)</label>
+                    <label for="txt_cliente_search">Cliente (Escriba nombre o documento)</label>
                     <input type="text" id="txt_cliente_search" list="clientes_list" name="txt_cliente_text"
                         value="{{ reserva_edit.cliente.nombre_completo }} ({{ reserva_edit.cliente.id }})"
                         placeholder="Buscar cliente..." required autocomplete="off" style="padding: 12px;" minlength="10" maxlength="40">
@@ -58,7 +58,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="txt_cliente">Cliente (Escriba nombre o documento)</label>
+                    <label for="txt_cliente_search">Cliente (Escriba nombre o documento)</label>
                     <input type="text" id="txt_cliente_search" list="clientes_list" name="txt_cliente_text" placeholder="Buscar cliente..." required autocomplete="off" style="padding: 12px;" minlength="10" maxlength="40">
                     <datalist id="clientes_list">
                         {% for cliente in clientes %}
@@ -85,7 +85,8 @@
         <div class="form-busqueda" style="margin-bottom: 20px;">
             <div class="buscador-izq" style="width: 100%;">
                 <form method="GET" action="{% url 'listar_reservas' %}" style="display: flex; gap: 10px; width: 100%;">
-                    <input type="text" name="buscar" placeholder="Buscar por cliente o documento" value="{{ buscar|default:'' }}" style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                    <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por cliente o documento</label>
+                    <input type="text" id="buscar" name="buscar" placeholder="Buscar por cliente o documento" value="{{ buscar|default:'' }}" style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     <button type="submit" class="btn btn-guardar" style="padding: 10px 20px;">Buscar</button>
                 </form>
             </div>

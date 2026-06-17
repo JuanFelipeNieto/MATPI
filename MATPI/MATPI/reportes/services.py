@@ -14,6 +14,8 @@ from materia_prima.models import MateriaPrima
 from proveedores.models import Proveedor
 from reservas.models import Reserva
 
+LABEL_TELEFONO = 'Teléfono'
+
 def obtener_rango_fechas(periodo):
     """Retorna fecha_inicio y fecha_fin en base al periodo (semanal o mensual)."""
     ahora = timezone.now()
@@ -105,14 +107,14 @@ def generar_csv_general(periodo):
 
     # 4. Clientes
     writer.writerow(['--- DETALLE DE CLIENTES ---'])
-    writer.writerow(['Documento', 'Nombre', 'Total Pedidos', 'Registrado por', 'Teléfono', 'Dirección', 'Localidad'])
+    writer.writerow(['Documento', 'Nombre', 'Total Pedidos', 'Registrado por', LABEL_TELEFONO, 'Dirección', 'Localidad'])
     for c in ctx['clientes']:
         writer.writerow([c.id, c.nombre_completo, c.total_pedidos, c.usuario.nombre_completo if c.usuario else '—', c.telefono, c.direccion, c.localidad])
     writer.writerow([])
 
     # 5. Usuarios
     writer.writerow(['--- DETALLE DE USUARIOS ---'])
-    writer.writerow(['Documento', 'Nombre', 'Correo', 'Teléfono'])
+    writer.writerow(['Documento', 'Nombre', 'Correo', LABEL_TELEFONO])
     for u in ctx['usuarios']:
         writer.writerow([u.id, u.nombre_completo, u.correo_electronico, u.telefono])
     writer.writerow([])
@@ -133,7 +135,7 @@ def generar_csv_general(periodo):
 
     # 8. Proveedores
     writer.writerow(['--- DETALLE DE PROVEEDORES ---'])
-    writer.writerow(['ID', 'Nombre', 'Correo', 'Teléfono'])
+    writer.writerow(['ID', 'Nombre', 'Correo', LABEL_TELEFONO])
     for pv in ctx['proveedores']:
         writer.writerow([pv.id, pv.nombre_proveedor, pv.correo_electronico, pv.telefono])
     writer.writerow([])

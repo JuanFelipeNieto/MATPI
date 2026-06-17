@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_http_methods, require_GET
 from .models import Proveedor, DetalleProveedorMateriaP
 from usuarios.models import Administrador
 from materia_prima.models import MateriaPrima
@@ -14,6 +15,7 @@ def check_admin(request):
 
 # --- VISTAS DE PROVEEDORES ---
 
+@require_GET
 def listar_proveedores(request):
     id_sesion = request.session.get('usuario_id')
     if not id_sesion:
@@ -27,6 +29,7 @@ def listar_proveedores(request):
     })
 
 
+@require_GET
 def mostrar_registro_proveedor(request):
     if not check_admin(request):
         messages.error(request, "Solo el administrador puede registrar proveedores.")
@@ -35,12 +38,12 @@ def mostrar_registro_proveedor(request):
     return render(request, 'proveedores/registrar.html', {'es_admin': True})
 
 
+@require_http_methods(["GET", "POST"])
 def registrar_proveedor(request):
     if not check_admin(request):
         return redirect('listar_proveedores')
 
     if request.method == 'POST':
-        # ... logic remains similar but with safety
         nombre    = request.POST.get('txt_nombre')
         direccion = request.POST.get('txt_direccion')
         correo    = request.POST.get('txt_correo')
@@ -60,30 +63,32 @@ def registrar_proveedor(request):
     return redirect('mostrar_registro_proveedor')
 
 
-def pre_editar_proveedor(request, id):
+@require_GET
+def pre_editar_proveedor(request, proveedor_id):
     if not check_admin(request):
         messages.error(request, "No tienes permisos para editar proveedores.")
         return redirect('listar_proveedores')
 
-    proveedor = get_object_or_404(Proveedor, pk=id)
+    proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
     return render(request, 'proveedores/editar.html', {
         'proveedor': proveedor,
         'es_admin': True
     })
 
 
+@require_http_methods(["GET", "POST"])
 def editar_proveedor(request):
     if not check_admin(request):
         return redirect('listar_proveedores')
 
     if request.method == 'POST':
-        id        = request.POST.get('txt_id')
+        proveedor_id = request.POST.get('txt_id')
         nombre    = request.POST.get('txt_nombre')
         direccion = request.POST.get('txt_direccion')
         correo    = request.POST.get('txt_correo')
         telefono  = request.POST.get('txt_telefono')
         try:
-            proveedor = Proveedor.objects.get(pk=id)
+            proveedor = Proveedor.objects.get(pk=proveedor_id)
             proveedor.nombre_proveedor    = nombre
             proveedor.direccion           = direccion
             proveedor.correo_electronico  = correo
@@ -96,26 +101,28 @@ def editar_proveedor(request):
     return redirect('listar_proveedores')
 
 
-def eliminar_proveedor(request, id):
+@require_http_methods(["GET", "POST"])
+def eliminar_proveedor(request, proveedor_id):
     if not check_admin(request):
         messages.error(request, "No tienes permisos para eliminar proveedores.")
         return redirect('listar_proveedores')
 
-    proveedor = get_object_or_404(Proveedor, pk=id)
+    proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
     proveedor.delete()
     messages.success(request, "Proveedor eliminado.")
     return redirect('listar_proveedores')
 
 # --- NUEVAS VISTAS PARA SUMINISTROS ---
 
-def mostrar_registro_suministro(request, id):
+@require_GET
+def mostrar_registro_suministro(request, proveedor_id):
     import json
     id_sesion = request.session.get('usuario_id')
     if not id_sesion:
         return redirect('login')
 
     es_admin = check_admin(request)
-    proveedor = get_object_or_404(Proveedor, pk=id)
+    proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
     materias_primas = MateriaPrima.objects.all()
 
     # Obtener el precio más reciente de cada materia prima
@@ -134,6 +141,7 @@ def mostrar_registro_suministro(request, id):
         'precios_json': json.dumps(precios_dict)
     })
 
+@require_http_methods(["GET", "POST"])
 def registrar_suministro_materia(request):
     if request.method == 'POST':
         proveedor_id = request.POST.get('txt_proveedor_id')
@@ -148,8 +156,6 @@ def registrar_suministro_materia(request):
                 proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
                 materia   = get_object_or_404(MateriaPrima, pk=materia_id)
 
-                # Import Lote from materia_prima.models (locally to avoid circularity if needed,
-                # but views already imports Proveedor, MateriaPrima, etc. so we should check imports)
                 from materia_prima.models import Lote
 
                 # Crear el registro del suministro

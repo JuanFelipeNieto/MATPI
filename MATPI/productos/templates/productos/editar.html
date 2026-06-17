@@ -35,7 +35,7 @@
                             {% for item in composicion %}
                             <tr class="fila-materia">
                                 <td>
-                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" aria-label="Materia Prima" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
+                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" aria-label="Seleccione Materia Prima" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
                                         <option value="" data-equiv="" data-unidad="">— Seleccione —</option>
                                         {% for materia in materias_primas %}
                                             <option value="{{ materia.id }}" data-equiv="{{ materia.cantidad_por_unidad|unlocalize }}" data-unidad="{{ materia.unidad_medida }}" {% if materia.id == item.materia_prima.id %}selected{% endif %}>
@@ -63,7 +63,7 @@
                         {% else %}
                             <tr class="fila-materia">
                                 <td>
-                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" aria-label="Materia Prima" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
+                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" aria-label="Seleccione Materia Prima" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
                                         <option value="" data-equiv="" data-unidad="">— Seleccione —</option>
                                         {% for materia in materias_primas %}
                                             <option value="{{ materia.id }}" data-equiv="{{ materia.cantidad_por_unidad|unlocalize }}" data-unidad="{{ materia.unidad_medida }}">{{ materia.nombre_materia_prima }}</option>
@@ -162,8 +162,8 @@
         const tr = selectObj.closest('tr');
         const opcion = selectObj.options[selectObj.selectedIndex];
 
-        const equiv = parseFloat(opcion.getAttribute('data-equiv')) || 0;
-        const unidad = opcion.getAttribute('data-unidad') || '';
+        const equiv = Number.parseFloat(opcion.dataset.equiv) || 0;
+        const unidad = opcion.dataset.unidad || '';
 
         const inputCantidad = tr.querySelector('.input-equiv');
         const inputUnidadOculto = tr.querySelector('.input-unidad-texto');
@@ -188,10 +188,10 @@
         const opcion = select.options[select.selectedIndex];
         if (!opcion || !opcion.value) return;
 
-        const equivBase = parseFloat(opcion.getAttribute('data-equiv')) || 1;
-        const cantidadActual = parseFloat(inputObj.value) || 0;
+        const equivBase = Number.parseFloat(opcion.dataset.equiv) || 1;
+        const cantidadActual = Number.parseFloat(inputObj.value) || 0;
         const numUnidades = (cantidadActual / equivBase).toFixed(2);
-        const floatUnidades = parseFloat(numUnidades);
+        const floatUnidades = Number.parseFloat(numUnidades);
 
         const msg = tr.querySelector('.msg-unidades');
         if (equivBase > 0 && cantidadActual > 0) {
@@ -214,10 +214,10 @@
         const inputObj = tr.querySelector('.input-equiv');
         const select = tr.querySelector('.select-materia');
         const opcion = select.options[select.selectedIndex];
-        const equivBase = parseFloat(opcion.getAttribute('data-equiv')) || 0;
+        const equivBase = Number.parseFloat(opcion.dataset.equiv) || 0;
 
         if (equivBase > 0) {
-            let actual = parseFloat(inputObj.value) || 0;
+            let actual = Number.parseFloat(inputObj.value) || 0;
             inputObj.value = (actual + equivBase).toFixed(2);
             actualizarUnidades(inputObj);
         }
@@ -228,10 +228,10 @@
         const inputObj = tr.querySelector('.input-equiv');
         const select = tr.querySelector('.select-materia');
         const opcion = select.options[select.selectedIndex];
-        const equivBase = parseFloat(opcion.getAttribute('data-equiv')) || 0;
+        const equivBase = Number.parseFloat(opcion.dataset.equiv) || 0;
 
         if (equivBase > 0) {
-            let actual = parseFloat(inputObj.value) || 0;
+            let actual = Number.parseFloat(inputObj.value) || 0;
             let nuevo = actual - equivBase;
             if (nuevo < 1) { nuevo = 1; } // Mínimo 1 en medida base
             inputObj.value = nuevo.toFixed(2);

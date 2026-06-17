@@ -11,7 +11,8 @@
     <div class="form-busqueda">
         <div class="buscador-izq">
             <form method="GET" action="{% url 'listar_usuarios' %}">
-                <input type="text" name="buscar" placeholder="Buscar por documento o nombre"
+                <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por documento o nombre</label>
+                <input type="text" id="buscar" name="buscar" placeholder="Buscar por documento o nombre"
                     value="{{ buscar|default:'' }}">
                 <button type="submit" class="btn btn-guardar">Buscar</button>
             </form>
@@ -40,7 +41,7 @@
                     <td>{{ usuario.telefono }}</td>
                     <td>{{ usuario.estado }}</td>
                     <td class="acciones">
-                        <a href="{% url 'ver_perfil' usuario.id %}" class="btn-azul" style="background-color: #3b82f6; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; margin-right: 4px;">Ver Detalles</a>
+                        <a href="{% url 'ver_perfil' usuario.id %}" class="btn-azul" style="background-color: #1d4ed8; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; margin-right: 4px;">Ver Detalles</a>
                         <a href="{% url 'editar_usuario' usuario.id %}" class="btn-editar">Editar</a>
                         <a href="{% url 'eliminar_usuario' usuario.id %}" class="btn-danger"
                             onclick="return confirm('¿Eliminar este usuario?')">Eliminar</a>

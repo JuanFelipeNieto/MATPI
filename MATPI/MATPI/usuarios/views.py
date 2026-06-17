@@ -12,6 +12,7 @@ from django.db.models import Sum, Count
 from matplotlib.ticker import MaxNLocator
 from django.http import HttpResponse
 from django.template.loader import get_template, TemplateDoesNotExist
+from django.views.decorators.http import require_http_methods, require_GET, require_POST
 
 # Librería para PDF
 from xhtml2pdf import pisa
@@ -58,6 +59,7 @@ def login_requerido(view_func):
     return _wrapped_view
 
 
+@require_http_methods(["GET", "POST"])
 def login_view(request):
     if request.method == 'POST':
         documento = request.POST.get('txt_id')
@@ -82,6 +84,7 @@ def login_view(request):
             messages.error(request, "Documento o contraseña incorrectos.")
     return render(request, 'usuarios/login.html')
 
+@require_GET
 def logout_view(request):
     request.session.flush()
     return redirect('login')
@@ -137,11 +140,57 @@ def listar_usuarios(request):
         usuarios = usuarios.filter(
             models.Q(id__icontains=buscar) | models.Q(nombre_completo__icontains=buscar)
         )
-    return render(request, 'usuarios/listar.html', {'usuarios': usuarios, 'buscar': buscar, 'es_admin': True})
+    return render(request, 'usuarios/listar.html', {'usuarios': usuarios, 'buscar': buscar})
+
+def _validar_usuario_base(doc_id, nombre, telefono, experiencia_file=None):
+    if doc_id is not None:
+        if len(doc_id) != 10:
+            raise ValueError("El documento debe tener exactamente 10 caracteres.")
+    if nombre:
+        if len(nombre) < 3:
+            raise ValueError("El nombre no puede tener menos de 3 caracteres.")
+        if not validar_nombre(nombre):
+            raise ValueError("El nombre no puede tener números ni caracteres especiales.")
+    if telefono and len(telefono) < 6:
+        raise ValueError("El teléfono no puede tener menos de 6 caracteres.")
+    if experiencia_file and not experiencia_file.name.lower().endswith('.pdf'):
+        raise ValueError("El archivo de experiencia laboral debe ser en formato PDF.")
+
+def _validar_emergencia(emergencia_nombre, emergencia_parentesco, emergencia_numero, required=True):
+    if required:
+        if emergencia_nombre and len(emergencia_nombre) < 3:
+            raise ValueError("El nombre del contacto de emergencia no puede tener menos de 3 caracteres.")
+        if not validar_nombre(emergencia_nombre):
+            raise ValueError("El nombre del contacto de emergencia no puede tener números.")
+        if emergencia_parentesco and len(emergencia_parentesco) > 15:
+            raise ValueError("El parentesco no puede tener más de 15 caracteres.")
+        if not validar_nombre(emergencia_parentesco):
+            raise ValueError("El parentesco no puede tener números.")
+        if emergencia_numero and len(emergencia_numero) < 6:
+            raise ValueError("El teléfono de emergencia no puede tener menos de 6 caracteres.")
+        if not validar_solo_numeros(emergencia_numero):
+            raise ValueError("El teléfono de emergencia solo puede tener números.")
+    else:
+        if emergencia_nombre:
+            if len(emergencia_nombre) < 3:
+                raise ValueError("El nombre del contacto de emergencia no puede tener menos de 3 caracteres.")
+            if not validar_nombre(emergencia_nombre):
+                raise ValueError("El nombre del contacto de emergencia no puede tener números.")
+        if emergencia_parentesco:
+            if len(emergencia_parentesco) > 15:
+                raise ValueError("El parentesco no puede tener más de 15 caracteres.")
+            if not validar_nombre(emergencia_parentesco):
+                raise ValueError("El parentesco no puede tener números.")
+        if emergencia_numero:
+            if len(emergencia_numero) < 6:
+                raise ValueError("El teléfono de emergencia no puede tener menos de 6 caracteres.")
+            if not validar_solo_numeros(emergencia_numero):
+                raise ValueError("El teléfono de emergencia solo puede tener números.")
 
 @login_requerido
-def ver_perfil(request, id):
-    usuario = get_object_or_404(Usuario, id=id)
+@require_http_methods(["GET", "POST"])
+def ver_perfil(request, usuario_id):
+    usuario = get_object_or_404(Usuario, id=usuario_id)
     cajero = Cajero.objects.filter(usuario=usuario).first()
 
     es_propio = str(usuario.id) == str(request.session.get('usuario_id'))
@@ -153,7 +202,7 @@ def ver_perfil(request, id):
             usuario.save()
             request.session['tipo_navegacion'] = tipo_nav
             messages.success(request, "Preferencia de navegación actualizada.")
-            return redirect('ver_perfil', id=id)
+            return redirect('ver_perfil', usuario_id=usuario_id)
 
     return render(request, 'usuarios/perfil.html', {
         'usuario': usuario,
@@ -163,88 +212,66 @@ def ver_perfil(request, id):
     })
 
 @login_requerido
+@require_http_methods(["GET", "POST"])
 def registrar_usuario(request):
     if not es_administrador(request): return redirect('dashboard')
-    if request.method == 'POST':
-        try:
-            with transaction.atomic():
-                # VALIDACIONES
-                doc_id = request.POST.get('txt_id')
-                nombre = request.POST.get('txt_nombre')
-                f_ingreso_str = request.POST.get('txt_fecha_ingreso')
-                telefono = request.POST.get('txt_telefono')
+    if request.method != 'POST':
+        return render(request, 'usuarios/registrar.html', {'es_admin': True})
 
-                if len(doc_id) > 10 or len(doc_id) < 10:
-                    raise Exception("El documento debe tener exactamente 10 caracteres.")
-                if len(nombre) < 3:
-                    raise Exception("El nombre no puede tener menos de 3 caracteres.")
-                if not validar_nombre(nombre):
-                    raise Exception("El nombre no puede tener números ni caracteres especiales.")
-                if telefono and len(telefono) < 6:
-                    raise Exception("El teléfono no puede tener menos de 6 caracteres.")
+    try:
+        with transaction.atomic():
+            doc_id = request.POST.get('txt_id')
+            nombre = request.POST.get('txt_nombre')
+            f_ingreso_str = request.POST.get('txt_fecha_ingreso')
+            telefono = request.POST.get('txt_telefono')
+            emergencia_nombre = request.POST.get('txt_emergencia_nombre')
+            emergencia_parentesco = request.POST.get('txt_emergencia_parentesco')
+            emergencia_numero = request.POST.get('txt_emergencia_numero')
+            experiencia_file = request.FILES.get('txt_experiencia')
 
-                emergencia_nombre = request.POST.get('txt_emergencia_nombre')
-                emergencia_parentesco = request.POST.get('txt_emergencia_parentesco')
-                emergencia_numero = request.POST.get('txt_emergencia_numero')
+            _validar_usuario_base(doc_id, nombre, telefono, experiencia_file)
+            _validar_emergencia(emergencia_nombre, emergencia_parentesco, emergencia_numero, required=True)
 
-                if emergencia_nombre and len(emergencia_nombre) < 3:
-                    raise Exception("El nombre del contacto de emergencia no puede tener menos de 3 caracteres.")
-                if not validar_nombre(emergencia_nombre):
-                    raise Exception("El nombre del contacto de emergencia no puede tener números.")
-                if emergencia_parentesco and len(emergencia_parentesco) > 15:
-                    raise Exception("El parentesco no puede tener más de 15 caracteres.")
-                if not validar_nombre(emergencia_parentesco):
-                    raise Exception("El parentesco no puede tener números.")
-                if emergencia_numero and len(emergencia_numero) < 6:
-                    raise Exception("El teléfono de emergencia no puede tener menos de 6 caracteres.")
-                if not validar_solo_numeros(emergencia_numero):
-                    raise Exception("El teléfono de emergencia solo puede tener números.")
+            f_ingreso = datetime.strptime(f_ingreso_str, '%Y-%m-%d').date()
+            hoy = timezone.now().date()
+            estado = 'Activo' if f_ingreso <= hoy else 'Inactivo'
 
-                experiencia_file = request.FILES.get('txt_experiencia')
-                if experiencia_file and not experiencia_file.name.lower().endswith('.pdf'):
-                    raise Exception("El archivo de experiencia laboral debe ser en formato PDF.")
-
-                # Lógica de Estado Automático
-                f_ingreso = datetime.strptime(f_ingreso_str, '%Y-%m-%d').date()
-                hoy = timezone.now().date()
-                estado = 'Activo' if f_ingreso <= hoy else 'Inactivo'
-
-                u = Usuario.objects.create(
-                    id=doc_id,
-                    nombre_completo=nombre,
-                    contraseña=request.POST.get('txt_contrasena'),
-                    correo_electronico=request.POST.get('txt_correo'),
-                    telefono=request.POST.get('txt_telefono'),
-                    fecha_nacimiento=request.POST.get('txt_fecha_nacimiento'),
-                    direccion=request.POST.get('txt_direccion'),
-                    fecha_ingreso=f_ingreso,
-                    experiencia_laboral=experiencia_file,
-                    estado=estado
-                )
-                fecha_term = request.POST.get('txt_fecha_terminacion')
-                Cajero.objects.create(
-                    usuario=u,
-                    eps=request.POST.get('txt_eps'),
-                    tipo_contrato=request.POST.get('txt_tipo_contrato'),
-                    turno=request.POST.get('txt_turno'),
-                    fecha_terminacion_contrato=fecha_term if (fecha_term and request.POST.get('txt_tipo_contrato') == 'Fijo') else None,
-                    contacto_emergencia_nombre=emergencia_nombre,
-                    contacto_emergencia_parentesco=emergencia_parentesco,
-                    contacto_emergencia_numero=emergencia_numero
-                )
-            messages.success(request, f"Cajero {u.nombre_completo} creado.")
-            return redirect('listar_usuarios')
-        except Exception as e:
-            messages.error(request, f"Error: {e}")
-            return render(request, 'usuarios/registrar.html', {'es_admin': True, 'datos': request.POST})
-    return render(request, 'usuarios/registrar.html', {'es_admin': True})
+            u = Usuario.objects.create(
+                id=doc_id,
+                nombre_completo=nombre,
+                contraseña=request.POST.get('txt_contrasena'),
+                correo_electronico=request.POST.get('txt_correo'),
+                telefono=request.POST.get('txt_telefono'),
+                fecha_nacimiento=request.POST.get('txt_fecha_nacimiento'),
+                direccion=request.POST.get('txt_direccion'),
+                fecha_ingreso=f_ingreso,
+                experiencia_laboral=experiencia_file,
+                estado=estado
+            )
+            fecha_term = request.POST.get('txt_fecha_terminacion')
+            Cajero.objects.create(
+                usuario=u,
+                eps=request.POST.get('txt_eps'),
+                tipo_contrato=request.POST.get('txt_tipo_contrato'),
+                turno=request.POST.get('txt_turno'),
+                fecha_terminacion_contrato=fecha_term if (fecha_term and request.POST.get('txt_tipo_contrato') == 'Fijo') else None,
+                contacto_emergencia_nombre=emergencia_nombre,
+                contacto_emergencia_parentesco=emergencia_parentesco,
+                contacto_emergencia_numero=emergencia_numero
+            )
+        messages.success(request, f"Cajero {u.nombre_completo} creado.")
+        return redirect('listar_usuarios')
+    except ValueError as e:
+        messages.error(request, f"Error: {e}")
+        return render(request, 'usuarios/registrar.html', {'es_admin': True, 'datos': request.POST})
 
 @login_requerido
-def editar_usuario(request, id=None):
+@require_http_methods(["GET", "POST"])
+def editar_usuario(request, usuario_id=None):
     if not es_administrador(request): return redirect('dashboard')
 
-    if id: # Cargar el formulario con datos
-        usuario = get_object_or_404(Usuario, id=id)
+    if usuario_id:
+        usuario = get_object_or_404(Usuario, id=usuario_id)
         cajero = Cajero.objects.filter(usuario=usuario).first()
         return render(request, 'usuarios/editar.html', {
             'usuario': usuario,
@@ -252,105 +279,85 @@ def editar_usuario(request, id=None):
             'es_admin': True
         })
 
-    if request.method == 'POST': # Procesar la edición
-        usuario = get_object_or_404(Usuario, id=request.POST.get('txt_id'))
-        try:
-            with transaction.atomic():
-                # VALIDACIONES
-                nombre = request.POST.get('txt_nombre')
-                if nombre and len(nombre) < 3:
-                    raise Exception("El nombre no puede tener menos de 3 caracteres.")
-                if not validar_nombre(nombre):
-                    raise Exception("El nombre no puede tener números ni caracteres especiales.")
+    if request.method != 'POST':
+        return redirect('listar_usuarios')
 
-                emergencia_nombre = request.POST.get('txt_emergencia_nombre')
-                emergencia_parentesco = request.POST.get('txt_emergencia_parentesco')
-                emergencia_numero = request.POST.get('txt_emergencia_numero')
+    usuario = get_object_or_404(Usuario, id=request.POST.get('txt_id'))
+    try:
+        with transaction.atomic():
+            nombre = request.POST.get('txt_nombre')
+            telefono = request.POST.get('txt_telefono')
+            emergencia_nombre = request.POST.get('txt_emergencia_nombre')
+            emergencia_parentesco = request.POST.get('txt_emergencia_parentesco')
+            emergencia_numero = request.POST.get('txt_emergencia_numero')
+            experiencia_file = request.FILES.get('txt_experiencia')
 
-                if emergencia_nombre and len(emergencia_nombre) < 3:
-                    raise Exception("El nombre del contacto de emergencia no puede tener menos de 3 caracteres.")
-                if emergencia_nombre and not validar_nombre(emergencia_nombre):
-                    raise Exception("El nombre del contacto de emergencia no puede tener números.")
-                if emergencia_parentesco and len(emergencia_parentesco) > 15:
-                    raise Exception("El parentesco no puede tener más de 15 caracteres.")
-                if emergencia_parentesco and not validar_nombre(emergencia_parentesco):
-                    raise Exception("El parentesco no puede tener números.")
-                if emergencia_numero and len(emergencia_numero) < 6:
-                    raise Exception("El teléfono de emergencia no puede tener menos de 6 caracteres.")
-                if emergencia_numero and not validar_solo_numeros(emergencia_numero):
-                    raise Exception("El teléfono de emergencia solo puede tener números.")
+            _validar_usuario_base(None, nombre, telefono, experiencia_file)
+            _validar_emergencia(emergencia_nombre, emergencia_parentesco, emergencia_numero, required=False)
 
-                telefono = request.POST.get('txt_telefono')
-                if telefono and len(telefono) < 6:
-                    raise Exception("El teléfono no puede tener menos de 6 caracteres.")
+            usuario.nombre_completo = nombre
+            usuario.correo_electronico = request.POST.get('txt_correo')
+            usuario.telefono = telefono
+            usuario.fecha_nacimiento = request.POST.get('txt_fecha_nacimiento')
+            usuario.direccion = request.POST.get('txt_direccion')
 
-                usuario.nombre_completo = nombre
-                usuario.correo_electronico = request.POST.get('txt_correo')
-                usuario.telefono = telefono
-                usuario.fecha_nacimiento = request.POST.get('txt_fecha_nacimiento')
-                usuario.direccion = request.POST.get('txt_direccion')
-
-                # Estado Automático si se cambia fecha de ingreso
-                nueva_f_ingreso = request.POST.get('txt_fecha_ingreso')
-                if nueva_f_ingreso:
-                    usuario.fecha_ingreso = nueva_f_ingreso
-                    f_date = datetime.strptime(nueva_f_ingreso, '%Y-%m-%d').date()
-                    hoy = timezone.now().date()
-                    usuario.estado = 'Activo' if f_date <= hoy else 'Inactivo'
-                else:
-                    usuario.estado = request.POST.get('txt_estado')
-
-                if 'txt_experiencia' in request.FILES:
-                    experiencia_file = request.FILES.get('txt_experiencia')
-                    if experiencia_file and not experiencia_file.name.lower().endswith('.pdf'):
-                        raise Exception("El archivo de experiencia laboral debe ser en formato PDF.")
-                    usuario.experiencia_laboral = experiencia_file
-                if request.POST.get('txt_contrasena'):
-                    usuario.contraseña = request.POST.get('txt_contrasena')
-                usuario.save()
-
-                if usuario.es_cajero:
-                    cajero, _ = Cajero.objects.get_or_create(usuario=usuario)
-                    if request.POST.get('txt_eps'):
-                        cajero.eps = request.POST.get('txt_eps')
-
-                    tipo_c = request.POST.get('txt_tipo_contrato')
-                    if tipo_c:
-                        cajero.tipo_contrato = tipo_c
-
-                    if request.POST.get('txt_turno'):
-                        cajero.turno = request.POST.get('txt_turno')
-                    if emergencia_nombre:
-                        cajero.contacto_emergencia_nombre = emergencia_nombre
-                    if emergencia_parentesco:
-                        cajero.contacto_emergencia_parentesco = emergencia_parentesco
-                    if emergencia_numero:
-                        cajero.contacto_emergencia_numero = emergencia_numero
-
-                    # Handle empty date or based on fixed contract
-                    fecha_term = request.POST.get('txt_fecha_terminacion')
-                    if tipo_c == 'Indefinido':
-                        cajero.fecha_terminacion_contrato = None
-                    elif fecha_term:
-                        cajero.fecha_terminacion_contrato = fecha_term
-
-                    cajero.save()
-
-            if str(usuario.id) == str(request.session.get('usuario_id')):
-                messages.success(request, "Usuario actualizado correctamente.")
-                return redirect('ver_perfil', id=usuario.id)
+            nueva_f_ingreso = request.POST.get('txt_fecha_ingreso')
+            if nueva_f_ingreso:
+                usuario.fecha_ingreso = nueva_f_ingreso
+                f_date = datetime.strptime(nueva_f_ingreso, '%Y-%m-%d').date()
+                hoy = timezone.now().date()
+                usuario.estado = 'Activo' if f_date <= hoy else 'Inactivo'
             else:
-                messages.success(request, "Cajero actualizado correctamente.")
-                return redirect('listar_usuarios')
-        except Exception as e:
-            messages.error(request, f"Error al editar: {e}")
-            return redirect('editar_usuario', id=request.POST.get('txt_id'))
+                usuario.estado = request.POST.get('txt_estado')
+
+            if experiencia_file:
+                usuario.experiencia_laboral = experiencia_file
+            if request.POST.get('txt_contrasena'):
+                usuario.contraseña = request.POST.get('txt_contrasena')
+            usuario.save()
+
+            if usuario.es_cajero:
+                cajero, _ = Cajero.objects.get_or_create(usuario=usuario)
+                if request.POST.get('txt_eps'):
+                    cajero.eps = request.POST.get('txt_eps')
+
+                tipo_c = request.POST.get('txt_tipo_contrato')
+                if tipo_c:
+                    cajero.tipo_contrato = tipo_c
+                if request.POST.get('txt_turno'):
+                    cajero.turno = request.POST.get('txt_turno')
+                if emergencia_nombre:
+                    cajero.contacto_emergencia_nombre = emergencia_nombre
+                if emergencia_parentesco:
+                    cajero.contacto_emergencia_parentesco = emergencia_parentesco
+                if emergencia_numero:
+                    cajero.contacto_emergencia_numero = emergencia_numero
+
+                fecha_term = request.POST.get('txt_fecha_terminacion')
+                if tipo_c == 'Indefinido':
+                    cajero.fecha_terminacion_contrato = None
+                elif fecha_term:
+                    cajero.fecha_terminacion_contrato = fecha_term
+
+                cajero.save()
+
+        if str(usuario.id) == str(request.session.get('usuario_id')):
+            messages.success(request, "Usuario actualizado correctamente.")
+            return redirect('ver_perfil', usuario_id=usuario.id)
+        else:
+            messages.success(request, "Cajero actualizado correctamente.")
+            return redirect('listar_usuarios')
+    except ValueError as e:
+        messages.error(request, f"Error al editar: {e}")
+        return redirect('editar_usuario', usuario_id=request.POST.get('txt_id'))
     return redirect('listar_usuarios')
 
 @login_requerido
-def eliminar_usuario(request, id):
+@login_requerido
+@require_http_methods(["GET", "POST"])
+def eliminar_usuario(request, usuario_id):
     if not es_administrador(request): return redirect('dashboard')
-    usuario = get_object_or_404(Usuario, id=id)
+    usuario = get_object_or_404(Usuario, id=usuario_id)
     if str(usuario.id) == str(request.session.get('usuario_id')):
         messages.error(request, "No puedes eliminarte a ti mismo.")
     else:
@@ -428,6 +435,7 @@ def generar_grafica_pedidos(queryset, periodo):
     return base64.b64encode(buf.read()).decode('utf-8')
 
 @login_requerido
+@require_GET
 def reporte_modulo_pdf(request, modulo, periodo):
     from reportes.services import obtener_rango_fechas
     ahora = timezone.now()
@@ -489,12 +497,12 @@ def reporte_modulo_pdf(request, modulo, periodo):
     return generar_pdf(template_path, contexto, f"MATPI_{modulo}")
 
 @login_requerido
+@require_POST
 def actualizar_metas(request):
     if not es_administrador(request): return redirect('dashboard')
-    if request.method == 'POST':
-        config, _ = DashboardConfig.objects.get_or_create(id=1)
-        config.meta_reservas = int(request.POST.get('meta_reservas', 0))
-        config.meta_pedidos = int(request.POST.get('meta_pedidos', 0))
-        config.save()
-        messages.success(request, "Metas actualizadas.")
+    config, _ = DashboardConfig.objects.get_or_create(id=1)
+    config.meta_reservas = int(request.POST.get('meta_reservas', 0))
+    config.meta_pedidos = int(request.POST.get('meta_pedidos', 0))
+    config.save()
+    messages.success(request, "Metas actualizadas.")
     return redirect('dashboard')

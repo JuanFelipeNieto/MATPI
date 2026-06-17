@@ -38,7 +38,7 @@
             <label for="txt_imagen">Imagen (Opcional)</label>
             {% if producto.imagen %}
                 <div style="margin-bottom: 10px;">
-                    <img src="{{ producto.imagen.url }}" alt="Imagen actual" style="max-width: 200px; border-radius: 8px;">
+                    <img src="{{ producto.imagen.url }}" alt="Producto actual" style="max-width: 200px; border-radius: 8px;">
                 </div>
             {% endif %}
             <input type="file" id="txt_imagen" name="txt_imagen" accept=".png, .jpg, .jpeg">
