@@ -198,13 +198,10 @@
             </div>
             <input type="hidden" id="txt_valor" name="txt_valor" value="{{ pedido.valor }}">
         </div>
-    </form>
-</div>
-
 <!-- Template Oculto para Productos -->
 <div id="select-productos-html" style="display: none;">
-    <select name="producto_id[]" aria-label="Seleccione Producto" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
-        <option value="">— Seleccione Producto —</option>
+    <select name="producto_id[]" class="form-control select-producto" aria-label="Seleccione Producto" required onchange="actualizarComposicion_y_Precio(this)">
+        <option value="">Seleccione Producto</option>
         {% for producto in productos %}
             {% if producto.categoria != 'Bebidas' %}
             <option value="{{ producto.id }}" data-precio="{{ producto.precio }}" data-composicion='{{ producto.composicion_json|safe }}'>
@@ -217,8 +214,8 @@
 
 <!-- Template Oculto para Bebidas -->
 <div id="select-bebidas-html" style="display: none;">
-    <select name="producto_id[]" aria-label="Seleccione Bebida" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
-        <option value="">— Seleccione Bebida —</option>
+    <select name="producto_id[]" class="form-control select-producto" aria-label="Seleccione Bebida" required onchange="actualizarComposicion_y_Precio(this)">
+        <option value="">Seleccione Bebida</option>
         {% for bebida in bebidas %}
         <option value="{{ bebida.id }}" data-precio="{{ bebida.precio }}" data-composicion='[]'>
             {{ bebida.nombre_producto }}
@@ -276,10 +273,15 @@
 
         if (nuevaFila.getAttribute('data-tipo') === 'bebida') nuevaFila.classList.add('fila-bebida');
 
+        const labelText = datos && datos.tipo === 'bebida' ? 'Seleccione Bebida' : 'Seleccione Producto';
         nuevaFila.innerHTML = `
-            <td>${document.getElementById(datos && datos.tipo === 'bebida' ? 'select-bebidas-html' : 'select-productos-html').innerHTML}</td>
             <td>
-                <select name="producto_cantidad[]" class="form-control select-cantidad" onchange="calcularTotal()" required>
+                <label class="sr-only label-producto" for="select_producto_${contadorFilas}">${labelText}</label>
+                ${document.getElementById(datos && datos.tipo === 'bebida' ? 'select-bebidas-html' : 'select-productos-html').innerHTML}
+            </td>
+            <td>
+                <label class="sr-only label-cantidad" for="select_cantidad_${contadorFilas}">Cantidad</label>
+                <select name="producto_cantidad[]" id="select_cantidad_${contadorFilas}" class="form-control select-cantidad" aria-label="Cantidad" onchange="calcularTotal()" required>
                     ${generarOpcionesCantidad(datos ? datos.cantidad : 1)}
                 </select>
             </td>
@@ -292,7 +294,7 @@
                     <div class="lista-exclusiones"></div>
                     <div style="margin-top: 12px;">
                         <label style="font-size: 0.85rem; font-weight: 600; color: #64748b;">NOTAS:</label>
-                        <textarea name="producto_notas_${contadorFilas}" class="form-control" rows="2">${datos ? (datos.notas || '') : ''}</textarea>
+                        <textarea name="producto_notes_${contadorFilas}" class="form-control" rows="2">${datos ? (datos.notas || '') : ''}</textarea>
                     </div>
                 </div>
             </td>
@@ -303,8 +305,12 @@
 
         tbody.appendChild(nuevaFila);
 
+        const select = nuevaFila.querySelector('.select-producto');
+        if (select) {
+            select.id = `select_producto_${contadorFilas}`;
+        }
+
         if (datos) {
-            const select = nuevaFila.querySelector('.select-producto');
             select.value = datos.producto_id;
             actualizarComposicion_y_Precio(select, datos.excluidas_ids);
         }
@@ -450,7 +456,7 @@
             if (!opcion || !opcion.value) return;
 
             const composicion = JSON.parse(opcion.dataset.composicion || "[]");
-            const cantidad = parseInt(fila.querySelector('.select-cantidad').value);
+            const cantidad = Number.parseInt(fila.querySelector('.select-cantidad').value, 10);
             const excluidas = new Set(Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`)).map(cb => Number.parseInt(cb.value, 10)));
 
             composicion.forEach(mp => {

@@ -35,8 +35,9 @@
                             {% for item in composicion %}
                             <tr class="fila-materia">
                                 <td>
-                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" aria-label="Seleccione Materia Prima" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
-                                        <option value="" data-equiv="" data-unidad="">— Seleccione —</option>
+                                    <label class="sr-only label-select" for="select_materia_{{ forloop.counter }}">Seleccione Materia Prima</label>
+                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" class="form-control select-materia" aria-label="Seleccione Materia Prima" required onchange="actualizarEquivalencia(this)">
+                                        <option value="" data-equiv="" data-unidad="">Seleccione Materia Prima</option>
                                         {% for materia in materias_primas %}
                                             <option value="{{ materia.id }}" data-equiv="{{ materia.cantidad_por_unidad|unlocalize }}" data-unidad="{{ materia.unidad_medida }}" {% if materia.id == item.materia_prima.id %}selected{% endif %}>
                                                 {{ materia.nombre_materia_prima }}
@@ -48,9 +49,11 @@
                                 <td>
                                     <div class="input-group" style="display: flex; gap: 5px; align-items: center;">
                                         <button type="button" class="btn btn-outline-secondary btn-restar" onclick="restarUnidad(this)" title="Restar 1 unidad" style="padding: 2px 8px;">-</button>
-                                        <input type="number" name="materia_cantidad[]" class="form-control input-equiv" value="{{ item.cantidad_usada|unlocalize }}" min="0.01" step="0.01" required oninput="actualizarUnidades(this)" placeholder="0" style="text-align: center;">
+                                        <label class="sr-only label-input" for="materia_cantidad_{{ forloop.counter }}">Cantidad Total Usada</label>
+                                        <input type="number" id="materia_cantidad_{{ forloop.counter }}" name="materia_cantidad[]" class="form-control input-equiv" value="{{ item.cantidad_usada|unlocalize }}" min="0.01" step="0.01" required oninput="actualizarUnidades(this)" placeholder="0" style="text-align: center;">
                                         <button type="button" class="btn btn-outline-secondary btn-sumar" onclick="sumarUnidad(this)" title="Sumar 1 unidad" style="padding: 2px 8px;">+</button>
-                                        <input type="hidden" name="materia_unidad[]" class="input-unidad-texto" value="{{ item.unidad_medida }}">
+                                        <label class="sr-only label-unidad" for="materia_unidad_{{ forloop.counter }}">Unidad de medida</label>
+                                        <input type="hidden" id="materia_unidad_{{ forloop.counter }}" name="materia_unidad[]" class="input-unidad-texto" value="{{ item.unidad_medida }}">
                                         <span class="unit-label">{{ item.unidad_medida }}</span>
                                     </div>
                                     <small class="msg-unidades text-success" style="display: block; margin-top: 5px; font-weight: bold;"></small>
@@ -63,8 +66,9 @@
                         {% else %}
                             <tr class="fila-materia">
                                 <td>
-                                    <select name="materia_id[]" id="select_materia_{{ forloop.counter }}" aria-label="Seleccione Materia Prima" class="form-control select-materia" required onchange="actualizarEquivalencia(this)">
-                                        <option value="" data-equiv="" data-unidad="">— Seleccione —</option>
+                                    <label class="sr-only label-select" for="select_materia_1">Seleccione Materia Prima</label>
+                                    <select name="materia_id[]" id="select_materia_1" class="form-control select-materia" aria-label="Seleccione Materia Prima" required onchange="actualizarEquivalencia(this)">
+                                        <option value="" data-equiv="" data-unidad="">Seleccione Materia Prima</option>
                                         {% for materia in materias_primas %}
                                             <option value="{{ materia.id }}" data-equiv="{{ materia.cantidad_por_unidad|unlocalize }}" data-unidad="{{ materia.unidad_medida }}">{{ materia.nombre_materia_prima }}</option>
                                         {% endfor %}
@@ -74,9 +78,11 @@
                                 <td>
                                     <div class="input-group" style="display: flex; gap: 5px; align-items: center;">
                                         <button type="button" class="btn btn-outline-secondary btn-restar" onclick="restarUnidad(this)" title="Restar 1 unidad" style="padding: 2px 8px;">-</button>
-                                        <input type="number" name="materia_cantidad[]" class="form-control input-equiv" value="" min="0.01" step="0.01" required oninput="actualizarUnidades(this)" placeholder="0" style="text-align: center;">
+                                        <label class="sr-only label-input" for="materia_cantidad_1">Cantidad Total Usada</label>
+                                        <input type="number" id="materia_cantidad_1" name="materia_cantidad[]" class="form-control input-equiv" value="" min="0.01" step="0.01" required oninput="actualizarUnidades(this)" placeholder="0" style="text-align: center;">
                                         <button type="button" class="btn btn-outline-secondary btn-sumar" onclick="sumarUnidad(this)" title="Sumar 1 unidad" style="padding: 2px 8px;">+</button>
-                                        <input type="hidden" name="materia_unidad[]" class="input-unidad-texto" value="">
+                                        <label class="sr-only label-unidad" for="materia_unidad_1">Unidad de medida</label>
+                                        <input type="hidden" id="materia_unidad_1" name="materia_unidad[]" class="input-unidad-texto" value="">
                                         <span class="unit-label"></span>
                                     </div>
                                     <small class="msg-unidades text-success" style="display: block; margin-top: 5px; font-weight: bold;"></small>
@@ -136,15 +142,45 @@
         const tbody = document.getElementById('body-composicion');
         const filas = tbody.getElementsByClassName('fila-materia');
         const nuevaFila = filas[0].cloneNode(true);
-        const select = nuevaFila.querySelector('select');
-        const inputEquiv = nuevaFila.querySelector('.input-equiv');
-        const inputUnidad = nuevaFila.querySelector('.input-unidad-texto');
-        const msgUnidades = nuevaFila.querySelector('.msg-unidades');
+        const index = filas.length + 1;
 
-        if(select) select.value = "";
-        if(inputEquiv) inputEquiv.value = "";
+        const select = nuevaFila.querySelector('.select-materia');
+        const labelSelect = nuevaFila.querySelector('.label-select');
+        if(select) {
+            select.value = "";
+            select.id = `select_materia_${index}`;
+            select.setAttribute('aria-label', 'Seleccione Materia Prima');
+        }
+        if(labelSelect) {
+            labelSelect.setAttribute('for', `select_materia_${index}`);
+        }
+
+        const inputEquiv = nuevaFila.querySelector('.input-equiv');
+        const labelInput = nuevaFila.querySelector('.label-input');
+        if(inputEquiv) {
+            inputEquiv.value = "";
+            inputEquiv.id = `materia_cantidad_${index}`;
+        }
+        if(labelInput) {
+            labelInput.setAttribute('for', `materia_cantidad_${index}`);
+        }
+
+        const inputUnidad = nuevaFila.querySelector('.input-unidad-texto');
+        const labelUnidad = nuevaFila.querySelector('.label-unidad');
+        if(inputUnidad) {
+            inputUnidad.value = "-";
+            inputUnidad.id = `materia_unidad_${index}`;
+        }
+        if(labelUnidad) {
+            labelUnidad.setAttribute('for', `materia_unidad_${index}`);
+        }
+
+        const msgUnidades = nuevaFila.querySelector('.msg-unidades');
+        const unitLabels = nuevaFila.querySelectorAll('.unit-label');
+
         if(inputUnidad) inputUnidad.value = "-";
         if(msgUnidades) msgUnidades.textContent = "";
+        if(unitLabels) unitLabels.forEach(l => l.textContent = "");
 
         tbody.appendChild(nuevaFila);
     }
