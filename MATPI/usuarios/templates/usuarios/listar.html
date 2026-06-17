@@ -10,11 +10,14 @@
     {% if es_admin %}
     <div class="form-busqueda">
         <div class="buscador-izq">
-            <form method="GET" action="{% url 'listar_usuarios' %}">
+            <form method="GET" action="{% url 'listar_usuarios' %}" style="display: flex; gap: 10px; align-items: center;">
                 <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por documento o nombre</label>
                 <input type="text" id="buscar" name="buscar" placeholder="Buscar por documento o nombre"
                     value="{{ buscar|default:'' }}">
                 <button type="submit" class="btn btn-guardar">Buscar</button>
+                {% if buscar %}
+                    <a href="{% url 'listar_usuarios' %}" class="btn btn-cancelar" style="text-decoration: none; padding: 8px 15px; display: inline-flex; align-items: center;">Limpiar</a>
+                {% endif %}
             </form>
         </div>
         <a href="{% url 'registrar_usuario' %}" class="btn btn-guardar">+ Nuevo Cajero</a>

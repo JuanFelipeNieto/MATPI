@@ -84,10 +84,13 @@
 
         <div class="form-busqueda" style="margin-bottom: 20px;">
             <div class="buscador-izq" style="width: 100%;">
-                <form method="GET" action="{% url 'listar_reservas' %}" style="display: flex; gap: 10px; width: 100%;">
+                <form method="GET" action="{% url 'listar_reservas' %}" style="display: flex; gap: 10px; width: 100%; align-items: center;">
                     <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por cliente o documento</label>
                     <input type="text" id="buscar" name="buscar" placeholder="Buscar por cliente o documento" value="{{ buscar|default:'' }}" style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     <button type="submit" class="btn btn-guardar" style="padding: 10px 20px;">Buscar</button>
+                    {% if buscar %}
+                        <a href="{% url 'listar_reservas' %}" class="btn btn-cancelar" style="text-decoration: none; padding: 10px 20px; display: inline-flex; align-items: center; border-radius: 4px;">Limpiar</a>
+                    {% endif %}
                 </form>
             </div>
         </div>
