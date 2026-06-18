@@ -255,6 +255,23 @@ class ProductoViewsCompleteTest(TestCase):
 
         self.assertEqual(self.producto_comida.cantidad, 4)
 
+    def test_recalcular_stock_bebida_con_equivalencia_mayor_a_uno(self):
+        # 1. Configurar la materia prima de Coca Cola con equivalencia > 1 (ej. 350 ml por botella)
+        self.materia_coca.cantidad_por_unidad = 350
+        self.materia_coca.save()
+        
+        # 2. Configurar el lote con cantidad_actual = 24.0 (representando 24 botellas)
+        # stock_total = 24.0, y equivalencia_total = 24.0 * 350 = 8400 ml
+        self.lote_coca.cantidad_actual = 24.0
+        self.lote_coca.save()
+        
+        # 3. Recalcular el stock de la bebida. Al ser bebida, su stock debe ser
+        # igual a stock_total de la materia prima (24) y no a la de equivalencia (8400).
+        recalcular_stock_producto(self.producto_bebida)
+        self.producto_bebida.refresh_from_db()
+        
+        self.assertEqual(self.producto_bebida.cantidad, 24)
+
 
 
 

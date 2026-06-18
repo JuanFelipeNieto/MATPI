@@ -29,7 +29,12 @@ def recalcular_stock_producto(producto):
     for detalle in detalles:
         stock_mp = detalle.materia_prima.stock_total
         equivalencia = detalle.materia_prima.cantidad_por_unidad
-        stock_base = stock_mp * equivalencia
+        
+        # Si es bebida, el stock base es directamente stock_mp (stock total en unidades/botellas) y no su equivalencia
+        if producto.categoria == 'Bebidas' or detalle.materia_prima.tipo == 'Bebida':
+            stock_base = stock_mp
+        else:
+            stock_base = stock_mp * equivalencia
 
         # La cantidad usada ahora siempre viene en medida base desde el frontend
         cantidad_usada_base = detalle.cantidad_usada
@@ -38,7 +43,10 @@ def recalcular_stock_producto(producto):
             posible = int(stock_base / cantidad_usada_base)
             cantidades_posibles.append(posible)
             # Para visualización legible
-            cant_legible = float(cantidad_usada_base / equivalencia) if equivalencia > 0 else float(cantidad_usada_base)
+            if producto.categoria == 'Bebidas' or detalle.materia_prima.tipo == 'Bebida':
+                cant_legible = float(cantidad_usada_base)
+            else:
+                cant_legible = float(cantidad_usada_base / equivalencia) if equivalencia > 0 else float(cantidad_usada_base)
             componentes_desc.append(f"{detalle.materia_prima.nombre_materia_prima} ({cant_legible} {detalle.unidad_medida})")
 
     # El stock del producto es el limitante (mínimo de los ingredientes)
