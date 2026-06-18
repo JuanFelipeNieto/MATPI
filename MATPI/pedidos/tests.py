@@ -174,3 +174,19 @@ class PedidoViewsTest(TestCase):
         response = self.client.get(reverse('cocina'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'pedidos/cocina.html')
+
+    def test_mostrar_registro_pedido_excluye_vencidos_y_sin_stock(self):
+        self.login_como_cajero()
+
+        # 1. Producto con ingrediente vencido
+        self.lote.fecha_vencimiento = timezone.now().date() - timedelta(days=1)
+        self.lote.save()
+        response = self.client.get(reverse('mostrar_registro_pedido'))
+        self.assertNotIn(self.producto, response.context['productos'])
+
+        # 2. Producto con ingrediente sin stock (pero no vencido)
+        self.lote.fecha_vencimiento = timezone.now().date() + timedelta(days=5)
+        self.lote.cantidad_actual = 0
+        self.lote.save()
+        response = self.client.get(reverse('mostrar_registro_pedido'))
+        self.assertNotIn(self.producto, response.context['productos'])

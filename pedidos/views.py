@@ -193,13 +193,18 @@ def _validar_stock_pedido(productos_ids, cantidades, exclusiones_por_producto):
 
 @require_GET
 def mostrar_registro_pedido(request):
-    productos = Producto.objects.prefetch_related('detalles_materia__materia_prima')
-    # Pre-cargar composiciones para el modal/detalles
-    for p in productos:
-        # Determinar si el producto tiene algún ingrediente con lote actual vencido
-        detalles_prod = p.detalles_materia.all()
-        p.tiene_vencidos = any(d.materia_prima.is_insumo_vencido for d in detalles_prod)
+    all_productos = Producto.objects.prefetch_related('detalles_materia__materia_prima')
+    productos_filtrados = []
 
+    # Pre-cargar composiciones para el modal/detalles y filtrar productos
+    for p in all_productos:
+        detalles_prod = p.detalles_materia.all()
+
+        # Omitimos productos que tengan algún ingrediente/insumo vencido o sin stock
+        if any(d.materia_prima.is_insumo_vencido or d.materia_prima.is_out_of_stock for d in detalles_prod):
+            continue
+
+        p.tiene_vencidos = False
         p.composicion_json = json.dumps([
             {
                 'id': d.materia_prima.id,
@@ -211,6 +216,7 @@ def mostrar_registro_pedido(request):
             }
             for d in detalles_prod
         ])
+        productos_filtrados.append(p)
 
     # Calcular el próximo número de orden
     max_orden = Pedido.objects.aggregate(Max('numero_orden'))['numero_orden__max'] or 0
@@ -219,8 +225,8 @@ def mostrar_registro_pedido(request):
     datos = {
         'reservas': Reserva.objects.all(),
         'clientes': Cliente.objects.all(),
-        'productos': productos,
-        'bebidas': Producto.objects.filter(categoria='Bebidas'),
+        'productos': productos_filtrados,
+        'bebidas': [p for p in productos_filtrados if p.categoria == 'Bebidas'],
         'prox_orden': prox_orden,
     }
     return render(request, 'pedidos/registrar.html', _obtener_contexto_rol(request, datos))
@@ -237,6 +243,8 @@ def _validar_cliente_y_vencidos(request, productos_ids):
             prod = Producto.objects.get(pk=p_id)
             if any(d.materia_prima.is_insumo_vencido for d in prod.detalles_materia.all()):
                 raise ValueError(f"No se puede registrar el pedido: El producto '{prod.nombre_producto}' tiene ingredientes con lotes vencidos.")
+            if any(d.materia_prima.is_out_of_stock for d in prod.detalles_materia.all()):
+                raise ValueError(f"No se puede registrar el pedido: El producto '{prod.nombre_producto}' tiene ingredientes sin stock.")
 
 def _crear_detalles_pedido(pedido, request, productos_ids, cantidades):
     total_valor = 0
