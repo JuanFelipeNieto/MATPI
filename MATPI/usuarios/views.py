@@ -221,7 +221,7 @@ def ver_perfil(request, id):
             usuario.save()
             request.session['tipo_navegacion'] = tipo_nav
             messages.success(request, "Preferencia de navegación actualizada.")
-            return redirect('ver_perfil', usuario_id=usuario_id)
+            return redirect('ver_perfil', id=usuario_id)
 
     return render(request, 'usuarios/perfil.html', {
         'usuario': usuario,
@@ -352,7 +352,7 @@ def _editar_usuario_post(request):
 
         if str(usuario.id) == str(request.session.get('usuario_id')):
             messages.success(request, "Usuario actualizado correctamente.")
-            return redirect('ver_perfil', usuario_id=usuario.id)
+            return redirect('ver_perfil', id=usuario.id)
         else:
             messages.success(request, "Cajero actualizado correctamente.")
             return redirect('listar_usuarios')
