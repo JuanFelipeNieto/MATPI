@@ -66,21 +66,33 @@ def listar_productos(request):
 
     es_admin = check_admin(request)
     query = request.GET.get('buscar', '')
+    cat_filtrada = request.GET.get('categoria', '')
+
+    productos = Producto.objects.all().prefetch_related('detalles_materia__materia_prima')
 
     if query:
-        productos = Producto.objects.filter(nombre_producto__icontains=query).prefetch_related('detalles_materia__materia_prima').order_by('nombre_producto')
-    else:
-        productos = Producto.objects.all().prefetch_related('detalles_materia__materia_prima').order_by('nombre_producto')
+        productos = productos.filter(nombre_producto__icontains=query)
+
+    if cat_filtrada:
+        productos = productos.filter(categoria=cat_filtrada)
+
+    # Ordenar por categoría para que se muestren agrupados en el listado, y luego por nombre
+    productos = productos.order_by('categoria', 'nombre_producto')
 
     from django.core.paginator import Paginator
     paginator = Paginator(productos, 10)
     page_number = request.GET.get('page')
     productos_paginated = paginator.get_page(page_number)
 
+    # Obtener todas las categorías definidas en el modelo
+    categorias = [c[0] for c in Producto.CATEGORIAS]
+
     return render(request, 'productos/listar.html', {
         'productos': productos_paginated,
         'es_admin': es_admin,
-        'buscar': query
+        'buscar': query,
+        'categorias': categorias,
+        'categoria_activa': cat_filtrada
     })
 
 

@@ -124,6 +124,18 @@ class ProductoViewsCompleteTest(TestCase):
         self.assertTemplateUsed(response, 'productos/listar.html')
         self.assertIn('productos', response.context)
 
+        # Probar filtro de categoría 'Hamburguesas'
+        response = self.client.get(reverse('listar_productos') + '?categoria=Hamburguesas')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.producto_comida, response.context['productos'])
+        self.assertNotIn(self.producto_bebida, response.context['productos'])
+
+        # Probar filtro de categoría 'Bebidas'
+        response = self.client.get(reverse('listar_productos') + '?categoria=Bebidas')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.producto_bebida, response.context['productos'])
+        self.assertNotIn(self.producto_comida, response.context['productos'])
+
     # 2. Buscar productos con el filtro
     def test_listar_productos_filtro(self):
         self.login_como_admin()
