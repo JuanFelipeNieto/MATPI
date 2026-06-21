@@ -8,6 +8,7 @@
             <th>Unidad Técnica</th>
             <th class="text-center">Cant. Lotes</th>
             <th>Fechas de Suministro</th>
+            <th class="text-right">Consumido</th>
             <th class="text-right">Stock Total</th>
         </tr>
     </thead>
@@ -25,6 +26,9 @@
                 </ul>
             </td>
             <td class="text-right" style="vertical-align: top;">
+                {{ mp.total_consumido|floatformat:1 }}
+            </td>
+            <td class="text-right" style="vertical-align: top;">
                 {% if mp.is_low_stock %}
                     <strong style="color:red;">{{ mp.stock_total|floatformat:0 }}</strong>
                 {% else %}
@@ -35,7 +39,7 @@
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="text-center">No hay materias primas registradas.</td></tr>
+        <tr><td colspan="6" class="text-center">No hay materias primas registradas.</td></tr>
         {% endfor %}
     </tbody>
 </table>

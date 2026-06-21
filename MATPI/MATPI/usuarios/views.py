@@ -644,6 +644,46 @@ def reporte_modulo_pdf(request, modulo, periodo):
         qs = proveedores
         template_path = 'reportes/pdf_proveedores.html'
         titulo = "Reporte de Proveedores"
+    elif modulo in ['materias', 'materia_prima']:
+        from materia_prima.models import MateriaPrima, DetalleProductoMateriaP
+        from pedidos.models import DetallePedidoProducto
+
+        ordenar = request.GET.get('ordenar', '')
+
+        # Fetch all raw materials
+        materias = list(MateriaPrima.objects.all())
+        cons_dict = {mp.id: 0.0 for mp in materias}
+
+        # Calculate consumption based on completed/preparando orders in the period
+        detalles = DetallePedidoProducto.objects.filter(
+            pedido__fecha__gte=fecha_inicio,
+            pedido__fecha__lte=fecha_fin,
+            pedido__estado__in=['Preparacion', 'Completado']
+        ).select_related('producto').prefetch_related('materias_excluidas')
+
+        for det in detalles:
+            excluidas = set(det.materias_excluidas.all())
+            composicion = DetalleProductoMateriaP.objects.filter(producto=det.producto).select_related('materia_prima')
+            for comp in composicion:
+                if comp.materia_prima not in excluidas:
+                    cant_consumida = float(comp.cantidad_usada) * det.cantidad
+                    cons_dict[comp.materia_prima.id] += cant_consumida
+
+        # Attach total_consumido attribute to each raw material object
+        for mp in materias:
+            mp.total_consumido = cons_dict.get(mp.id, 0.0)
+
+        # Sort the materias list based on the select parameter
+        if ordenar == 'consumo_desc':
+            materias.sort(key=lambda x: x.total_consumido, reverse=True)
+        elif ordenar == 'consumo_asc':
+            materias.sort(key=lambda x: x.total_consumido)
+        else:
+            materias.sort(key=lambda x: x.total_consumido, reverse=True)
+
+        qs = materias
+        template_path = 'reportes/pdf_materias.html'
+        titulo = "Reporte de Materia Prima"
     else:
         qs, template_path = config_reporte.get(modulo, (None, ""))
         titulo = f"Reporte de {modulo.capitalize()}"
