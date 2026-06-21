@@ -89,7 +89,7 @@ def listar_productos(request):
     }
 
     if ordenar not in sorting_map:
-        ordenar = 'nombre_asc'
+        ordenar = 'fecha_desc'
     order_field = sorting_map[ordenar]
 
     productos = productos.order_by(order_field)

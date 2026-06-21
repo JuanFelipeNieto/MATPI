@@ -32,7 +32,7 @@
                 </select>
 
                 <button type="submit" class="btn btn-guardar">Buscar</button>
-                {% if buscar or categoria or ordenar != 'nombre_asc' %}
+                {% if buscar or categoria or ordenar != 'fecha_desc' %}
                     <a href="{% url 'listar_productos' %}" class="btn btn-cancelar" style="text-decoration: none; padding: 9px 15px; display: inline-flex; align-items: center; border-radius: 6px; font-weight: bold;">Limpiar</a>
                 {% endif %}
             </form>
