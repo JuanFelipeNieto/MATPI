@@ -8,13 +8,32 @@
 
     <div class="form-busqueda">
         <div class="buscador-izq">
-            <form method="GET" action="{% url 'listar_productos' %}" style="display: flex; gap: 10px; align-items: center;">
-                <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por nombre o categoría</label>
-                <input type="text" id="buscar" name="buscar" placeholder="Buscar por nombre o categoría"
-                    value="{{ buscar|default:'' }}">
+            <form method="GET" action="{% url 'listar_productos' %}" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por nombre</label>
+                <input type="text" id="buscar" name="buscar" placeholder="Buscar por nombre"
+                    value="{{ buscar|default:'' }}" style="padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit;">
+                
+                <select name="categoria" id="categoria" onchange="this.form.submit()" style="padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; cursor: pointer;">
+                    <option value="">Todas las Categorías</option>
+                    {% for cat_val, cat_name in categorias %}
+                        <option value="{{ cat_val }}" {% if cat_val == categoria %}selected{% endif %}>{{ cat_name }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="ordenar" id="ordenar" onchange="this.form.submit()" style="padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; cursor: pointer;">
+                    <option value="nombre_asc" {% if ordenar == 'nombre_asc' %}selected{% endif %}>Organizar por Nombre (A-Z)</option>
+                    <option value="nombre_desc" {% if ordenar == 'nombre_desc' %}selected{% endif %}>Organizar por Nombre (Z-A)</option>
+                    <option value="fecha_desc" {% if ordenar == 'fecha_desc' %}selected{% endif %}>Fecha de registro (Reciente)</option>
+                    <option value="fecha_asc" {% if ordenar == 'fecha_asc' %}selected{% endif %}>Fecha de registro (Antiguo)</option>
+                    <option value="stock_desc" {% if ordenar == 'stock_desc' %}selected{% endif %}>Stock (Mayor a menor)</option>
+                    <option value="stock_asc" {% if ordenar == 'stock_asc' %}selected{% endif %}>Stock (Menor a mayor)</option>
+                    <option value="precio_desc" {% if ordenar == 'precio_desc' %}selected{% endif %}>Precio (Mayor a menor)</option>
+                    <option value="precio_asc" {% if ordenar == 'precio_asc' %}selected{% endif %}>Precio (Menor a mayor)</option>
+                </select>
+
                 <button type="submit" class="btn btn-guardar">Buscar</button>
-                {% if buscar %}
-                    <a href="{% url 'listar_productos' %}" class="btn btn-cancelar" style="text-decoration: none; padding: 8px 15px; display: inline-flex; align-items: center;">Limpiar</a>
+                {% if buscar or categoria or ordenar != 'nombre_asc' %}
+                    <a href="{% url 'listar_productos' %}" class="btn btn-cancelar" style="text-decoration: none; padding: 9px 15px; display: inline-flex; align-items: center; border-radius: 6px; font-weight: bold;">Limpiar</a>
                 {% endif %}
             </form>
         </div>
@@ -91,8 +110,8 @@
     {% if productos.has_other_pages %}
     <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
         {% if productos.has_previous %}
-            <a href="?page=1{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&laquo;</a>
-            <a href="?page={{ productos.previous_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&lsaquo;</a>
+            <a href="?page=1{% if buscar %}&buscar={{ buscar }}{% endif %}{% if categoria %}&categoria={{ categoria }}{% endif %}{% if ordenar %}&ordenar={{ ordenar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&laquo;</a>
+            <a href="?page={{ productos.previous_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}{% if categoria %}&categoria={{ categoria }}{% endif %}{% if ordenar %}&ordenar={{ ordenar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&lsaquo;</a>
         {% endif %}
 
         <span class="current" style="font-weight: bold; color: #555;">
@@ -100,8 +119,8 @@
         </span>
 
         {% if productos.has_next %}
-            <a href="?page={{ productos.next_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&rsaquo;</a>
-            <a href="?page={{ productos.paginator.num_pages }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&raquo;</a>
+            <a href="?page={{ productos.next_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}{% if categoria %}&categoria={{ categoria }}{% endif %}{% if ordenar %}&ordenar={{ ordenar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&rsaquo;</a>
+            <a href="?page={{ productos.paginator.num_pages }}{% if buscar %}&buscar={{ buscar }}{% endif %}{% if categoria %}&categoria={{ categoria }}{% endif %}{% if ordenar %}&ordenar={{ ordenar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&raquo;</a>
         {% endif %}
     </div>
     {% endif %}
