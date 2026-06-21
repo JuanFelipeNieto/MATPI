@@ -115,7 +115,16 @@ def dashboard(request):
             estado__in=['Preparacion', 'Completado'],
             facturas__isnull=False
         ).aggregate(total=Sum('valor'))['total'] or 0,
-        'pedidos_recientes': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin, facturas__isnull=False).order_by('-id')[:5],
+        'recent_pedidos': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin, facturas__isnull=False).order_by('-id')[:5],
+        'recent_ingresos_pedidos': Pedido.objects.filter(
+            fecha__gte=hoy_inicio,
+            fecha__lt=hoy_fin,
+            estado__in=['Preparacion', 'Completado'],
+            facturas__isnull=False
+        ).order_by('-id')[:5],
+        'recent_clientes': Cliente.objects.all().order_by('-id')[:5],
+        'recent_productos': Producto.objects.all().order_by('-id')[:5],
+        'recent_reservas': Reserva.objects.filter(fecha_registro__gte=hoy_inicio, fecha_registro__lt=hoy_fin).order_by('-fecha_registro')[:5],
         'config': config,
         'usuario_nombre': request.session.get('usuario_nombre'),
         'usuario_nombre_corto': (' '.join([
