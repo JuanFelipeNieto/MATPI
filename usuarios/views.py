@@ -533,6 +533,44 @@ def reporte_modulo_pdf(request, modulo, periodo):
         qs = cajeros
         template_path = 'reportes/pdf_usuarios.html'
         titulo = "Reporte de Cajeros"
+    elif modulo == 'productos':
+        from django.db.models.functions import Coalesce
+
+        categoria = request.GET.get('categoria', '')
+        ordenar = request.GET.get('ordenar', '')
+
+        # Annotate each product with total sold quantity during the selected period
+        productos = Producto.objects.annotate(
+            total_vendido=Coalesce(
+                models.Sum(
+                    'detalles_pedido__cantidad',
+                    filter=models.Q(
+                        detalles_pedido__pedido__fecha__gte=fecha_inicio,
+                        detalles_pedido__pedido__fecha__lte=fecha_fin,
+                        detalles_pedido__pedido__facturas__isnull=False
+                    )
+                ),
+                0
+            )
+        )
+
+        if categoria:
+            productos = productos.filter(categoria=categoria)
+
+        if ordenar == 'ventas_desc':
+            productos = productos.order_by('-total_vendido')
+        elif ordenar == 'ventas_asc':
+            productos = productos.order_by('total_vendido')
+        elif ordenar == 'nombre_asc':
+            productos = productos.order_by('nombre_producto')
+        elif ordenar == 'nombre_desc':
+            productos = productos.order_by('-nombre_producto')
+        else:
+            productos = productos.order_by('-total_vendido')
+
+        qs = productos
+        template_path = 'reportes/pdf_productos.html'
+        titulo = "Reporte de Productos"
     else:
         qs, template_path = config_reporte.get(modulo, (None, ""))
         titulo = f"Reporte de {modulo.capitalize()}"

@@ -183,7 +183,39 @@
                     <option value="mensual">Mensual</option>
                     <option value="general">Todo</option>
                 </select>
-                <button onclick="window.open('/reporte/productos/' + document.getElementById('periodo_productos').value + '/', '_blank')" class="btn" style="background-color: #1d4ed8; color: white; width: 100%; font-size: 0.9em; padding: 8px;">Descargar</button>
+
+                <details style="margin-top: 10px; text-align: left; margin-bottom: 10px;">
+                    <summary style="font-size: 0.85em; color: #1d4ed8; cursor: pointer; font-weight: 600; outline: none; margin-bottom: 5px;">
+                        Más filtros ▼
+                    </summary>
+                    <div style="padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid #eee; font-size: 0.8em; margin-bottom: 5px;">
+                        <div style="margin-bottom: 8px;">
+                            <label for="productos_categoria" style="display:block; font-weight:600; margin-bottom:3px; color: #444;">Categoría:</label>
+                            <select id="productos_categoria" style="width:100%; padding:4px; border-radius:4px; border:1px solid #ccc; font-family: inherit; font-size: 0.85em; cursor: pointer;">
+                                <option value="">Todas las Categorías</option>
+                                <option value="Hamburguesas">Hamburguesas</option>
+                                <option value="Perros Calientes">Perros Calientes</option>
+                                <option value="Entradas y Snacks">Entradas y Snacks</option>
+                                <option value="Combos">Combos</option>
+                                <option value="Bebidas">Bebidas</option>
+                                <option value="Postres">Postres</option>
+                                <option value="Adiciones">Adiciones</option>
+                                <option value="Salsas">Salsas</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 4px;">
+                            <label for="productos_ordenar" style="display:block; font-weight:600; margin-bottom:3px; color: #444;">Ordenar por:</label>
+                            <select id="productos_ordenar" style="width:100%; padding:4px; border-radius:4px; border:1px solid #ccc; font-family: inherit; font-size: 0.85em; cursor: pointer;">
+                                <option value="ventas_desc">Más vendidos (mayor a menor)</option>
+                                <option value="ventas_asc">Menos vendidos (menor a mayor)</option>
+                                <option value="nombre_asc">Nombre (A-Z)</option>
+                                <option value="nombre_desc">Nombre (Z-A)</option>
+                            </select>
+                        </div>
+                    </div>
+                </details>
+
+                <button onclick="descargarReporteProductos()" class="btn" style="background-color: #1d4ed8; color: white; width: 100%; font-size: 0.9em; padding: 8px;">Descargar</button>
             </div>
             <!-- Proveedores -->
             <div style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; text-align: center;">
@@ -262,6 +294,18 @@
 
         var url = '/reporte/usuarios/' + periodo + '/?';
         if (minPedidos) url += 'min_pedidos=' + encodeURIComponent(minPedidos) + '&';
+        if (ordenar) url += 'ordenar=' + encodeURIComponent(ordenar) + '&';
+
+        window.open(url, '_blank');
+    }
+
+    function descargarReporteProductos() {
+        var periodo = document.getElementById('periodo_productos').value;
+        var categoria = document.getElementById('productos_categoria').value;
+        var ordenar = document.getElementById('productos_ordenar').value;
+
+        var url = '/reporte/productos/' + periodo + '/?';
+        if (categoria) url += 'categoria=' + encodeURIComponent(categoria) + '&';
         if (ordenar) url += 'ordenar=' + encodeURIComponent(ordenar) + '&';
 
         window.open(url, '_blank');

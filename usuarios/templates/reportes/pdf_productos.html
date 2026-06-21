@@ -4,20 +4,20 @@
 <table class="table-data">
     <thead>
         <tr>
-
             <th>Nombre del Producto</th>
             <th>Categoría</th>
             <th>Estado</th>
+            <th class="text-right">Vendidos (uds.)</th>
             <th class="text-right">Precio Actual ($)</th>
         </tr>
     </thead>
     <tbody>
         {% for p in datos %}
         <tr>
-
             <td>{{ p.nombre_producto }}</td>
             <td>{{ p.categoria|default:"Sin Categoría" }}</td>
             <td>{% if p.cantidad > 0 %}Disponible ({{ p.cantidad }}){% else %}Agotado{% endif %}</td>
+            <td class="text-right">{{ p.total_vendido|default:"0" }}</td>
             <td class="text-right">${{ p.precio }}</td>
         </tr>
         {% empty %}
