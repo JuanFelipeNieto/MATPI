@@ -504,6 +504,32 @@ def reporte_modulo_pdf(request, modulo, periodo):
             pedidos_periodo=models.Count('usuario__pedidos', filter=models.Q(usuario__pedidos__estado__in=['Preparacion', 'Completado'], usuario__pedidos__fecha__gte=fecha_inicio, usuario__pedidos__fecha__lte=fecha_fin))
         ).select_related('usuario')
 
+        # Filtros y ordenamiento adicionales
+        min_pedidos = request.GET.get('min_pedidos')
+        fecha_desde = request.GET.get('fecha_desde')
+        fecha_hasta = request.GET.get('fecha_hasta')
+        ordenar = request.GET.get('ordenar')
+
+        if min_pedidos:
+            try:
+                cajeros = cajeros.filter(pedidos_periodo__gte=int(min_pedidos))
+            except ValueError:
+                pass
+
+        if fecha_desde:
+            cajeros = cajeros.filter(usuario__fecha_ingreso__gte=fecha_desde)
+        if fecha_hasta:
+            cajeros = cajeros.filter(usuario__fecha_ingreso__lte=fecha_hasta)
+
+        if ordenar == 'pedidos_desc':
+            cajeros = cajeros.order_by('-pedidos_periodo')
+        elif ordenar == 'pedidos_asc':
+            cajeros = cajeros.order_by('pedidos_periodo')
+        elif ordenar == 'fecha_desc':
+            cajeros = cajeros.order_by('-usuario__fecha_ingreso')
+        elif ordenar == 'fecha_asc':
+            cajeros = cajeros.order_by('usuario__fecha_ingreso')
+
         qs = cajeros
         template_path = 'reportes/pdf_usuarios.html'
         titulo = "Reporte de Cajeros"
