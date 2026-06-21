@@ -1,4 +1,4 @@
-﻿{% extends "reportes/base_pdf.html" %}
+{% extends "reportes/base_pdf.html" %}
 
 {% block content %}
 {% if grafica_base64 %}
@@ -16,6 +16,8 @@
             <th>Teléfono</th>
             <th>Dirección</th>
             <th>Localidad</th>
+            <th class="text-center">Pedidos</th>
+            <th class="text-center">Reservas</th>
         </tr>
     </thead>
     <tbody>
@@ -25,9 +27,11 @@
             <td>{{ c.telefono|default:"N/A" }}</td>
             <td>{{ c.direccion|default:"N/A" }}</td>
             <td>{{ c.localidad|default:"N/A" }}</td>
+            <td class="text-center">{{ c.total_pedidos|default:"0" }}</td>
+            <td class="text-center">{{ c.total_reservas|default:"0" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" class="text-center">No hay clientes registrados en este periodo.</td></tr>
+        <tr><td colspan="6" class="text-center">No hay clientes registrados en este periodo.</td></tr>
         {% endfor %}
     </tbody>
 </table>

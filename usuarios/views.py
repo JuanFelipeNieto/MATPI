@@ -571,6 +571,54 @@ def reporte_modulo_pdf(request, modulo, periodo):
         qs = productos
         template_path = 'reportes/pdf_productos.html'
         titulo = "Reporte de Productos"
+    elif modulo == 'clientes':
+        from django.db.models.functions import Coalesce
+
+        ordenar = request.GET.get('ordenar', '')
+
+        # Annotate each client with total orders and total reservations made in the selected period
+        clientes = Cliente.objects.annotate(
+            total_pedidos=Coalesce(
+                models.Count(
+                    'pedidos',
+                    filter=models.Q(
+                        pedidos__fecha__gte=fecha_inicio,
+                        pedidos__fecha__lte=fecha_fin,
+                        pedidos__facturas__isnull=False
+                    )
+                ),
+                0
+            ),
+            total_reservas=Coalesce(
+                models.Count(
+                    'reservas',
+                    filter=models.Q(
+                        reservas__fecha_registro__gte=fecha_inicio,
+                        reservas__fecha_registro__lte=fecha_fin
+                    )
+                ),
+                0
+            )
+        )
+
+        if ordenar == 'pedidos_desc':
+            clientes = clientes.order_by('-total_pedidos')
+        elif ordenar == 'pedidos_asc':
+            clientes = clientes.order_by('total_pedidos')
+        elif ordenar == 'reservas_desc':
+            clientes = clientes.order_by('-total_reservas')
+        elif ordenar == 'reservas_asc':
+            clientes = clientes.order_by('total_reservas')
+        elif ordenar == 'nombre_asc':
+            clientes = clientes.order_by('nombre_completo')
+        elif ordenar == 'nombre_desc':
+            clientes = clientes.order_by('-nombre_completo')
+        else:
+            clientes = clientes.order_by('-total_pedidos')
+
+        qs = clientes
+        template_path = 'reportes/pdf_clientes.html'
+        titulo = "Reporte de Clientes"
     else:
         qs, template_path = config_reporte.get(modulo, (None, ""))
         titulo = f"Reporte de {modulo.capitalize()}"
