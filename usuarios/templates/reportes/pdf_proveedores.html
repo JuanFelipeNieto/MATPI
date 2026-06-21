@@ -1,4 +1,4 @@
-﻿{% extends "reportes/base_pdf.html" %}
+{% extends "reportes/base_pdf.html" %}
 
 {% block content %}
 {% if grafica_base64 %}
@@ -15,6 +15,7 @@
             <th>Nombre Proveedor</th>
             <th>Correo Electrónico</th>
             <th>Teléfono</th>
+            <th class="text-center">Suministros</th>
         </tr>
     </thead>
     <tbody>
@@ -23,9 +24,10 @@
             <td>{{ pv.nombre_proveedor }}</td>
             <td>{{ pv.correo_electronico|default:"N/A" }}</td>
             <td>{{ pv.telefono|default:"N/A" }}</td>
+            <td class="text-center">{{ pv.total_suministros|default:"0" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="3" class="text-center">No hay proveedores registrados.</td></tr>
+        <tr><td colspan="4" class="text-center">No hay proveedores registrados.</td></tr>
         {% endfor %}
     </tbody>
 </table>

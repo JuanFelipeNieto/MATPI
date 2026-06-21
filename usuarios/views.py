@@ -615,6 +615,35 @@ def reporte_modulo_pdf(request, modulo, periodo):
         qs = clientes
         template_path = 'reportes/pdf_clientes.html'
         titulo = "Reporte de Clientes"
+    elif modulo == 'proveedores':
+        from django.db.models.functions import Coalesce
+
+        ordenar = request.GET.get('ordenar', '')
+
+        # Annotate each supplier with the count of registered supplies in the selected period
+        proveedores = Proveedor.objects.annotate(
+            total_suministros=Coalesce(
+                models.Count(
+                    'detalles_materia',
+                    filter=models.Q(
+                        detalles_materia__fecha_suministro__gte=fecha_inicio,
+                        detalles_materia__fecha_suministro__lte=fecha_fin
+                    )
+                ),
+                0
+            )
+        )
+
+        if ordenar == 'suministros_desc':
+            proveedores = proveedores.order_by('-total_suministros')
+        elif ordenar == 'suministros_asc':
+            proveedores = proveedores.order_by('total_suministros')
+        else:
+            proveedores = proveedores.order_by('-total_suministros')
+
+        qs = proveedores
+        template_path = 'reportes/pdf_proveedores.html'
+        titulo = "Reporte de Proveedores"
     else:
         qs, template_path = config_reporte.get(modulo, (None, ""))
         titulo = f"Reporte de {modulo.capitalize()}"

@@ -245,7 +245,23 @@
                     <option value="mensual">Mensual</option>
                     <option value="general">Todo</option>
                 </select>
-                <button onclick="window.open('/reporte/proveedores/' + document.getElementById('periodo_proveedores').value + '/', '_blank')" class="btn" style="background-color: #0f766e; color: white; width: 100%; font-size: 0.9em; padding: 8px;">Descargar</button>
+
+                <details style="margin-top: 10px; text-align: left; margin-bottom: 10px;">
+                    <summary style="font-size: 0.85em; color: #0f766e; cursor: pointer; font-weight: 600; outline: none; margin-bottom: 5px;">
+                        Más filtros ▼
+                    </summary>
+                    <div style="padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid #eee; font-size: 0.8em; margin-bottom: 5px;">
+                        <div style="margin-bottom: 4px;">
+                            <label for="proveedores_ordenar" style="display:block; font-weight:600; margin-bottom:3px; color: #444;">Ordenar por:</label>
+                            <select id="proveedores_ordenar" style="width:100%; padding:4px; border-radius:4px; border:1px solid #ccc; font-family: inherit; font-size: 0.85em; cursor: pointer;">
+                                <option value="suministros_desc">Suministros registrados (mayor a menor)</option>
+                                <option value="suministros_asc">Suministros registrados (menor a mayor)</option>
+                            </select>
+                        </div>
+                    </div>
+                </details>
+
+                <button onclick="descargarReporteProveedores()" class="btn" style="background-color: #0f766e; color: white; width: 100%; font-size: 0.9em; padding: 8px;">Descargar</button>
             </div>
             <!-- Reservas -->
             <div style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; text-align: center;">
@@ -334,6 +350,16 @@
         var ordenar = document.getElementById('clientes_ordenar').value;
 
         var url = '/reporte/clientes/' + periodo + '/?';
+        if (ordenar) url += 'ordenar=' + encodeURIComponent(ordenar) + '&';
+
+        window.open(url, '_blank');
+    }
+
+    function descargarReporteProveedores() {
+        var periodo = document.getElementById('periodo_proveedores').value;
+        var ordenar = document.getElementById('proveedores_ordenar').value;
+
+        var url = '/reporte/proveedores/' + periodo + '/?';
         if (ordenar) url += 'ordenar=' + encodeURIComponent(ordenar) + '&';
 
         window.open(url, '_blank');
