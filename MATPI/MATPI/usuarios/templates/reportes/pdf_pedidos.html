@@ -12,26 +12,26 @@
 <table class="table-data">
     <thead>
         <tr>
-
             <th>Fecha</th>
             <th>Cajero</th>
             <th>Cliente</th>
             <th>Método Pago</th>
+            <th class="text-center">Cant. Productos</th>
             <th class="text-right">Total ($)</th>
         </tr>
     </thead>
     <tbody>
         {% for pd in datos %}
         <tr>
-
             <td>{{ pd.fecha|date:"d/m/Y" }}</td>
             <td>{{ pd.usuario.nombre_completo|default:"N/A" }}</td>
             <td>{{ pd.cliente.nombre_completo|default:"N/A" }}</td>
             <td>{{ pd.metodo_pago }}</td>
+            <td class="text-center">{{ pd.total_productos|default:"0" }}</td>
             <td class="text-right">{{ pd.valor }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="text-center">No hay registros de pedidos en este periodo.</td></tr>
+        <tr><td colspan="6" class="text-center">No hay registros de pedidos en este periodo.</td></tr>
         {% endfor %}
     </tbody>
 </table>
