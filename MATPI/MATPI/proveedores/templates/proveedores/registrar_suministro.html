@@ -35,7 +35,7 @@
 
         <div class="form-group">
             <label for="txt_fecha">Fecha de Suministro</label>
-            <input type="datetime-local" name="txt_fecha" id="txt_fecha" value="{{ fecha_actual|date:'Y-m-d\TH:i' }}">
+            <input type="datetime-local" name="txt_fecha" id="txt_fecha" value="{{ fecha_actual|date:'Y-m-d\TH:i' }}" readonly style="pointer-events: none; background: #eef2f3; cursor: not-allowed;">
         </div>
 
         <div class="form-group">
@@ -68,16 +68,34 @@
             });
         }
 
-        // La fecha de vencimiento no puede ser menor a la fecha actual
+        // La fecha de vencimiento no puede ser menor a una semana de la fecha actual
         const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        const formattedToday = `${yyyy}-${mm}-${dd}`;
+        const oneWeekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const yyyy = oneWeekLater.getFullYear();
+        const mm = String(oneWeekLater.getMonth() + 1).padStart(2, '0');
+        const dd = String(oneWeekLater.getDate()).padStart(2, '0');
+        const formattedMinDate = `${yyyy}-${mm}-${dd}`;
 
         const inputFechaVencimiento = document.getElementById('txt_vencimiento');
         if (inputFechaVencimiento) {
-            inputFechaVencimiento.min = formattedToday;
+            inputFechaVencimiento.min = formattedMinDate;
+        }
+
+        // Validar también en el submit del formulario por si acaso
+        const form = document.querySelector('.custom-form');
+        if (form && inputFechaVencimiento) {
+            form.addEventListener('submit', function(event) {
+                const vencimientoVal = inputFechaVencimiento.value;
+                if (vencimientoVal) {
+                    const selectedDate = new Date(vencimientoVal + 'T00:00:00');
+                    const minDate = new Date(formattedMinDate + 'T00:00:00');
+                    if (selectedDate < minDate) {
+                        alert('La fecha de vencimiento no puede ser menor a una semana de la fecha actual (mínimo ' + formattedMinDate + ').');
+                        event.preventDefault();
+                        return false;
+                    }
+                }
+            });
         }
     });
 </script>
