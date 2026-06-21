@@ -413,7 +413,7 @@ def generar_pdf(template_src, contexto, nombre_archivo):
         pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), result)
         if not pdf.err:
             response = HttpResponse(result.getvalue(), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}.pdf"'
+            response['Content-Disposition'] = f'inline; filename="{nombre_archivo}.pdf"'
             return response
     except TemplateDoesNotExist:
         return HttpResponse("Error: No se encontró la plantilla del reporte.", status=404)
