@@ -645,8 +645,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
         template_path = 'reportes/pdf_proveedores.html'
         titulo = "Reporte de Proveedores"
     elif modulo in ['materias', 'materia_prima']:
-        from materia_prima.models import MateriaPrima, DetalleProductoMateriaP
-        from pedidos.models import DetallePedidoProducto
+        from materia_prima.models import DetalleProductoMateriaP
 
         ordenar = request.GET.get('ordenar', '')
 
