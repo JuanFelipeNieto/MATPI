@@ -721,6 +721,30 @@ def reporte_modulo_pdf(request, modulo, periodo):
         qs = pedidos
         template_path = 'reportes/pdf_pedidos.html'
         titulo = "Reporte de Pedidos"
+    elif modulo == 'reservas':
+        agendado_para = request.GET.get('agendado_para', '')
+
+        # Start with all reservations in the period
+        reservas = reservas_periodo
+
+        if agendado_para:
+            ahora_local = timezone.localtime(timezone.now())
+            if agendado_para == 'proximos_dias':
+                # Next 3 days (from now to now + 3 days)
+                limite = ahora_local + timedelta(days=3)
+                reservas = Reserva.objects.filter(fecha__gte=ahora_local, fecha__lte=limite)
+            elif agendado_para == 'proxima_semana':
+                # Next 7 days
+                limite = ahora_local + timedelta(days=7)
+                reservas = Reserva.objects.filter(fecha__gte=ahora_local, fecha__lte=limite)
+            elif agendado_para == 'proximo_mes':
+                # Next 30 days
+                limite = ahora_local + timedelta(days=30)
+                reservas = Reserva.objects.filter(fecha__gte=ahora_local, fecha__lte=limite)
+
+        qs = reservas.order_by('fecha')
+        template_path = 'reportes/pdf_reservas.html'
+        titulo = "Reporte de Reservas"
     else:
         qs, template_path = config_reporte.get(modulo, (None, ""))
         titulo = f"Reporte de {modulo.capitalize()}"

@@ -321,7 +321,25 @@
                     <option value="mensual">Mensual</option>
                     <option value="general">Todo</option>
                 </select>
-                <button onclick="window.open('/reporte/reservas/' + document.getElementById('periodo_reservas').value + '/', '_blank')" class="btn" style="background-color: #c53030; color: white; width: 100%; font-size: 0.9em; padding: 8px;">Descargar</button>
+
+                <details style="margin-top: 10px; text-align: left; margin-bottom: 10px;">
+                    <summary style="font-size: 0.85em; color: #c53030; cursor: pointer; font-weight: 600; outline: none; margin-bottom: 5px;">
+                        Más filtros ▼
+                    </summary>
+                    <div style="padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid #eee; font-size: 0.8em; margin-bottom: 5px;">
+                        <div style="margin-bottom: 4px;">
+                            <label for="reservas_agendado" style="display:block; font-weight:600; margin-bottom:3px; color: #444;">Agendado para:</label>
+                            <select id="reservas_agendado" style="width:100%; padding:4px; border-radius:4px; border:1px solid #ccc; font-family: inherit; font-size: 0.85em; cursor: pointer;">
+                                <option value="">Todos (según período)</option>
+                                <option value="proximos_dias">Próximos días (3 días)</option>
+                                <option value="proxima_semana">Próxima semana (7 días)</option>
+                                <option value="proximo_mes">Próximo mes (30 días)</option>
+                            </select>
+                        </div>
+                    </div>
+                </details>
+
+                <button onclick="descargarReporteReservas()" class="btn" style="background-color: #c53030; color: white; width: 100%; font-size: 0.9em; padding: 8px;">Descargar</button>
             </div>
             <!-- Cajeros -->
             <div style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; text-align: center;">
@@ -439,6 +457,16 @@
 
         var url = '/reporte/pedidos/' + periodo + '/?';
         if (ordenar) url += 'ordenar=' + encodeURIComponent(ordenar) + '&';
+
+        window.open(url, '_blank');
+    }
+
+    function descargarReporteReservas() {
+        var periodo = document.getElementById('periodo_reservas').value;
+        var agendado = document.getElementById('reservas_agendado').value;
+
+        var url = '/reporte/reservas/' + periodo + '/?';
+        if (agendado) url += 'agendado_para=' + encodeURIComponent(agendado) + '&';
 
         window.open(url, '_blank');
     }
