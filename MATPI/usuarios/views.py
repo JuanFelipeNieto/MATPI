@@ -21,7 +21,7 @@ from xhtml2pdf import pisa
 from .models import Usuario, Administrador, Cajero, DashboardConfig
 from clientes.models import Cliente
 from productos.models import Producto
-from pedidos.models import Pedido
+from pedidos.models import Pedido, DetallePedidoProducto
 from reservas.models import Reserva
 from materia_prima.models import MateriaPrima
 from facturas.models import Factura
@@ -123,7 +123,15 @@ def dashboard(request):
             facturas__isnull=False
         ).order_by('-id')[:5],
         'recent_clientes': Cliente.objects.all().order_by('-id')[:5],
-        'recent_productos': Producto.objects.all().order_by('-id')[:5],
+        'recent_productos_vendidos': DetallePedidoProducto.objects.filter(
+            pedido__fecha__gte=hoy_inicio,
+            pedido__fecha__lt=hoy_fin,
+            pedido__facturas__isnull=False
+        ).values(
+            'producto__nombre_producto'
+        ).annotate(
+            total_vendido=Sum('cantidad')
+        ).order_by('-total_vendido')[:5],
         'recent_reservas': Reserva.objects.filter(fecha_registro__gte=hoy_inicio, fecha_registro__lt=hoy_fin).order_by('-fecha_registro')[:5],
         'config': config,
         'usuario_nombre': request.session.get('usuario_nombre'),

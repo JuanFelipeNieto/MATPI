@@ -73,7 +73,7 @@
                         {% for cliente in recent_clientes %}
                             <li>
                                 <span class="desc" title="{{ cliente.nombre_completo }}">{{ cliente.nombre_completo|truncatechars:15 }}</span>
-                                <span class="val" style="font-size: 0.75rem; color: #666;">ID: {{ cliente.id }}</span>
+                                <span class="val" style="font-size: 0.75rem; color: #666;">C.C: {{ cliente.id }}</span>
                             </li>
                         {% empty %}
                             <li class="empty">No hay clientes registrados</li>
@@ -88,17 +88,17 @@
             <div class="stat-number">{{ total_productos }}</div>
             <div class="stat-label">Productos en Menú</div>
             <div class="stat-dropdown">
-                <button class="stat-dropdown-btn" onclick="toggleDropdown(event, 'drop-productos')">Ver recientes <span class="arrow">▼</span></button>
+                <button class="stat-dropdown-btn" onclick="toggleDropdown(event, 'drop-productos')">Más vendidos <span class="arrow">▼</span></button>
                 <div class="stat-dropdown-content" id="drop-productos">
-                    <div class="dropdown-header">Últimos Productos</div>
+                    <div class="dropdown-header">Más vendidos hoy</div>
                     <ul>
-                        {% for producto in recent_productos %}
+                        {% for item in recent_productos_vendidos %}
                             <li>
-                                <span class="desc" title="{{ producto.nombre_producto }}">{{ producto.nombre_producto|truncatechars:15 }}</span>
-                                <span class="val">${{ producto.precio }}</span>
+                                <span class="desc" title="{{ item.producto__nombre_producto }}">{{ item.producto__nombre_producto|truncatechars:15 }}</span>
+                                <span class="val">{{ item.total_vendido }} uds.</span>
                             </li>
                         {% empty %}
-                            <li class="empty">No hay productos en menú</li>
+                            <li class="empty">No hay ventas hoy</li>
                         {% endfor %}
                     </ul>
                     <a href="{% url 'listar_productos' %}" class="btn-ver-mas">Ver más</a>
