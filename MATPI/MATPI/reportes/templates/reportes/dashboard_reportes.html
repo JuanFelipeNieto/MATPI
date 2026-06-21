@@ -147,7 +147,25 @@
                     <option value="mensual">Mensual</option>
                     <option value="general">Todo</option>
                 </select>
-                <button onclick="window.open('/reporte/clientes/' + document.getElementById('periodo_clientes').value + '/', '_blank')" class="btn" style="background-color: #1d4ed8; color: white; width: 100%; font-size: 0.9em; padding: 8px;">Descargar</button>
+
+                <details style="margin-top: 10px; text-align: left; margin-bottom: 10px;">
+                    <summary style="font-size: 0.85em; color: #1d4ed8; cursor: pointer; font-weight: 600; outline: none; margin-bottom: 5px;">
+                        Más filtros ▼
+                    </summary>
+                    <div style="padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid #eee; font-size: 0.8em; margin-bottom: 5px;">
+                        <div style="margin-bottom: 4px;">
+                            <label for="clientes_ordenar" style="display:block; font-weight:600; margin-bottom:3px; color: #444;">Ordenar por:</label>
+                            <select id="clientes_ordenar" style="width:100%; padding:4px; border-radius:4px; border:1px solid #ccc; font-family: inherit; font-size: 0.85em; cursor: pointer;">
+                                <option value="pedidos_desc">Pedidos realizados (mayor a menor)</option>
+                                <option value="pedidos_asc">Pedidos realizados (menor a mayor)</option>
+                                <option value="reservas_desc">Reservas registradas (mayor a menor)</option>
+                                <option value="reservas_asc">Reservas registradas (menor a mayor)</option>
+                            </select>
+                        </div>
+                    </div>
+                </details>
+
+                <button onclick="descargarReporteClientes()" class="btn" style="background-color: #1d4ed8; color: white; width: 100%; font-size: 0.9em; padding: 8px;">Descargar</button>
             </div>
             <!-- Materia Prima -->
             <div style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; text-align: center;">
@@ -306,6 +324,16 @@
 
         var url = '/reporte/productos/' + periodo + '/?';
         if (categoria) url += 'categoria=' + encodeURIComponent(categoria) + '&';
+        if (ordenar) url += 'ordenar=' + encodeURIComponent(ordenar) + '&';
+
+        window.open(url, '_blank');
+    }
+
+    function descargarReporteClientes() {
+        var periodo = document.getElementById('periodo_clientes').value;
+        var ordenar = document.getElementById('clientes_ordenar').value;
+
+        var url = '/reporte/clientes/' + periodo + '/?';
         if (ordenar) url += 'ordenar=' + encodeURIComponent(ordenar) + '&';
 
         window.open(url, '_blank');

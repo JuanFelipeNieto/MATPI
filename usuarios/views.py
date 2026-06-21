@@ -609,10 +609,6 @@ def reporte_modulo_pdf(request, modulo, periodo):
             clientes = clientes.order_by('-total_reservas')
         elif ordenar == 'reservas_asc':
             clientes = clientes.order_by('total_reservas')
-        elif ordenar == 'nombre_asc':
-            clientes = clientes.order_by('nombre_completo')
-        elif ordenar == 'nombre_desc':
-            clientes = clientes.order_by('-nombre_completo')
         else:
             clientes = clientes.order_by('-total_pedidos')
 
