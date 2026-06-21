@@ -683,33 +683,21 @@ def reporte_modulo_pdf(request, modulo, periodo):
         qs = materias
         template_path = 'reportes/pdf_materias.html'
         titulo = "Reporte de Materia Prima"
-    elif modulo in ['pedidos', 'ventas']:
-        from django.db.models.functions import Coalesce
-
+    elif modulo == 'facturas':
         ordenar = request.GET.get('ordenar', '')
 
-        # Annotate each order with total quantity of products (sum of detalles__cantidad)
-        pedidos = pedidos_completados.annotate(
-            total_productos=Coalesce(
-                models.Sum('detalles__cantidad'),
-                0
-            )
-        )
+        facturas = facturas_periodo
 
         if ordenar == 'valor_desc':
-            pedidos = pedidos.order_by('-valor')
+            facturas = facturas.order_by('-valor_total')
         elif ordenar == 'valor_asc':
-            pedidos = pedidos.order_by('valor')
-        elif ordenar == 'cantidad_desc':
-            pedidos = pedidos.order_by('-total_productos')
-        elif ordenar == 'cantidad_asc':
-            pedidos = pedidos.order_by('total_productos')
+            facturas = facturas.order_by('valor_total')
         else:
-            pedidos = pedidos.order_by('-fecha')
+            facturas = facturas.order_by('-valor_total')
 
-        qs = pedidos
-        template_path = 'reportes/pdf_pedidos.html'
-        titulo = "Reporte de Pedidos"
+        qs = facturas
+        template_path = 'reportes/pdf_facturas.html'
+        titulo = "Reporte de Facturas"
     else:
         qs, template_path = config_reporte.get(modulo, (None, ""))
         titulo = f"Reporte de {modulo.capitalize()}"
