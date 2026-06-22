@@ -62,7 +62,7 @@
                     </select>
                 </div>
                 <input type="hidden" name="txt_estado" value="{{ pedido.estado }}">
-                <input type="hidden" name="txt_cajero" value="{{ pedido.cajero_id|default:'' }}">
+                <input type="hidden" name="txt_cajero" value="{{ pedido.usuario_id|default:'' }}">
             </div>
         </div>
 
@@ -139,7 +139,7 @@
     </select>
 </div>
 
-<script src="{% static 'js/pedidos.js' %}?v=1.2"></script>
+<script src="{% static 'js/pedidos.js' %}?v=3.0"></script>
 <script>
     let contadorFilas = 0;
     const detallesIniciales = {{ detalles_json|safe }};

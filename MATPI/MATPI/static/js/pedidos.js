@@ -31,10 +31,11 @@ function filtrarReservas(clienteId) {
     const opciones = selectReserva.options;
     let encontradas = 0;
 
-    // Resetear select
-    selectReserva.value = "";
+    // Guardar el valor seleccionado antes de filtrar
+    const valorOriginal = selectReserva.value;
 
     if (!clienteId) {
+        selectReserva.value = "";
         selectReserva.disabled = true;
         for (let i = 1; i < opciones.length; i++) {
             opciones[i].style.display = 'none';
@@ -56,9 +57,23 @@ function filtrarReservas(clienteId) {
 
     if (encontradas > 0) {
         selectReserva.disabled = false;
+        // Restaurar el valor original si pertenece al cliente seleccionado, si no, vaciar
+        let opcionSeleccionada = null;
+        for (let i = 0; i < opciones.length; i++) {
+            if (opciones[i].value === valorOriginal) {
+                opcionSeleccionada = opciones[i];
+                break;
+            }
+        }
+        if (opcionSeleccionada && (opcionSeleccionada.dataset.cliente === clienteId || valorOriginal === "")) {
+            selectReserva.value = valorOriginal;
+        } else {
+            selectReserva.value = "";
+        }
         const helpText = document.getElementById('reserva-help');
         if (helpText) helpText.innerText = `Se encontraron ${encontradas} reserva(s) para este cliente.`;
     } else {
+        selectReserva.value = "";
         selectReserva.disabled = true;
         const helpText = document.getElementById('reserva-help');
         if (helpText) helpText.innerText = "Este cliente no tiene reservas activas.";
