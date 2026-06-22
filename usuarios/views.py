@@ -480,6 +480,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
     fecha_inicio, fecha_fin = obtener_rango_fechas(periodo)
     cajero_estrella_mensaje = None
     producto_estrella_mensaje = None
+    materia_estrella_mensaje = None
 
     pedidos_completados = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     reservas_periodo = Reserva.objects.filter(fecha__gte=fecha_inicio)
@@ -708,6 +709,23 @@ def reporte_modulo_pdf(request, modulo, periodo):
         for mp in materias:
             mp.total_consumido = cons_dict.get(mp.id, 0.0)
 
+        # Encontrar la materia prima más consumida en el periodo
+        materia_estrella_consumo = 0.0
+        materia_estrella_nombre = "Ninguna"
+        for mp in materias:
+            if mp.total_consumido > materia_estrella_consumo:
+                materia_estrella_consumo = mp.total_consumido
+                materia_estrella_nombre = mp.nombre_materia_prima
+
+        if materia_estrella_consumo > 0:
+            periodo_durante_map = {
+                'diario': 'el día',
+                'semanal': 'la semana',
+                'mensual': 'el mes',
+                'general': 'todo el tiempo'
+            }
+            materia_estrella_mensaje = f"La materia prima más consumida durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {materia_estrella_nombre}"
+
         # Sort the materias list based on the select parameter
         if ordenar == 'consumo_desc':
             materias.sort(key=lambda x: x.total_consumido, reverse=True)
@@ -807,6 +825,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'chart_base64': chart_base64,
         'cajero_estrella_mensaje': cajero_estrella_mensaje,
         'producto_estrella_mensaje': producto_estrella_mensaje,
+        'materia_estrella_mensaje': materia_estrella_mensaje,
     }
     return generar_pdf(template_path, contexto, f"MATPI_{modulo}")
 
