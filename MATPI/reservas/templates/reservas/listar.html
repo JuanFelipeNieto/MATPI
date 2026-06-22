@@ -31,7 +31,7 @@
                     <label for="txt_cliente_search">Cliente (Escriba nombre o documento)</label>
                     <input type="text" id="txt_cliente_search" list="clientes_list" name="txt_cliente_text"
                         value="{{ reserva_edit.cliente.nombre_completo }} ({{ reserva_edit.cliente.id }})"
-                        placeholder="Buscar cliente..." required autocomplete="off" style="padding: 12px;" minlength="10" maxlength="40">
+                        placeholder="Buscar cliente..." required autocomplete="off" style="padding: 12px;" minlength="10" maxlength="150">
                     <datalist id="clientes_list">
                         {% for cliente in clientes %}
                         <option value="{{ cliente.nombre_completo }} ({{ cliente.id }})">
@@ -59,7 +59,7 @@
 
                 <div class="form-group">
                     <label for="txt_cliente_search">Cliente (Escriba nombre o documento)</label>
-                    <input type="text" id="txt_cliente_search" list="clientes_list" name="txt_cliente_text" placeholder="Buscar cliente..." required autocomplete="off" style="padding: 12px;" minlength="10" maxlength="40">
+                    <input type="text" id="txt_cliente_search" list="clientes_list" name="txt_cliente_text" placeholder="Buscar cliente..." required autocomplete="off" style="padding: 12px;" minlength="10" maxlength="150">
                     <datalist id="clientes_list">
                         {% for cliente in clientes %}
                         <option value="{{ cliente.nombre_completo }} ({{ cliente.id }})">
