@@ -220,8 +220,9 @@ def mostrar_registro_pedido(request):
         ])
         productos_filtrados.append(p)
 
-    # Calcular el próximo número de orden
-    max_orden = Pedido.objects.aggregate(Max('numero_orden'))['numero_orden__max'] or 0
+    # Calcular el próximo número de orden (se reinicia a 1 cada día)
+    hoy_local = timezone.localdate()
+    max_orden = Pedido.objects.filter(fecha__date=hoy_local).aggregate(Max('numero_orden'))['numero_orden__max'] or 0
     prox_orden = max_orden + 1
 
     datos = {
