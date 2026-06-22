@@ -482,6 +482,9 @@ def reporte_modulo_pdf(request, modulo, periodo):
     producto_estrella_mensaje = None
     materia_estrella_mensaje = None
     pedidos_pico_mensaje = None
+    cliente_estrella_mensaje = None
+    reserva_estrella_mensaje = None
+    proveedor_estrella_mensaje = None
 
     pedidos_completados = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     reservas_periodo = Reserva.objects.filter(fecha__gte=fecha_inicio)
@@ -614,7 +617,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
 
         ordenar = request.GET.get('ordenar', '')
 
-        # Annotate each client with total orders and total reservations made in the selected period
+        # Annotate each client with total orders, total reservations, and total consumption in the selected period
         clientes = Cliente.objects.annotate(
             total_pedidos=Coalesce(
                 models.Count(
@@ -636,8 +639,36 @@ def reporte_modulo_pdf(request, modulo, periodo):
                     )
                 ),
                 0
+            ),
+            total_consumo=Coalesce(
+                models.Sum(
+                    'pedidos__valor',
+                    filter=models.Q(
+                        pedidos__fecha__gte=fecha_inicio,
+                        pedidos__fecha__lte=fecha_fin,
+                        pedidos__facturas__isnull=False
+                    )
+                ),
+                0
             )
         )
+
+        # Encontrar el cliente que más consumió
+        cliente_estrella_consumo = 0
+        cliente_estrella_nombre = "Ninguno"
+        for c in clientes:
+            if c.total_consumo > cliente_estrella_consumo:
+                cliente_estrella_consumo = c.total_consumo
+                cliente_estrella_nombre = c.nombre_completo
+
+        if cliente_estrella_consumo > 0:
+            periodo_durante_map = {
+                'diario': 'el día',
+                'semanal': 'la semana',
+                'mensual': 'el mes',
+                'general': 'todo el tiempo'
+            }
+            cliente_estrella_mensaje = f"El cliente que más consumió durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {cliente_estrella_nombre}"
 
         if ordenar == 'pedidos_desc':
             clientes = clientes.order_by('-total_pedidos')
@@ -671,6 +702,23 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 0
             )
         )
+
+        # Encontrar el proveedor que más suministró
+        proveedor_estrella_cantidad = 0
+        proveedor_estrella_nombre = "Ninguno"
+        for p in proveedores:
+            if p.total_suministros > proveedor_estrella_cantidad:
+                proveedor_estrella_cantidad = p.total_suministros
+                proveedor_estrella_nombre = p.nombre_proveedor
+
+        if proveedor_estrella_cantidad > 0:
+            periodo_durante_map = {
+                'diario': 'el día',
+                'semanal': 'la semana',
+                'mensual': 'el mes',
+                'general': 'todo el tiempo'
+            }
+            proveedor_estrella_mensaje = f"El proveedor que más cantidad suministró durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {proveedor_estrella_nombre}"
 
         if ordenar == 'suministros_desc':
             proveedores = proveedores.order_by('-total_suministros')
@@ -841,6 +889,19 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 reservas = Reserva.objects.filter(fecha__gte=ahora_local, fecha__lte=limite)
 
         qs = reservas.order_by('fecha')
+
+        # Encontrar el cliente con más reservas en el período
+        reserva_estrella_cantidad = 0
+        reserva_estrella_nombre = "Ninguno"
+        if qs.exists():
+            from collections import Counter
+            clientes_reservas = [r.cliente.nombre_completo for r in qs if r.cliente]
+            if clientes_reservas:
+                reserva_estrella_nombre, reserva_estrella_cantidad = Counter(clientes_reservas).most_common(1)[0]
+
+        if reserva_estrella_cantidad > 0:
+            reserva_estrella_mensaje = f"El cliente que más reservas realizó fue: {reserva_estrella_nombre}"
+
         template_path = 'reportes/pdf_reservas.html'
         titulo = "Reporte de Reservas"
     else:
@@ -871,6 +932,9 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'producto_estrella_mensaje': producto_estrella_mensaje,
         'materia_estrella_mensaje': materia_estrella_mensaje,
         'pedidos_pico_mensaje': pedidos_pico_mensaje,
+        'cliente_estrella_mensaje': cliente_estrella_mensaje,
+        'reserva_estrella_mensaje': reserva_estrella_mensaje,
+        'proveedor_estrella_mensaje': proveedor_estrella_mensaje,
     }
     return generar_pdf(template_path, contexto, f"MATPI_{modulo}")
 

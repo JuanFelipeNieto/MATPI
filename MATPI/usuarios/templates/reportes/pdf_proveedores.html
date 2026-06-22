@@ -6,7 +6,13 @@
     <h3 style="font-size: 14px; color: #333; margin-bottom: 5px;">Visualización de Datos - {{ periodo_str }}</h3>
     <img src="{{ grafica_base64 }}" alt="Gráfico estadístico" style="width: 500px; height: auto; border: 1px solid #eee; border-radius: 8px;">
 </div>
-<br>
+{% endif %}
+{% if proveedor_estrella_mensaje %}
+<div style="text-align: center; margin-bottom: 25px;">
+    <div style="background-color: #fefcf0; border: 2px solid #d4af37; color: #8a6d3b; padding: 8px 25px; font-size: 12px; font-weight: bold; border-radius: 20px; display: inline-block; font-family: Helvetica, Arial, sans-serif;">
+        🏆 {{ proveedor_estrella_mensaje }}
+    </div>
+</div>
 {% endif %}
 
 <table class="table-data">
