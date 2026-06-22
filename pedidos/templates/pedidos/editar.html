@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="formulario-seccion" style="max-width: 1000px; padding: 0; background: transparent; box-shadow: none;">
-    <h1 style="margin-bottom: 30px;">Editar Pedido #{{ pedido.id }}</h1>
+    <h1 style="margin-bottom: 30px;">Editar Pedido #{{ pedido.numero_orden }}</h1>
 
     <form method="POST" action="{% url 'editar_pedido' %}" id="order-form">
         {% csrf_token %}
