@@ -121,7 +121,7 @@ def dashboard(request):
             fecha__lt=hoy_fin,
             estado__in=['Preparacion', 'Completado'],
             facturas__isnull=False
-        ).order_by('-id')[:5],
+        ).order_by('-valor', '-id')[:5],
         'recent_clientes': Cliente.objects.all().order_by('-id')[:5],
         'recent_productos_vendidos': DetallePedidoProducto.objects.filter(
             pedido__fecha__gte=hoy_inicio,
