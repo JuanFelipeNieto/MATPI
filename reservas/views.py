@@ -17,13 +17,35 @@ def listar_reservas(request, edit_id=None):
     Reserva.objects.filter(fecha__lt=timezone.now()).delete()
 
     buscar = request.GET.get('buscar', '')
+    fecha_desde = request.GET.get('fecha_desde', '')
+    fecha_hasta = request.GET.get('fecha_hasta', '')
+
+    reservas_list = Reserva.objects.all()
+
     if buscar:
-        reservas_list = Reserva.objects.filter(
+        reservas_list = reservas_list.filter(
             Q(cliente__nombre_completo__icontains=buscar) |
             Q(cliente__id__icontains=buscar)
-        ).order_by('-fecha')
-    else:
-        reservas_list = Reserva.objects.all().order_by('-fecha')
+        )
+
+    if fecha_desde:
+        try:
+            desde_dt = datetime.strptime(fecha_desde, '%Y-%m-%d')
+            desde_dt = timezone.make_aware(desde_dt)
+            reservas_list = reservas_list.filter(fecha__gte=desde_dt)
+        except ValueError:
+            pass
+
+    if fecha_hasta:
+        try:
+            hasta_dt = datetime.strptime(fecha_hasta, '%Y-%m-%d')
+            hasta_dt = hasta_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
+            hasta_dt = timezone.make_aware(hasta_dt)
+            reservas_list = reservas_list.filter(fecha__lte=hasta_dt)
+        except ValueError:
+            pass
+
+    reservas_list = reservas_list.order_by('-fecha')
 
     paginator = Paginator(reservas_list, 4)
     page_number = request.GET.get('page')
@@ -35,6 +57,8 @@ def listar_reservas(request, edit_id=None):
     context = {
         'reservas': reservas,
         'buscar': buscar,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta,
         'clientes': clientes,
         'ahora': ahora
     }
