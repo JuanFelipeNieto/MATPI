@@ -74,21 +74,30 @@ def listar_reservas(request, edit_id=None):
 
 
 def _validar_fecha_reserva(fecha_str):
-    try:
-        fecha_dt = datetime.strptime(fecha_str, '%Y-%m-%dT%H:%M')
-        if timezone.is_naive(fecha_dt):
-            fecha_dt = timezone.make_aware(fecha_dt)
+    if not fecha_str:
+        raise ValueError("La fecha de reserva es requerida.")
 
-        if fecha_dt < timezone.now():
-            raise ValueError("La fecha de reserva no puede ser anterior a la actual.")
+    fecha_dt = None
+    for fmt in ('%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M'):
+        try:
+            fecha_dt = datetime.strptime(fecha_str, fmt)
+            break
+        except ValueError:
+            pass
 
-        if fecha_dt.hour < 11 or fecha_dt.hour > 19 or (fecha_dt.hour == 19 and fecha_dt.minute > 0):
-            raise ValueError("Las reservas solo están permitidas entre las 11:00 AM y las 7:00 PM.")
-        return fecha_dt
-    except ValueError as e:
-        if "Las reservas solo" in str(e) or "La fecha de reserva" in str(e):
-            raise
-        return None
+    if not fecha_dt:
+        raise ValueError("El formato de fecha no es válido.")
+
+    if timezone.is_naive(fecha_dt):
+        fecha_dt = timezone.make_aware(fecha_dt)
+
+    if fecha_dt < timezone.now():
+        raise ValueError("La fecha de reserva no puede ser anterior a la actual.")
+
+    if fecha_dt.hour < 11 or fecha_dt.hour > 19 or (fecha_dt.hour == 19 and fecha_dt.minute > 0):
+        raise ValueError("Las reservas solo están permitidas entre las 11:00 AM y las 7:00 PM.")
+
+    return fecha_dt
 
 def _obtener_cliente_id_desde_texto(cliente_text):
     if cliente_text:

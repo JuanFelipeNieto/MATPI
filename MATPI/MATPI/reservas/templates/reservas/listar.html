@@ -165,9 +165,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const txtFecha = document.getElementById('txt_fecha');
-
-    if (txtFecha) {
+    const txtFechas = document.querySelectorAll('input[type="datetime-local"]');
+    txtFechas.forEach(function(txtFecha) {
         txtFecha.addEventListener('change', function() {
             if (!this.value) return;
 
@@ -178,20 +177,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Si está fuera del horario de 11:00 AM a 7:00 PM
             if (hours < 11 || hours > 19 || (hours === 19 && minutes > 0)) {
                 alert('Las reservas solo pueden realizarse entre las 11:00 AM y las 7:00 PM.');
-
-                // Ajustar automáticamente a la hora mínima permitida (11:00 AM) para no perder la fecha
-                selectedDate.setHours(11, 0, 0, 0);
-
-                const year = selectedDate.getFullYear();
-                const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                const day = String(selectedDate.getDate()).padStart(2, '0');
-                const hourStr = String(selectedDate.getHours()).padStart(2, '0');
-                const minStr = String(selectedDate.getMinutes()).padStart(2, '0');
-
-                this.value = `${year}-${month}-${day}T${hourStr}:${minStr}`;
+                this.value = ''; // Limpiar el valor para invalidar el campo requerido y bloquear el envío
             }
         });
-    }
+    });
 });
 </script>
 {% endblock %}
