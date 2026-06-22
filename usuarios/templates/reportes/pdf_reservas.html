@@ -20,6 +20,7 @@
         <tr>
             <th>Fecha Reservada</th>
             <th>Cliente</th>
+            <th class="text-center">Reservas en Periodo</th>
             <th>Estado</th>
         </tr>
     </thead>
@@ -28,10 +29,11 @@
         <tr>
             <td>{{ r.fecha|date:"d/m/Y H:i" }}</td>
             <td>{{ r.cliente.nombre_completo|default:"N/A" }}</td>
+            <td class="text-center">{{ r.cliente_total_reservas|default:"0" }}</td>
             <td>{% if r.estado %}Activa{% else %}Inactiva{% endif %}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="3" class="text-center">No hay reservas en este periodo.</td></tr>
+        <tr><td colspan="4" class="text-center">No hay reservas en este periodo.</td></tr>
         {% endfor %}
     </tbody>
 </table>

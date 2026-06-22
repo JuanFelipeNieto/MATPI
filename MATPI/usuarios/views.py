@@ -888,19 +888,24 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 limite = ahora_local + timedelta(days=30)
                 reservas = Reserva.objects.filter(fecha__gte=ahora_local, fecha__lte=limite)
 
-        qs = reservas.order_by('fecha')
+        qs = list(reservas.order_by('fecha'))
 
         # Encontrar el cliente con más reservas en el período
         reserva_estrella_cantidad = 0
         reserva_estrella_nombre = "Ninguno"
-        if qs.exists():
+        if qs:
             from collections import Counter
             clientes_reservas = [r.cliente.nombre_completo for r in qs if r.cliente]
             if clientes_reservas:
                 reserva_estrella_nombre, reserva_estrella_cantidad = Counter(clientes_reservas).most_common(1)[0]
 
+            # Contar total de reservas por cliente y asociarlo a cada objeto Reserva
+            counts = Counter(r.cliente_id for r in qs if r.cliente_id)
+            for r in qs:
+                r.cliente_total_reservas = counts.get(r.cliente_id, 0)
+
         if reserva_estrella_cantidad > 0:
-            reserva_estrella_mensaje = f"El cliente que más reservas realizó fue: {reserva_estrella_nombre} ({reserva_estrella_cantidad} reservas)"
+            reserva_estrella_mensaje = f"El cliente que más reservas realizó fue: {reserva_estrella_nombre}"
 
         template_path = 'reportes/pdf_reservas.html'
         titulo = "Reporte de Reservas"
