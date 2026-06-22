@@ -58,12 +58,39 @@ def listar_materia_prima(request):
         return redirect('login')
 
     es_admin = check_admin(request)
+    
     query = request.GET.get('buscar', '')
+    unidad = request.GET.get('unidad', '')
+    cant_lotes = request.GET.get('cant_lotes', '')
+    cant_total = request.GET.get('cant_total', '')
+
+    from django.db.models import Count, Sum
+    from django.db.models.functions import Coalesce
+    
+    materia_primas = MateriaPrima.objects.annotate(
+        num_lotes=Coalesce(Count('lotes'), 0),
+        total_cantidad=Coalesce(Sum('lotes__cantidad_actual'), 0.0)
+    )
 
     if query:
-        materia_primas = MateriaPrima.objects.filter(nombre_materia_prima__icontains=query).order_by('nombre_materia_prima')
-    else:
-        materia_primas = MateriaPrima.objects.all().order_by('nombre_materia_prima')
+        materia_primas = materia_primas.filter(nombre_materia_prima__icontains=query)
+    
+    if unidad:
+        materia_primas = materia_primas.filter(unidad_medida__icontains=unidad)
+        
+    if cant_lotes:
+        try:
+            materia_primas = materia_primas.filter(num_lotes=int(cant_lotes))
+        except ValueError:
+            pass
+            
+    if cant_total:
+        try:
+            materia_primas = materia_primas.filter(total_cantidad__gte=float(cant_total))
+        except ValueError:
+            pass
+
+    materia_primas = materia_primas.order_by('nombre_materia_prima')
 
     paginator = Paginator(materia_primas, 10)
     page_number = request.GET.get('page')
@@ -72,7 +99,10 @@ def listar_materia_prima(request):
     return render(request, 'materia_prima/listar.html', {
         'materia_primas': materia_primas_paginated,
         'es_admin': es_admin,
-        'buscar': query
+        'buscar': query,
+        'unidad': unidad,
+        'cant_lotes': cant_lotes,
+        'cant_total': cant_total,
     })
 
 # --- GESTIÓN DE MATERIA PRIMA (CREACIÓN ABIERTA A CAJERO Y ADMIN) ---

@@ -15,20 +15,38 @@
 <div class="formulario-seccion">
     <h1>Materia Prima</h1>
 
-    <div class="form-busqueda">
-        <div class="buscador-izq">
-            <form method="GET" action="{% url 'listar_materia_prima' %}" style="display: flex; gap: 10px; align-items: center;">
+    <div class="form-busqueda" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; align-items: stretch;">
+        <div class="buscador-izq" style="width: 100%;">
+            <form method="GET" action="{% url 'listar_materia_prima' %}" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; width: 100%;">
                 <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por nombre</label>
-                <input type="text" id="buscar" name="buscar" placeholder="Buscar por nombre" value="{{ buscar|default:'' }}">
-                <button type="submit" class="btn btn-guardar">Buscar</button>
-                {% if buscar %}
-                    <a href="{% url 'listar_materia_prima' %}" class="btn btn-cancelar" style="text-decoration: none; padding: 8px 15px; display: inline-flex; align-items: center;">Limpiar</a>
-                {% endif %}
+                <input type="text" id="buscar" name="buscar" placeholder="Buscar por nombre" value="{{ buscar|default:'' }}" style="flex: 2; min-width: 180px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <label for="unidad" style="font-size: 0.9rem; color: #555; font-weight: 500;">Unidad:</label>
+                    <input type="text" id="unidad" name="unidad" placeholder="g, ml, unid..." value="{{ unidad|default:'' }}" style="width: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <label for="cant_lotes" style="font-size: 0.9rem; color: #555; font-weight: 500;">Lotes:</label>
+                    <input type="number" id="cant_lotes" name="cant_lotes" placeholder="Cant. lotes" value="{{ cant_lotes|default:'' }}" min="0" style="width: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <label for="cant_total" style="font-size: 0.9rem; color: #555; font-weight: 500;">Cant. Total Mín:</label>
+                    <input type="number" id="cant_total" name="cant_total" placeholder="Cant. total" value="{{ cant_total|default:'' }}" min="0" style="width: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" class="btn btn-guardar" style="padding: 10px 20px;">🔍 Buscar</button>
+                    {% if buscar or unidad or cant_lotes or cant_total %}
+                        <a href="{% url 'listar_materia_prima' %}" class="btn btn-cancelar" style="text-decoration: none; padding: 10px 20px; display: inline-flex; align-items: center; border-radius: 4px;">Limpiar</a>
+                    {% endif %}
+                </div>
             </form>
         </div>
 
         {% if es_admin %}
-        <div class="acciones-header" style="display: flex; gap: 10px;">
+        <div class="acciones-header" style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a href="{% url 'mostrar_registro_materia_prima' %}" class="btn btn-guardar">+ Nueva Materia Prima</a>
             <a href="{% url 'importar_materia_prima_excel' %}" class="btn btn-azul">Importar Materias primas</a>
             <a href="{% url 'importar_lotes_excel' %}" class="btn btn-azul" style="background: #778898;">Importar Lotes</a>
@@ -78,8 +96,8 @@
     {% if materia_primas.has_other_pages %}
     <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
         {% if materia_primas.has_previous %}
-            <a href="?page=1{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&laquo;</a>
-            <a href="?page={{ materia_primas.previous_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&lsaquo;</a>
+            <a href="?page=1{% if buscar %}&buscar={{ buscar }}{% endif %}{% if unidad %}&unidad={{ unidad }}{% endif %}{% if cant_lotes %}&cant_lotes={{ cant_lotes }}{% endif %}{% if cant_total %}&cant_total={{ cant_total }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&laquo;</a>
+            <a href="?page={{ materia_primas.previous_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}{% if unidad %}&unidad={{ unidad }}{% endif %}{% if cant_lotes %}&cant_lotes={{ cant_lotes }}{% endif %}{% if cant_total %}&cant_total={{ cant_total }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&lsaquo;</a>
         {% endif %}
 
         <span class="current" style="font-weight: bold; color: #555;">
@@ -87,8 +105,8 @@
         </span>
 
         {% if materia_primas.has_next %}
-            <a href="?page={{ materia_primas.next_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&rsaquo;</a>
-            <a href="?page={{ materia_primas.paginator.num_pages }}{% if buscar %}&buscar={{ buscar }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&raquo;</a>
+            <a href="?page={{ materia_primas.next_page_number }}{% if buscar %}&buscar={{ buscar }}{% endif %}{% if unidad %}&unidad={{ unidad }}{% endif %}{% if cant_lotes %}&cant_lotes={{ cant_lotes }}{% endif %}{% if cant_total %}&cant_total={{ cant_total }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&rsaquo;</a>
+            <a href="?page={{ materia_primas.paginator.num_pages }}{% if buscar %}&buscar={{ buscar }}{% endif %}{% if unidad %}&unidad={{ unidad }}{% endif %}{% if cant_lotes %}&cant_lotes={{ cant_lotes }}{% endif %}{% if cant_total %}&cant_total={{ cant_total }}{% endif %}" class="btn" style="padding: 5px 10px; border-radius: 4px; background-color: #f0f0f0; color: #333; text-decoration: none;">&raquo;</a>
         {% endif %}
     </div>
     {% endif %}
