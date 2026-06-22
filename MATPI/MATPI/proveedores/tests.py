@@ -119,7 +119,7 @@ class ProveedorViewsTest(TestCase):
             'txt_cantidad': '50',
             'txt_precio': '1500',
             'txt_fecha': timezone.now().strftime('%Y-%m-%dT%H:%M'),
-            'txt_vencimiento': (timezone.now().date() + timedelta(days=5)).strftime('%Y-%m-%d')
+            'txt_vencimiento': (timezone.now().date() + timedelta(days=10)).strftime('%Y-%m-%d')
         }
         response = self.client.post(reverse('registrar_suministro_materia'), datos)
         self.assertRedirects(response, reverse('listar_proveedores'))
