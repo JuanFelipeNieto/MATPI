@@ -900,7 +900,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 reserva_estrella_nombre, reserva_estrella_cantidad = Counter(clientes_reservas).most_common(1)[0]
 
         if reserva_estrella_cantidad > 0:
-            reserva_estrella_mensaje = f"El cliente que más reservas realizó fue: {reserva_estrella_nombre}"
+            reserva_estrella_mensaje = f"El cliente que más reservas realizó fue: {reserva_estrella_nombre} ({reserva_estrella_cantidad} reservas)"
 
         template_path = 'reportes/pdf_reservas.html'
         titulo = "Reporte de Reservas"
