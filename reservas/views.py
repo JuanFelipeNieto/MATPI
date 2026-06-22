@@ -133,6 +133,11 @@ def registrar_reserva(request):
     observaciones = request.POST.get('txt_observaciones')
     cliente_text  = request.POST.get('txt_cliente_text')
 
+    if not observaciones or not observaciones.strip():
+        observaciones = "ninguna"
+    else:
+        observaciones = observaciones.strip()
+
     cliente_id = _obtener_cliente_id_desde_texto(cliente_text)
     cajero = _obtener_cajero_reserva(request.session.get('usuario_id'))
     cliente = Cliente.objects.get(pk=cliente_id) if cliente_id else None
@@ -171,6 +176,11 @@ def editar_reserva(request):
     estado        = request.POST.get('txt_estado', '1') == '1'
     observaciones = request.POST.get('txt_observaciones')
     cliente_text  = request.POST.get('txt_cliente_text')
+
+    if not observaciones or not observaciones.strip():
+        observaciones = "ninguna"
+    else:
+        observaciones = observaciones.strip()
 
     cliente_id = _obtener_cliente_id_desde_texto(cliente_text)
     cliente = Cliente.objects.get(pk=cliente_id) if cliente_id else None
