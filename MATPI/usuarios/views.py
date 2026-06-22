@@ -481,6 +481,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
     cajero_estrella_mensaje = None
     producto_estrella_mensaje = None
     materia_estrella_mensaje = None
+    pedidos_pico_mensaje = None
 
     pedidos_completados = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     reservas_periodo = Reserva.objects.filter(fecha__gte=fecha_inicio)
@@ -773,6 +774,41 @@ def reporte_modulo_pdf(request, modulo, periodo):
             pedidos = pedidos.order_by('-fecha')
 
         qs = pedidos
+
+        # Calcular el pico de pedidos según el período
+        pedidos_pico_mensaje = None
+        if pedidos.exists():
+            from collections import Counter
+            if periodo == 'diario':
+                horas = [timezone.localtime(p.fecha).hour for p in pedidos]
+                if horas:
+                    hora_pico = Counter(horas).most_common(1)[0][0]
+                    pedidos_pico_mensaje = f"La hora en la que más pedidos se hicieron durante el día fue: {hora_pico:02d}:00"
+            elif periodo == 'semanal':
+                dias_semana_nombres = {
+                    1: 'Lunes', 2: 'Martes', 3: 'Miércoles',
+                    4: 'Jueves', 5: 'Viernes', 6: 'Sábado', 7: 'Domingo'
+                }
+                dias = [timezone.localtime(p.fecha).isoweekday() for p in pedidos]
+                if dias:
+                    dia_pico = Counter(dias).most_common(1)[0][0]
+                    pedidos_pico_mensaje = f"El día de la semana en el que más pedidos se hicieron durante la semana fue: {dias_semana_nombres.get(dia_pico)}"
+            elif periodo == 'mensual':
+                dias_mes = [timezone.localtime(p.fecha).day for p in pedidos]
+                if dias_mes:
+                    dia_pico = Counter(dias_mes).most_common(1)[0][0]
+                    pedidos_pico_mensaje = f"El día del mes en el que más pedidos se hicieron durante el mes fue: {dia_pico}"
+            elif periodo == 'general':
+                semanas = []
+                for p in pedidos:
+                    fl = timezone.localtime(p.fecha).date()
+                    lunes = fl - timedelta(days=fl.weekday())
+                    semanas.append(lunes)
+                if semanas:
+                    semana_pica_lunes = Counter(semanas).most_common(1)[0][0]
+                    fecha_str = semana_pica_lunes.strftime("%d/%m/%Y")
+                    pedidos_pico_mensaje = f"La semana en la que más pedidos se hicieron fue la del: {fecha_str}"
+
         template_path = 'reportes/pdf_pedidos.html'
         titulo = "Reporte de Pedidos"
     elif modulo == 'reservas':
@@ -826,6 +862,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'cajero_estrella_mensaje': cajero_estrella_mensaje,
         'producto_estrella_mensaje': producto_estrella_mensaje,
         'materia_estrella_mensaje': materia_estrella_mensaje,
+        'pedidos_pico_mensaje': pedidos_pico_mensaje,
     }
     return generar_pdf(template_path, contexto, f"MATPI_{modulo}")
 
