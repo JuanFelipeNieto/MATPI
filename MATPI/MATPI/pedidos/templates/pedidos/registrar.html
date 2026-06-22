@@ -41,7 +41,7 @@
                 <h3>Cliente y Reserva</h3>
                 <div class="form-group">
                     <label for="txt_cliente_search">Buscar Cliente</label>
-                    <input type="text" id="txt_cliente_search" list="clientes_list" placeholder="Busque por Nombre o Documento" autocomplete="off" oninput="sincronizarClienteId(this.value)" minlength="2" maxlength="30">
+                    <input type="text" id="txt_cliente_search" list="clientes_list" placeholder="Busque por Nombre o Documento" autocomplete="off" oninput="sincronizarClienteId(this.value)" minlength="2" maxlength="150">
                     <input type="hidden" id="txt_cliente_id" name="txt_cliente_id">
                     <datalist id="clientes_list">
                         {% for cliente in clientes %}

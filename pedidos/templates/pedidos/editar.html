@@ -42,7 +42,7 @@
                 <h3>Asociaciones</h3>
                 <div class="form-group">
                     <label for="txt_cliente_search">Cliente</label>
-                    <input type="text" id="txt_cliente_search" list="clientes_list" placeholder="Busque por Nombre" autocomplete="off" oninput="sincronizarClienteId(this.value)" value="{{ pedido.cliente.nombre_completo|default:'' }}" minlength="2" maxlength="30">
+                    <input type="text" id="txt_cliente_search" list="clientes_list" placeholder="Busque por Nombre" autocomplete="off" oninput="sincronizarClienteId(this.value)" value="{{ pedido.cliente.nombre_completo|default:'' }}" minlength="2" maxlength="150">
                     <input type="hidden" id="txt_cliente_id" name="txt_cliente" value="{{ pedido.cliente_id|default:'' }}">
                     <datalist id="clientes_list">
                         {% for cliente in clientes %}
