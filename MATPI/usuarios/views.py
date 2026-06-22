@@ -794,10 +794,18 @@ def reporte_modulo_pdf(request, modulo, periodo):
                     dia_pico = Counter(dias).most_common(1)[0][0]
                     pedidos_pico_mensaje = f"El día de la semana en el que más pedidos se hicieron durante la semana fue: {dias_semana_nombres.get(dia_pico)}"
             elif periodo == 'mensual':
-                dias_mes = [timezone.localtime(p.fecha).day for p in pedidos]
-                if dias_mes:
-                    dia_pico = Counter(dias_mes).most_common(1)[0][0]
-                    pedidos_pico_mensaje = f"El día del mes en el que más pedidos se hicieron durante el mes fue: {dia_pico}"
+                semanas_mes = [(timezone.localtime(p.fecha).day - 1) // 7 + 1 for p in pedidos]
+                if semanas_mes:
+                    semana_pica_num = Counter(semanas_mes).most_common(1)[0][0]
+                    semanas_nombres = {
+                        1: 'la primera semana',
+                        2: 'la segunda semana',
+                        3: 'la tercera semana',
+                        4: 'la cuarta semana',
+                        5: 'la quinta semana'
+                    }
+                    semana_str = semanas_nombres.get(semana_pica_num, 'la primera semana')
+                    pedidos_pico_mensaje = f"La semana del mes en la que más pedidos se hicieron durante el mes fue: {semana_str}"
             elif periodo == 'general':
                 semanas = []
                 for p in pedidos:
