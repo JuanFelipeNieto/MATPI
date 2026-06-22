@@ -115,7 +115,7 @@ def dashboard(request):
             estado__in=['Preparacion', 'Completado'],
             facturas__isnull=False
         ).aggregate(total=Sum('valor'))['total'] or 0,
-        'recent_pedidos': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin, facturas__isnull=False).order_by('-id')[:5],
+        'recent_pedidos': Pedido.objects.filter(fecha__gte=hoy_inicio, fecha__lt=hoy_fin, facturas__isnull=False).select_related('usuario').order_by('-id')[:5],
         'recent_ingresos_pedidos': Pedido.objects.filter(
             fecha__gte=hoy_inicio,
             fecha__lt=hoy_fin,

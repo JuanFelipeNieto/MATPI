@@ -29,7 +29,7 @@
                         {% for pedido in recent_pedidos %}
                             <li>
                                 <span class="desc">#{{ pedido.numero_orden }} ({{ pedido.fecha|date:"H:i" }})</span>
-                                <span class="val">${{ pedido.valor }}</span>
+                                <span class="val" style="font-size: 0.8rem; color: #64748b;" title="{{ pedido.usuario.nombre_completo|default:'Sistema' }}">{{ pedido.usuario.nombre_completo|default:"Sistema"|truncatechars:15 }}</span>
                             </li>
                         {% empty %}
                             <li class="empty">No hay pedidos hoy</li>
@@ -44,7 +44,7 @@
             <div class="stat-number">${{ ingresos|floatformat:0 }}</div>
             <div class="stat-label">Ingresos del dia</div>
             <div class="stat-dropdown">
-                <button class="stat-dropdown-btn" onclick="toggleDropdown(event, 'drop-ingresos')">Ver recientes <span class="arrow">▼</span></button>
+                <button class="stat-dropdown-btn" onclick="toggleDropdown(event, 'drop-ingresos')">Mejores ventas <span class="arrow">▼</span></button>
                 <div class="stat-dropdown-content" id="drop-ingresos">
                     <div class="dropdown-header">Detalle de Ingresos</div>
                     <ul>
