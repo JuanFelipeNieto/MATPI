@@ -9,7 +9,10 @@ from django.views.decorators.http import require_http_methods, require_GET
 
 @require_GET
 def listar_facturas(request):
-    facturas = Factura.objects.all().order_by('-id')
+    from django.utils import timezone
+    # El listado de facturas se reinicia cada día (solo muestra las de hoy)
+    hoy_local = timezone.localdate()
+    facturas = Factura.objects.filter(pedido__fecha__date=hoy_local).order_by('-id')
     data = {'facturas': facturas}
     return render(request, 'facturas/listar.html', data)
 

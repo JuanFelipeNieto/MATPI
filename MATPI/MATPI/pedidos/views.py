@@ -66,8 +66,10 @@ def _cancelar_pedidos_abandonados():
 def listar_pedidos(request):
     _cancelar_pedidos_abandonados() # Limpieza automática
     buscar = request.GET.get('buscar', '')
-    # Excluimos los pedidos cancelados y los registrados (que esperan factura) por petición del usuario
-    pedidos = Pedido.objects.exclude(estado__in=['Cancelado', 'Registrado']).order_by('-fecha', '-id')
+    
+    # El listado de pedidos se reinicia cada día (solo muestra los de hoy)
+    hoy_local = timezone.localdate()
+    pedidos = Pedido.objects.filter(fecha__date=hoy_local).exclude(estado__in=['Cancelado', 'Registrado']).order_by('-fecha', '-id')
 
     if buscar:
         if buscar.isdigit():
