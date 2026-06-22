@@ -64,12 +64,13 @@ def listar_materia_prima(request):
     cant_lotes = request.GET.get('cant_lotes', '')
     cant_total = request.GET.get('cant_total', '')
 
-    from django.db.models import Count, Sum
+    from django.db.models import Count, Sum, Value
     from django.db.models.functions import Coalesce
+    from decimal import Decimal
     
     materia_primas = MateriaPrima.objects.annotate(
-        num_lotes=Coalesce(Count('lotes'), 0),
-        total_cantidad=Coalesce(Sum('lotes__cantidad_actual'), 0.0)
+        num_lotes=Count('lotes'),
+        total_cantidad=Coalesce(Sum('lotes__cantidad_actual'), Value(Decimal('0')))
     )
 
     if query:
