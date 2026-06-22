@@ -69,7 +69,12 @@ def listar_productos(request):
     categoria = request.GET.get('categoria', '')
     ordenar = request.GET.get('ordenar', '')
 
-    productos = Producto.objects.all().prefetch_related('detalles_materia__materia_prima')
+    from django.db.models import Exists, OuterRef
+    from facturas.models import Factura
+
+    productos = Producto.objects.annotate(
+        asociado_factura=Exists(Factura.objects.filter(pedido__detalles__producto=OuterRef('pk')))
+    ).prefetch_related('detalles_materia__materia_prima')
 
     if query:
         productos = productos.filter(nombre_producto__icontains=query)
@@ -300,6 +305,12 @@ def eliminar_producto(request, id):
         return redirect('listar_productos')
 
     producto = get_object_or_404(Producto, pk=id)
+
+    from facturas.models import Factura
+    if Factura.objects.filter(pedido__detalles__producto=producto).exists():
+        messages.error(request, f"No se puede eliminar el producto '{producto.nombre_producto}' porque está asociado a una factura.")
+        return redirect('listar_productos')
+
     producto.delete()
     messages.success(request, "Producto eliminado.")
     return redirect('listar_productos')

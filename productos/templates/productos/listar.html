@@ -90,8 +90,8 @@
                     {% if es_admin %}
                     <td class="acciones">
                         <a href="{% url 'pre_editar_producto' producto.id %}" class="btn-editar">Editar</a>
-                        <a href="{% url 'eliminar_producto' producto.id %}" class="btn-danger"
-                            onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
+                        <a href="{% if producto.asociado_factura %}#{% else %}{% url 'eliminar_producto' producto.id %}{% endif %}" class="btn-danger"
+                            onclick="{% if producto.asociado_factura %}alert('No se puede eliminar este producto porque está asociado a una factura.'); return false;{% else %}return confirm('¿Eliminar este producto?'){% endif %}">Eliminar</a>
                     </td>
                     {% endif %}
                 </tr>
