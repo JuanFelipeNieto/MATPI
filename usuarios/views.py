@@ -511,13 +511,15 @@ def reporte_modulo_pdf(request, modulo, periodo):
             pedidos_periodo=models.Count('usuario__pedidos', filter=models.Q(usuario__pedidos__estado__in=['Preparacion', 'Completado'], usuario__pedidos__fecha__gte=fecha_inicio, usuario__pedidos__fecha__lte=fecha_fin))
         ).select_related('usuario')
 
-        # Encontrar el cajero que más pedidos atendió en el periodo
+        # Encontrar el cajero que más pedidos atendió en el periodo (soportando empates)
         cajero_estrella_pedidos = 0
-        cajero_estrella_nombre = "Ninguno"
+        cajeros_ganadores = []
         for c in cajeros:
             if c.pedidos_periodo > cajero_estrella_pedidos:
                 cajero_estrella_pedidos = c.pedidos_periodo
-                cajero_estrella_nombre = c.usuario.nombre_completo
+                cajeros_ganadores = [c.usuario.nombre_completo]
+            elif c.pedidos_periodo == cajero_estrella_pedidos and cajero_estrella_pedidos > 0:
+                cajeros_ganadores.append(c.usuario.nombre_completo)
 
         if cajero_estrella_pedidos > 0:
             periodo_durante_map = {
@@ -526,7 +528,12 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 'mensual': 'el mes',
                 'general': 'todo el tiempo'
             }
-            cajero_estrella_mensaje = f"El cajero que más pedidos atendió durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {cajero_estrella_nombre}"
+            p_durante = periodo_durante_map.get(periodo, 'el periodo')
+            if len(cajeros_ganadores) > 1:
+                nombres = ", ".join(cajeros_ganadores[:-1]) + " y " + cajeros_ganadores[-1]
+                cajero_estrella_mensaje = f"Los cajeros que más pedidos atendieron durante {p_durante} fueron: {nombres}"
+            else:
+                cajero_estrella_mensaje = f"El cajero que más pedidos atendió durante {p_durante} fue: {cajeros_ganadores[0]}"
 
         # Filtros y ordenamiento adicionales
         min_pedidos = request.GET.get('min_pedidos')
@@ -581,13 +588,15 @@ def reporte_modulo_pdf(request, modulo, periodo):
         if categoria:
             productos = productos.filter(categoria=categoria)
 
-        # Encontrar el producto más vendido en el periodo
+        # Encontrar el producto más vendido en el periodo (soportando empates)
         producto_estrella_cantidad = 0
-        producto_estrella_nombre = "Ninguno"
+        productos_ganadores = []
         for p in productos:
             if p.total_vendido > producto_estrella_cantidad:
                 producto_estrella_cantidad = p.total_vendido
-                producto_estrella_nombre = p.nombre_producto
+                productos_ganadores = [p.nombre_producto]
+            elif p.total_vendido == producto_estrella_cantidad and producto_estrella_cantidad > 0:
+                productos_ganadores.append(p.nombre_producto)
 
         if producto_estrella_cantidad > 0:
             periodo_durante_map = {
@@ -596,7 +605,12 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 'mensual': 'el mes',
                 'general': 'todo el tiempo'
             }
-            producto_estrella_mensaje = f"El producto más vendido durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {producto_estrella_nombre}"
+            p_durante = periodo_durante_map.get(periodo, 'el periodo')
+            if len(productos_ganadores) > 1:
+                nombres = ", ".join(productos_ganadores[:-1]) + " y " + productos_ganadores[-1]
+                producto_estrella_mensaje = f"Los productos más vendidos durante {p_durante} fueron: {nombres}"
+            else:
+                producto_estrella_mensaje = f"El producto más vendido durante {p_durante} fue: {productos_ganadores[0]}"
 
         if ordenar == 'ventas_desc':
             productos = productos.order_by('-total_vendido')
@@ -653,13 +667,15 @@ def reporte_modulo_pdf(request, modulo, periodo):
             )
         )
 
-        # Encontrar el cliente que más consumió
+        # Encontrar el cliente que más consumió (soportando empates)
         cliente_estrella_consumo = 0
-        cliente_estrella_nombre = "Ninguno"
+        clientes_ganadores = []
         for c in clientes:
             if c.total_consumo > cliente_estrella_consumo:
                 cliente_estrella_consumo = c.total_consumo
-                cliente_estrella_nombre = c.nombre_completo
+                clientes_ganadores = [c.nombre_completo]
+            elif c.total_consumo == cliente_estrella_consumo and cliente_estrella_consumo > 0:
+                clientes_ganadores.append(c.nombre_completo)
 
         if cliente_estrella_consumo > 0:
             periodo_durante_map = {
@@ -668,7 +684,12 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 'mensual': 'el mes',
                 'general': 'todo el tiempo'
             }
-            cliente_estrella_mensaje = f"El cliente que más consumió durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {cliente_estrella_nombre}"
+            p_durante = periodo_durante_map.get(periodo, 'el periodo')
+            if len(clientes_ganadores) > 1:
+                nombres = ", ".join(clientes_ganadores[:-1]) + " y " + clientes_ganadores[-1]
+                cliente_estrella_mensaje = f"Los clientes que más consumieron durante {p_durante} fueron: {nombres}"
+            else:
+                cliente_estrella_mensaje = f"El cliente que más consumió durante {p_durante} fue: {clientes_ganadores[0]}"
 
         if ordenar == 'pedidos_desc':
             clientes = clientes.order_by('-total_pedidos')
@@ -703,13 +724,15 @@ def reporte_modulo_pdf(request, modulo, periodo):
             )
         )
 
-        # Encontrar el proveedor que más suministró
+        # Encontrar el proveedor que más suministró (soportando empates)
         proveedor_estrella_cantidad = 0
-        proveedor_estrella_nombre = "Ninguno"
+        proveedores_ganadores = []
         for p in proveedores:
             if p.total_suministros > proveedor_estrella_cantidad:
                 proveedor_estrella_cantidad = p.total_suministros
-                proveedor_estrella_nombre = p.nombre_proveedor
+                proveedores_ganadores = [p.nombre_proveedor]
+            elif p.total_suministros == proveedor_estrella_cantidad and proveedor_estrella_cantidad > 0:
+                proveedores_ganadores.append(p.nombre_proveedor)
 
         if proveedor_estrella_cantidad > 0:
             periodo_durante_map = {
@@ -718,7 +741,12 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 'mensual': 'el mes',
                 'general': 'todo el tiempo'
             }
-            proveedor_estrella_mensaje = f"El proveedor que más cantidad suministró durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {proveedor_estrella_nombre}"
+            p_durante = periodo_durante_map.get(periodo, 'el periodo')
+            if len(proveedores_ganadores) > 1:
+                nombres = ", ".join(proveedores_ganadores[:-1]) + " y " + proveedores_ganadores[-1]
+                proveedor_estrella_mensaje = f"Los proveedores que más cantidad suministraron durante {p_durante} fueron: {nombres}"
+            else:
+                proveedor_estrella_mensaje = f"El proveedor que más cantidad suministró durante {p_durante} fue: {proveedores_ganadores[0]}"
 
         if ordenar == 'suministros_desc':
             proveedores = proveedores.order_by('-total_suministros')
@@ -758,13 +786,15 @@ def reporte_modulo_pdf(request, modulo, periodo):
         for mp in materias:
             mp.total_consumido = cons_dict.get(mp.id, 0.0)
 
-        # Encontrar la materia prima más consumida en el periodo
+        # Encontrar la materia prima más consumida en el periodo (soportando empates)
         materia_estrella_consumo = 0.0
-        materia_estrella_nombre = "Ninguna"
+        materias_ganadoras = []
         for mp in materias:
             if mp.total_consumido > materia_estrella_consumo:
                 materia_estrella_consumo = mp.total_consumido
-                materia_estrella_nombre = mp.nombre_materia_prima
+                materias_ganadoras = [mp.nombre_materia_prima]
+            elif mp.total_consumido == materia_estrella_consumo and materia_estrella_consumo > 0:
+                materias_ganadoras.append(mp.nombre_materia_prima)
 
         if materia_estrella_consumo > 0:
             periodo_durante_map = {
@@ -773,7 +803,12 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 'mensual': 'el mes',
                 'general': 'todo el tiempo'
             }
-            materia_estrella_mensaje = f"La materia prima más consumida durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {materia_estrella_nombre}"
+            p_durante = periodo_durante_map.get(periodo, 'el periodo')
+            if len(materias_ganadoras) > 1:
+                nombres = ", ".join(materias_ganadoras[:-1]) + " y " + materias_ganadoras[-1]
+                materia_estrella_mensaje = f"Las materias primas más consumidas durante {p_durante} fueron: {nombres}"
+            else:
+                materia_estrella_mensaje = f"La materia prima más consumida durante {p_durante} fue: {materias_ganadoras[0]}"
 
         # Sort the materias list based on the select parameter
         if ordenar == 'consumo_desc':
@@ -823,15 +858,22 @@ def reporte_modulo_pdf(request, modulo, periodo):
 
         qs = pedidos
 
-        # Calcular el pico de pedidos según el período
+        # Calcular el pico de pedidos según el período (soportando empates)
         pedidos_pico_mensaje = None
         if pedidos.exists():
             from collections import Counter
             if periodo == 'diario':
                 horas = [timezone.localtime(p.fecha).hour for p in pedidos]
                 if horas:
-                    hora_pico = Counter(horas).most_common(1)[0][0]
-                    pedidos_pico_mensaje = f"La hora en la que más pedidos se hicieron durante el día fue: {hora_pico:02d}:00"
+                    counter = Counter(horas)
+                    most_common = counter.most_common()
+                    max_count = most_common[0][1]
+                    picos = [h for h, c in most_common if c == max_count]
+                    picos_str = ", ".join(f"{h:02d}:00" for h in picos[:-1]) + " y " + f"{picos[-1]:02d}:00" if len(picos) > 1 else f"{picos[0]:02d}:00"
+                    if len(picos) > 1:
+                        pedidos_pico_mensaje = f"Las horas en las que más pedidos se hicieron durante el día fueron: {picos_str}"
+                    else:
+                        pedidos_pico_mensaje = f"La hora en la que más pedidos se hicieron durante el día fue: {picos_str}"
             elif periodo == 'semanal':
                 dias_semana_nombres = {
                     1: 'Lunes', 2: 'Martes', 3: 'Miércoles',
@@ -839,12 +881,21 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 }
                 dias = [timezone.localtime(p.fecha).isoweekday() for p in pedidos]
                 if dias:
-                    dia_pico = Counter(dias).most_common(1)[0][0]
-                    pedidos_pico_mensaje = f"El día de la semana en el que más pedidos se hicieron durante la semana fue: {dias_semana_nombres.get(dia_pico)}"
+                    counter = Counter(dias)
+                    most_common = counter.most_common()
+                    max_count = most_common[0][1]
+                    picos = [dias_semana_nombres.get(d) for d, c in most_common if c == max_count]
+                    picos_str = ", ".join(picos[:-1]) + " y " + picos[-1] if len(picos) > 1 else picos[0]
+                    if len(picos) > 1:
+                        pedidos_pico_mensaje = f"Los días de la semana en los que más pedidos se hicieron durante la semana fueron: {picos_str}"
+                    else:
+                        pedidos_pico_mensaje = f"El día de la semana en el que más pedidos se hicieron durante la semana fue: {picos_str}"
             elif periodo == 'mensual':
                 semanas_mes = [(timezone.localtime(p.fecha).day - 1) // 7 + 1 for p in pedidos]
                 if semanas_mes:
-                    semana_pica_num = Counter(semanas_mes).most_common(1)[0][0]
+                    counter = Counter(semanas_mes)
+                    most_common = counter.most_common()
+                    max_count = most_common[0][1]
                     semanas_nombres = {
                         1: 'la primera semana',
                         2: 'la segunda semana',
@@ -852,8 +903,12 @@ def reporte_modulo_pdf(request, modulo, periodo):
                         4: 'la cuarta semana',
                         5: 'la quinta semana'
                     }
-                    semana_str = semanas_nombres.get(semana_pica_num, 'la primera semana')
-                    pedidos_pico_mensaje = f"La semana del mes en la que más pedidos se hicieron durante el mes fue: {semana_str}"
+                    picos = [semanas_nombres.get(s) for s, c in most_common if c == max_count]
+                    picos_str = ", ".join(picos[:-1]) + " y " + picos[-1] if len(picos) > 1 else picos[0]
+                    if len(picos) > 1:
+                        pedidos_pico_mensaje = f"Las semanas del mes en las que más pedidos se hicieron durante el mes fueron: {picos_str}"
+                    else:
+                        pedidos_pico_mensaje = f"La semana del mes en la que más pedidos se hicieron durante el mes fue: {picos_str}"
             elif periodo == 'general':
                 semanas = []
                 for p in pedidos:
@@ -861,9 +916,15 @@ def reporte_modulo_pdf(request, modulo, periodo):
                     lunes = fl - timedelta(days=fl.weekday())
                     semanas.append(lunes)
                 if semanas:
-                    semana_pica_lunes = Counter(semanas).most_common(1)[0][0]
-                    fecha_str = semana_pica_lunes.strftime("%d/%m/%Y")
-                    pedidos_pico_mensaje = f"La semana en la que más pedidos se hicieron fue la del: {fecha_str}"
+                    counter = Counter(semanas)
+                    most_common = counter.most_common()
+                    max_count = most_common[0][1]
+                    picos = [s.strftime("%d/%m/%Y") for s, c in most_common if c == max_count]
+                    picos_str = ", ".join(f"la del {p}" for p in picos[:-1]) + " y " + f"la del {picos[-1]}" if len(picos) > 1 else f"la del {picos[0]}"
+                    if len(picos) > 1:
+                        pedidos_pico_mensaje = f"Las semanas en las que más pedidos se hicieron fueron: {picos_str}"
+                    else:
+                        pedidos_pico_mensaje = f"La semana en la que más pedidos se hicieron fue: {picos_str}"
 
         template_path = 'reportes/pdf_pedidos.html'
         titulo = "Reporte de Pedidos"
@@ -890,14 +951,17 @@ def reporte_modulo_pdf(request, modulo, periodo):
 
         qs = list(reservas.order_by('fecha'))
 
-        # Encontrar el cliente con más reservas en el período
+        # Encontrar el cliente con más reservas en el período (soportando empates)
         reserva_estrella_cantidad = 0
-        reserva_estrella_nombre = "Ninguno"
+        reservas_ganadores = []
         if qs:
             from collections import Counter
             clientes_reservas = [r.cliente.nombre_completo for r in qs if r.cliente]
             if clientes_reservas:
-                reserva_estrella_nombre, reserva_estrella_cantidad = Counter(clientes_reservas).most_common(1)[0]
+                counter = Counter(clientes_reservas)
+                most_common = counter.most_common()
+                reserva_estrella_cantidad = most_common[0][1]
+                reservas_ganadores = [name for name, count in most_common if count == reserva_estrella_cantidad]
 
             # Contar total de reservas por cliente y asociarlo a cada objeto Reserva
             counts = Counter(r.cliente_id for r in qs if r.cliente_id)
@@ -905,7 +969,11 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 r.cliente_total_reservas = counts.get(r.cliente_id, 0)
 
         if reserva_estrella_cantidad > 0:
-            reserva_estrella_mensaje = f"El cliente que más reservas realizó fue: {reserva_estrella_nombre}"
+            if len(reservas_ganadores) > 1:
+                nombres = ", ".join(reservas_ganadores[:-1]) + " y " + reservas_ganadores[-1]
+                reserva_estrella_mensaje = f"Los clientes que más reservas realizaron fueron: {nombres}"
+            else:
+                reserva_estrella_mensaje = f"El cliente que más reservas realizó fue: {reservas_ganadores[0]}"
 
         template_path = 'reportes/pdf_reservas.html'
         titulo = "Reporte de Reservas"
