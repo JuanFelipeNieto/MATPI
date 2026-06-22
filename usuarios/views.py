@@ -591,7 +591,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
                 'mensual': 'el mes',
                 'general': 'todo el tiempo'
             }
-            producto_estrella_mensaje = f"El producto más vendido durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {producto_estrella_nombre} ({producto_estrella_cantidad} uds.)"
+            producto_estrella_mensaje = f"El producto más vendido durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {producto_estrella_nombre}"
 
         if ordenar == 'ventas_desc':
             productos = productos.order_by('-total_vendido')
