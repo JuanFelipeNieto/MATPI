@@ -82,6 +82,7 @@
                     <tbody id="body-productos">
                         <tr class="fila-producto" data-indice="0" data-tipo="producto">
                             <td>
+                                <input type="hidden" name="indices[]" value="0">
                                 <label class="sr-only label-producto" for="select_producto_0">Seleccione Producto</label>
                                 <select name="producto_id[]" id="select_producto_0" class="form-control select-producto" required onchange="actualizarComposicion_y_Precio(this)">
                                     <option value="">Seleccione Producto</option>
@@ -227,6 +228,11 @@
 
         const nuevoIndice = contadorFilas++;
         fila.dataset.indice = nuevoIndice;
+
+        const inputIndice = fila.querySelector('input[name="indices[]"]');
+        if (inputIndice) {
+            inputIndice.value = nuevoIndice;
+        }
         
         select.id = `select_producto_${nuevoIndice}`;
         selectCant.id = `select_cantidad_${nuevoIndice}`;

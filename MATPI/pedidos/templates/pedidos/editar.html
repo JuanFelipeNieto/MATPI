@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Editar Pedido #{{ pedido.id }} — Matpi{% endblock %}
+{% block title %}Editar Pedido — Matpi{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/pedidos.css' %}">
@@ -23,10 +23,7 @@
                     <label for="txt_numero_orden">Número de Orden</label>
                     <input type="number" id="txt_numero_orden" name="txt_numero_orden" value="{{ pedido.numero_orden }}" readonly class="readonly-field" required min="1" max="999">
                 </div>
-                <div class="form-group">
-                    <label for="txt_fecha">Fecha</label>
-                    <input type="date" id="txt_fecha" name="txt_fecha" value="{{ pedido.fecha|date:'Y-m-d' }}" readonly class="readonly-field">
-                </div>
+
                 <div class="form-group">
                     <label for="txt_metodo_pago">Método de Pago</label>
                     <select id="txt_metodo_pago" name="txt_metodo_pago">
@@ -142,7 +139,7 @@
     </select>
 </div>
 
-<script src="{% static 'js/pedidos.js' %}"></script>
+<script src="{% static 'js/pedidos.js' %}?v=1.2"></script>
 <script>
     let contadorFilas = 0;
     const detallesIniciales = {{ detalles_json|safe }};
@@ -158,6 +155,7 @@
 
         nuevaFila.innerHTML = `
             <td>
+                <input type="hidden" name="indices[]" value="${contadorFilas}">
                 ${document.getElementById(datos && datos.tipo === 'bebida' ? 'select-bebidas-html' : 'select-productos-html').innerHTML}
             </td>
             <td>
@@ -175,7 +173,7 @@
                     <div class="lista-exclusiones"></div>
                     <div style="margin-top: 12px;">
                         <label style="font-size: 0.85rem; font-weight: 600; color: #64748b;">NOTAS:</label>
-                        <textarea name="producto_notes_${contadorFilas}" class="form-control" rows="2">${datos ? (datos.notas || '') : ''}</textarea>
+                        <textarea name="producto_notas_${contadorFilas}" class="form-control" rows="2">${datos ? (datos.notas || '') : ''}</textarea>
                     </div>
                 </div>
             </td>

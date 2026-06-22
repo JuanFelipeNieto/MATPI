@@ -130,6 +130,7 @@ class PedidoViewsTest(TestCase):
             'txt_metodo_pago': 'Tarjeta Débito',
             'txt_cajero': self.cajero_user.id,
             'txt_cliente': self.cliente.id,
+            'indices[]': ['0'],
             'producto_id[]': [self.producto.id],
             'producto_cantidad[]': ['2'],
             'producto_exclusiones_0[]': [],
@@ -140,6 +141,30 @@ class PedidoViewsTest(TestCase):
         self.assertIn('/facturas/registrar/', response.url)
         self.pedido.refresh_from_db()
         self.assertEqual(self.pedido.metodo_pago, 'Tarjeta Débito')
+
+    def test_editar_pedido_post_indices_mapping(self):
+        self.login_como_cajero()
+        # Test non-contiguous indices (e.g. index 3) to verify exclusions and notes alignment
+        datos = {
+            'txt_id': self.pedido.id,
+            'txt_metodo_pago': 'Tarjeta Débito',
+            'txt_cajero': self.cajero_user.id,
+            'txt_cliente': self.cliente.id,
+            'indices[]': ['3'],
+            'producto_id[]': [self.producto.id],
+            'producto_cantidad[]': ['2'],
+            'producto_exclusiones_3[]': [self.materia.id],
+            'producto_notas_3': 'Exclusion alignment test notes'
+        }
+        response = self.client.post(reverse('editar_pedido'), datos)
+        self.assertEqual(response.status_code, 302)
+        self.pedido.refresh_from_db()
+        
+        # Verify details were updated correctly
+        detalles = list(self.pedido.detalles.all())
+        self.assertEqual(len(detalles), 1)
+        self.assertEqual(detalles[0].notas, 'Exclusion alignment test notes')
+        self.assertIn(self.materia, detalles[0].materias_excluidas.all())
 
     def test_pedidos_pendientes_get(self):
         self.login_como_cajero()

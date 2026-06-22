@@ -250,6 +250,7 @@ def _validar_cliente_y_vencidos(request, productos_ids):
                 raise ValueError(f"No se puede registrar el pedido: El producto '{prod.nombre_producto}' tiene ingredientes sin stock.")
 
 def _crear_detalles_pedido(pedido, request, productos_ids, cantidades):
+    indices = request.POST.getlist('indices[]')
     total_valor = 0
     for i, (p_id, p_cant) in enumerate(zip(productos_ids, cantidades)):
         if not p_id:
@@ -267,13 +268,15 @@ def _crear_detalles_pedido(pedido, request, productos_ids, cantidades):
             precio_unitario=precio_u
         )
 
-        exclusiones_key = f'producto_exclusiones_{i}[]'
+        idx = indices[i] if i < len(indices) else i
+        exclusiones_key = f'producto_exclusiones_{idx}[]'
         excluidas_ids = request.POST.getlist(exclusiones_key)
         if excluidas_ids:
             detalle.materias_excluidas.set(excluidas_ids)
 
-        notas_key = f'producto_notas_{i}'
-        detalle.notas = request.POST.get(notas_key)
+        notas_key = f'producto_notas_{idx}'
+        notes_key = f'producto_notes_{idx}'
+        detalle.notas = request.POST.get(notas_key) or request.POST.get(notes_key) or ""
         detalle.save()
     return total_valor
 
@@ -298,9 +301,11 @@ def registrar_pedido(request):
     try:
         _validar_cliente_y_vencidos(request, productos_ids)
 
+        indices = request.POST.getlist('indices[]')
         exclusiones_data = []
         for i in range(len(productos_ids)):
-            exclusiones_data.append(request.POST.getlist(f'producto_exclusiones_{i}[]'))
+            idx = indices[i] if i < len(indices) else i
+            exclusiones_data.append(request.POST.getlist(f'producto_exclusiones_{idx}[]'))
 
         es_valido, error_msg = _validar_stock_pedido(productos_ids, cantidades, exclusiones_data)
         if not es_valido:
@@ -441,9 +446,11 @@ def editar_pedido(request):
     # 1.1 Validar nuevo stock antes de borrar detalles y aplicar cambios
     productos_ids_nuevos = request.POST.getlist(PRODUCTO_ID_KEY)
     cantidades_nuevas = request.POST.getlist(PRODUCTO_CANTIDAD_KEY)
+    indices_nuevos = request.POST.getlist('indices[]')
     exclusiones_data_nuevas = []
     for i in range(len(productos_ids_nuevos)):
-        exclusiones_data_nuevas.append(request.POST.getlist(f'producto_exclusiones_{i}[]'))
+        idx = indices_nuevos[i] if i < len(indices_nuevos) else i
+        exclusiones_data_nuevas.append(request.POST.getlist(f'producto_exclusiones_{idx}[]'))
 
     es_valido, error_msg = _validar_stock_pedido(productos_ids_nuevos, cantidades_nuevas, exclusiones_data_nuevas)
     if not es_valido:
