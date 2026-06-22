@@ -32,6 +32,9 @@ def listar_reservas(request, edit_id=None):
         try:
             desde_dt = datetime.strptime(fecha_desde, '%Y-%m-%d')
             desde_dt = timezone.make_aware(desde_dt)
+            if desde_dt.date() < timezone.localdate():
+                messages.error(request, "No se puede buscar una fecha menor a la actual.")
+                return redirect('listar_reservas')
             reservas_list = reservas_list.filter(fecha__gte=desde_dt)
         except ValueError:
             pass
@@ -41,6 +44,9 @@ def listar_reservas(request, edit_id=None):
             hasta_dt = datetime.strptime(fecha_hasta, '%Y-%m-%d')
             hasta_dt = hasta_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
             hasta_dt = timezone.make_aware(hasta_dt)
+            if hasta_dt.date() < timezone.localdate():
+                messages.error(request, "No se puede buscar una fecha menor a la actual.")
+                return redirect('listar_reservas')
             reservas_list = reservas_list.filter(fecha__lte=hasta_dt)
         except ValueError:
             pass

@@ -90,12 +90,12 @@
                     
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <label for="fecha_desde" style="font-size: 0.9rem; color: #555; font-weight: 500;">Desde:</label>
-                        <input type="date" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde|default:'' }}" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <input type="date" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde|default:'' }}" min="{{ ahora|date:'Y-m-d' }}" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <label for="fecha_hasta" style="font-size: 0.9rem; color: #555; font-weight: 500;">Hasta:</label>
-                        <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta|default:'' }}" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta|default:'' }}" min="{{ ahora|date:'Y-m-d' }}" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
                     
                     <div style="display: flex; gap: 8px;">
