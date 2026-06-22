@@ -15,9 +15,9 @@
 <div class="formulario-seccion">
     <h1>Materia Prima</h1>
 
-    <div class="form-busqueda" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; align-items: stretch;">
-        <div class="buscador-izq" style="width: 100%;">
-            <form method="GET" action="{% url 'listar_materia_prima' %}" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; width: 100%;">
+    <div class="form-busqueda" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; width: 100%;">
+        <div class="buscador-izq" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+            <form method="GET" action="{% url 'listar_materia_prima' %}" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                 <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por nombre</label>
                 <input type="text" id="buscar" name="buscar" placeholder="Buscar por nombre" value="{{ buscar|default:'' }}" style="width: 220px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                 
@@ -51,10 +51,10 @@
         </div>
 
         {% if es_admin %}
-        <div class="acciones-header" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <a href="{% url 'mostrar_registro_materia_prima' %}" class="btn btn-guardar">+ Nueva Materia Prima</a>
-            <a href="{% url 'importar_materia_prima_excel' %}" class="btn btn-azul">Importar Materias primas</a>
-            <a href="{% url 'importar_lotes_excel' %}" class="btn btn-azul" style="background: #778898;">Importar Lotes</a>
+        <div class="acciones-header" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <a href="{% url 'mostrar_registro_materia_prima' %}" class="btn btn-guardar" style="padding: 10px 15px; line-height: 1.2;">+ Nueva Materia Prima</a>
+            <a href="{% url 'importar_materia_prima_excel' %}" class="btn btn-azul" style="padding: 10px 15px; line-height: 1.2;">Importar Materias primas</a>
+            <a href="{% url 'importar_lotes_excel' %}" class="btn btn-azul" style="background: #778898; padding: 10px 15px; line-height: 1.2;">Importar Lotes</a>
         </div>
         {% endif %}
     </div>
