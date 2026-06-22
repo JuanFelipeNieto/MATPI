@@ -240,6 +240,39 @@
                     }
                 });
             }
+
+            // Confirmación antes de salir si hay cambios sin guardar
+            (function() {
+                const forms = Array.from(document.querySelectorAll('form[method="post"], form[method="POST"]'));
+                const validForms = forms.filter(form => form.querySelectorAll('input:not([type="hidden"]), select, textarea').length > 0);
+                if (validForms.length === 0) return;
+
+                let isDirty = false;
+                let isSubmitting = false;
+
+                validForms.forEach(form => {
+                    form.addEventListener('change', () => { isDirty = true; });
+                    form.addEventListener('input', () => { isDirty = true; });
+                    form.addEventListener('submit', () => { isSubmitting = true; });
+                });
+
+                document.querySelectorAll('a, button, input[type="button"]').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const onclickAttr = el.getAttribute('onclick') || '';
+                        if (onclickAttr.includes('confirm') || el.classList.contains('btn-cancelar') || el.innerText.toLowerCase().includes('cancelar')) {
+                            isSubmitting = true;
+                        }
+                    });
+                });
+
+                window.addEventListener('beforeunload', (e) => {
+                    if (isDirty && !isSubmitting) {
+                        e.preventDefault();
+                        e.returnValue = '¿Seguro que quieres salir? Los cambios no guardados se perderán.';
+                        return e.returnValue;
+                    }
+                });
+            })();
         })();
     </script>
 
