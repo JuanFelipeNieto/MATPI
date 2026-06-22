@@ -1,10 +1,17 @@
-﻿{% extends "reportes/base_pdf.html" %}
+{% extends "reportes/base_pdf.html" %}
 
 {% block content %}
 {% if grafica_base64 %}
 <div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
     <h3 style="font-size: 14px; color: #333; margin-bottom: 5px;">Performance de Cajeros - {{ periodo_str }}</h3>
     <img src="{{ grafica_base64 }}" alt="Gráfico estadístico" style="width: 500px; height: auto; border: 1px solid #eee; border-radius: 8px;">
+</div>
+<br>
+{% endif %}
+
+{% if cajero_estrella_mensaje %}
+<div style="background-color: #fcf8e3; border: 1px solid #faebcc; color: #8a6d3b; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; font-weight: bold; text-align: center;">
+    {{ cajero_estrella_mensaje }}
 </div>
 <br>
 {% endif %}

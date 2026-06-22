@@ -478,6 +478,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
     from reportes.services import obtener_rango_fechas
     ahora = timezone.now()
     fecha_inicio, fecha_fin = obtener_rango_fechas(periodo)
+    cajero_estrella_mensaje = None
 
     pedidos_completados = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     reservas_periodo = Reserva.objects.filter(fecha__gte=fecha_inicio)
@@ -503,6 +504,23 @@ def reporte_modulo_pdf(request, modulo, periodo):
             pedidos_totales=models.Count('usuario__pedidos', filter=models.Q(usuario__pedidos__estado__in=['Preparacion', 'Completado'])),
             pedidos_periodo=models.Count('usuario__pedidos', filter=models.Q(usuario__pedidos__estado__in=['Preparacion', 'Completado'], usuario__pedidos__fecha__gte=fecha_inicio, usuario__pedidos__fecha__lte=fecha_fin))
         ).select_related('usuario')
+
+        # Encontrar el cajero que más pedidos atendió en el periodo
+        cajero_estrella_pedidos = 0
+        cajero_estrella_nombre = "Ninguno"
+        for c in cajeros:
+            if c.pedidos_periodo > cajero_estrella_pedidos:
+                cajero_estrella_pedidos = c.pedidos_periodo
+                cajero_estrella_nombre = c.usuario.nombre_completo
+
+        if cajero_estrella_pedidos > 0:
+            periodo_durante_map = {
+                'diario': 'el día',
+                'semanal': 'la semana',
+                'mensual': 'el mes',
+                'general': 'todo el tiempo'
+            }
+            cajero_estrella_mensaje = f"El cajero que más pedidos atendió durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {cajero_estrella_nombre}"
 
         # Filtros y ordenamiento adicionales
         min_pedidos = request.GET.get('min_pedidos')
@@ -768,7 +786,8 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'fecha': ahora,
         'vendedor': request.session.get('usuario_nombre'),
         'periodo_str': periodo_map.get(periodo, 'del Periodo'),
-        'chart_base64': chart_base64
+        'chart_base64': chart_base64,
+        'cajero_estrella_mensaje': cajero_estrella_mensaje,
     }
     return generar_pdf(template_path, contexto, f"MATPI_{modulo}")
 
