@@ -64,11 +64,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="txt_estado_display">Estado de Orden</label>
-                    <input type="text" id="txt_estado_display" value="{% if pedido.estado == 'Preparacion' %}En preparación{% elif pedido.estado == 'Completado' %}Completado{% else %}{{ pedido.estado }}{% endif %}" readonly class="readonly-field">
-                    <input type="hidden" name="txt_estado" value="{{ pedido.estado }}">
-                </div>
+                <input type="hidden" name="txt_estado" value="{{ pedido.estado }}">
                 <input type="hidden" name="txt_cajero" value="{{ pedido.cajero_id|default:'' }}">
             </div>
         </div>
@@ -223,7 +219,7 @@
     }
 
     document.getElementById('order-form').onsubmit = function(e) {
-        return validarStockYSubmit(e, "guardar");
+        return validarStockYSubmit(e, "guardar", true);
     };
 
     window.onload = () => {

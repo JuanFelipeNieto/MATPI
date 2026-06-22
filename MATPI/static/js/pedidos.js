@@ -207,7 +207,7 @@ function calcularTotal() {
     if (spanTotalItems) spanTotalItems.innerText = totalItems;
 }
 
-function validarStockYSubmit(e, accionTexto) {
+function validarStockYSubmit(e, accionTexto, esEdicion = false) {
     const clienteId = document.getElementById('txt_cliente_id').value;
     const clienteNombre = document.getElementById('txt_cliente_search').value;
 
@@ -215,6 +215,10 @@ function validarStockYSubmit(e, accionTexto) {
         alert("No se puede " + accionTexto + " el pedido: El cliente '" + clienteNombre + "' no existe. Selecciónelo de la lista o regístrelo primero.");
         e.preventDefault();
         return false;
+    }
+
+    if (esEdicion) {
+        return true;
     }
 
     const filas = document.querySelectorAll('.fila-producto');
