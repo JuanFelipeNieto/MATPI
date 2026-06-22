@@ -93,6 +93,9 @@ def listar_materia_prima(request):
 
     materia_primas = materia_primas.order_by('nombre_materia_prima')
 
+    unidades = MateriaPrima.objects.values_list('unidad_medida', flat=True).distinct().order_by('unidad_medida')
+    unidades = [u for u in unidades if u]
+
     paginator = Paginator(materia_primas, 10)
     page_number = request.GET.get('page')
     materia_primas_paginated = paginator.get_page(page_number)
@@ -104,6 +107,7 @@ def listar_materia_prima(request):
         'unidad': unidad,
         'cant_lotes': cant_lotes,
         'cant_total': cant_total,
+        'unidades': unidades,
     })
 
 # --- GESTIÓN DE MATERIA PRIMA (CREACIÓN ABIERTA A CAJERO Y ADMIN) ---

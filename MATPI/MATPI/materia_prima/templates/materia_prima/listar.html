@@ -19,11 +19,16 @@
         <div class="buscador-izq" style="width: 100%;">
             <form method="GET" action="{% url 'listar_materia_prima' %}" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; width: 100%;">
                 <label for="buscar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Buscar por nombre</label>
-                <input type="text" id="buscar" name="buscar" placeholder="Buscar por nombre" value="{{ buscar|default:'' }}" style="flex: 2; min-width: 180px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                <input type="text" id="buscar" name="buscar" placeholder="Buscar por nombre" value="{{ buscar|default:'' }}" style="width: 220px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                 
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <label for="unidad" style="font-size: 0.9rem; color: #555; font-weight: 500;">Unidad:</label>
-                    <input type="text" id="unidad" name="unidad" placeholder="g, ml, unid..." value="{{ unidad|default:'' }}" style="width: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                    <select id="unidad" name="unidad" style="width: 120px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; background-color: #fff;">
+                        <option value="">Todas</option>
+                        {% for u in unidades %}
+                            <option value="{{ u }}" {% if u == unidad %}selected{% endif %}>{{ u }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 6px;">
