@@ -479,6 +479,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
     ahora = timezone.now()
     fecha_inicio, fecha_fin = obtener_rango_fechas(periodo)
     cajero_estrella_mensaje = None
+    producto_estrella_mensaje = None
 
     pedidos_completados = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     reservas_periodo = Reserva.objects.filter(fecha__gte=fecha_inicio)
@@ -574,6 +575,23 @@ def reporte_modulo_pdf(request, modulo, periodo):
 
         if categoria:
             productos = productos.filter(categoria=categoria)
+
+        # Encontrar el producto más vendido en el periodo
+        producto_estrella_cantidad = 0
+        producto_estrella_nombre = "Ninguno"
+        for p in productos:
+            if p.total_vendido > producto_estrella_cantidad:
+                producto_estrella_cantidad = p.total_vendido
+                producto_estrella_nombre = p.nombre_producto
+
+        if producto_estrella_cantidad > 0:
+            periodo_durante_map = {
+                'diario': 'el día',
+                'semanal': 'la semana',
+                'mensual': 'el mes',
+                'general': 'todo el tiempo'
+            }
+            producto_estrella_mensaje = f"El producto más vendido durante {periodo_durante_map.get(periodo, 'el periodo')} fue: {producto_estrella_nombre} ({producto_estrella_cantidad} uds.)"
 
         if ordenar == 'ventas_desc':
             productos = productos.order_by('-total_vendido')
@@ -788,6 +806,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'periodo_str': periodo_map.get(periodo, 'del Periodo'),
         'chart_base64': chart_base64,
         'cajero_estrella_mensaje': cajero_estrella_mensaje,
+        'producto_estrella_mensaje': producto_estrella_mensaje,
     }
     return generar_pdf(template_path, contexto, f"MATPI_{modulo}")
 
