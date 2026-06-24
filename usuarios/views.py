@@ -1004,6 +1004,13 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'general': 'en Total'
     }
 
+    periodo_durante_map = {
+        'diario': 'durante el día',
+        'semanal': 'durante la semana',
+        'mensual': 'durante el mes',
+        'general': 'en total'
+    }
+
     # Generar gráfica solo para pedidos/ventas y periodos específicos
     chart_base64 = None
     if modulo in ['pedidos', 'ventas'] and periodo in ['diario', 'semanal', 'mensual']:
@@ -1015,6 +1022,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'fecha': ahora,
         'vendedor': request.session.get('usuario_nombre'),
         'periodo_str': periodo_map.get(periodo, 'del Periodo'),
+        'periodo_durante': periodo_durante_map.get(periodo, 'en el periodo seleccionado'),
         'chart_base64': chart_base64,
         'cajero_estrella_mensaje': cajero_estrella_mensaje,
         'producto_estrella_mensaje': producto_estrella_mensaje,

@@ -4,7 +4,7 @@
 {% if producto_filtrado %}
 <div style="background-color: #f8fafc; border-left: 4px solid #c53030; padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 1.1em; color: #333; line-height: 1.5;">
     <strong>Filtrado por producto:</strong> {{ producto_filtrado.nombre_producto }}<br>
-    Este producto se vendió <strong>{{ total_vendido }}</strong> veces en el rango de tiempo seleccionado.
+    Este producto se vendió <strong>{{ total_vendido }}</strong> veces {{ periodo_durante }}.
 </div>
 {% endif %}
 <table class="table-data">
