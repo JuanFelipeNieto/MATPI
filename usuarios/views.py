@@ -487,6 +487,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
     reserva_estrella_mensaje = None
     proveedor_estrella_mensaje = None
     producto_filtrado = None
+    total_vendido = 0
 
     pedidos_completados = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     reservas_periodo = Reserva.objects.filter(fecha__gte=fecha_inicio)
@@ -833,6 +834,12 @@ def reporte_modulo_pdf(request, modulo, periodo):
             producto_filtrado = Producto.objects.filter(pk=producto_id).first()
             if producto_filtrado:
                 facturas = facturas.filter(pedido__detalles__producto=producto_filtrado).distinct()
+                from django.db.models import Sum
+                from pedidos.models import DetallePedidoProducto
+                total_vendido = DetallePedidoProducto.objects.filter(
+                    pedido__facturas__in=facturas,
+                    producto=producto_filtrado
+                ).aggregate(total=Sum('cantidad'))['total'] or 0
 
         if ordenar == 'valor_desc':
             facturas = facturas.order_by('-valor_total')
@@ -1017,6 +1024,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'reserva_estrella_mensaje': reserva_estrella_mensaje,
         'proveedor_estrella_mensaje': proveedor_estrella_mensaje,
         'producto_filtrado': producto_filtrado,
+        'total_vendido': total_vendido,
     }
     return generar_pdf(template_path, contexto, f"MATPI_{modulo}")
 
