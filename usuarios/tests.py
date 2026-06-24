@@ -263,6 +263,39 @@ class UsuarioViewsCompleteTest(TestCase):
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertIn('inline; filename="MATPI_facturas.pdf"', response['Content-Disposition'])
 
+    def test_reporte_proveedores_con_proveedor_pdf(self):
+        from proveedores.models import Proveedor, DetalleProveedorMateriaP
+        from materia_prima.models import MateriaPrima
+
+        self.login_como_admin()
+
+        proveedor = Proveedor.objects.create(
+            nombre_proveedor="Proveedor Carnes",
+            direccion="Calle 1",
+            correo_electronico="carnes@matpi.com",
+            telefono="3009876543"
+        )
+        materia = MateriaPrima.objects.create(
+            nombre_materia_prima="Carne de res",
+            unidad_medida="kg",
+            cantidad_por_unidad=1,
+            tipo="Comida"
+        )
+        DetalleProveedorMateriaP.objects.create(
+            proveedor=proveedor,
+            materia_prima=materia,
+            precio_unitario=15000,
+            fecha_suministro=timezone.now(),
+            fecha_vencimiento=timezone.now().date() + timedelta(days=10)
+        )
+
+        response = self.client.get(
+            reverse('generar_reporte', kwargs={'modulo': 'proveedores', 'periodo': 'general'}) + f'?proveedor={proveedor.id}'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertIn('inline; filename="MATPI_proveedores.pdf"', response['Content-Disposition'])
+
 
     # 16. Actualizar Metas
     def test_actualizar_metas(self):

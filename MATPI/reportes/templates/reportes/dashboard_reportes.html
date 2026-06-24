@@ -322,6 +322,15 @@
                                 <option value="suministros_asc">Suministros registrados (menor a mayor)</option>
                             </select>
                         </div>
+                        <div style="margin-bottom: 4px; margin-top: 8px;">
+                            <label for="proveedores_filtrar" style="display:block; font-weight:600; margin-bottom:3px; color: #444;">Proveedor:</label>
+                            <select id="proveedores_filtrar" style="width:100%; padding:4px; border-radius:4px; border:1px solid #ccc; font-family: inherit; font-size: 0.85em; cursor: pointer;">
+                                <option value="">-- Todos los proveedores --</option>
+                                {% for prov in proveedores %}
+                                    <option value="{{ prov.id }}">{{ prov.nombre_proveedor }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                 </details>
 
@@ -440,9 +449,11 @@
     function descargarReporteProveedores() {
         var periodo = document.getElementById('periodo_proveedores').value;
         var ordenar = document.getElementById('proveedores_ordenar').value;
+        var proveedor = document.getElementById('proveedores_filtrar').value;
 
         var url = '/reporte/proveedores/' + periodo + '/?';
         if (ordenar) url += 'ordenar=' + encodeURIComponent(ordenar) + '&';
+        if (proveedor) url += 'proveedor=' + encodeURIComponent(proveedor) + '&';
 
         window.open(url, '_blank');
     }

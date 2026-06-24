@@ -488,6 +488,8 @@ def reporte_modulo_pdf(request, modulo, periodo):
     proveedor_estrella_mensaje = None
     producto_filtrado = None
     total_vendido = 0
+    proveedor_filtrado = None
+    total_suministros = 0
 
     pedidos_completados = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     reservas_periodo = Reserva.objects.filter(fecha__gte=fecha_inicio)
@@ -712,53 +714,69 @@ def reporte_modulo_pdf(request, modulo, periodo):
         from django.db.models.functions import Coalesce
 
         ordenar = request.GET.get('ordenar', '')
+        proveedor_id = request.GET.get('proveedor')
 
-        # Annotate each supplier with the count of registered supplies in the selected period
-        proveedores = Proveedor.objects.annotate(
-            total_suministros=Coalesce(
-                models.Count(
-                    'detalles_materia',
-                    filter=models.Q(
-                        detalles_materia__fecha_suministro__gte=fecha_inicio,
-                        detalles_materia__fecha_suministro__lte=fecha_fin
-                    )
-                ),
-                0
-            )
-        )
-
-        # Encontrar el proveedor que más suministró (soportando empates)
-        proveedor_estrella_cantidad = 0
-        proveedores_ganadores = []
-        for p in proveedores:
-            if p.total_suministros > proveedor_estrella_cantidad:
-                proveedor_estrella_cantidad = p.total_suministros
-                proveedores_ganadores = [p.nombre_proveedor]
-            elif p.total_suministros == proveedor_estrella_cantidad and proveedor_estrella_cantidad > 0:
-                proveedores_ganadores.append(p.nombre_proveedor)
-
-        if proveedor_estrella_cantidad > 0:
-            periodo_durante_map = {
-                'diario': 'el día',
-                'semanal': 'la semana',
-                'mensual': 'el mes',
-                'general': 'todo el tiempo'
-            }
-            p_durante = periodo_durante_map.get(periodo, 'el periodo')
-            if len(proveedores_ganadores) > 1:
-                nombres = ", ".join(proveedores_ganadores[:-1]) + " y " + proveedores_ganadores[-1]
-                proveedor_estrella_mensaje = f"Los proveedores que más cantidad suministraron durante {p_durante} fueron: {nombres}"
+        if proveedor_id:
+            from proveedores.models import DetalleProveedorMateriaP
+            proveedor_filtrado = Proveedor.objects.filter(pk=proveedor_id).first()
+            if proveedor_filtrado:
+                suministros = DetalleProveedorMateriaP.objects.filter(
+                    proveedor=proveedor_filtrado,
+                    fecha_suministro__gte=fecha_inicio,
+                    fecha_suministro__lte=fecha_fin
+                ).select_related('materia_prima').order_by('-fecha_suministro')
+                total_suministros = suministros.count()
+                qs = list(suministros)
             else:
-                proveedor_estrella_mensaje = f"El proveedor que más cantidad suministró durante {p_durante} fue: {proveedores_ganadores[0]}"
-
-        if ordenar == 'suministros_desc':
-            proveedores = proveedores.order_by('-total_suministros')
-        elif ordenar == 'suministros_asc':
-            proveedores = proveedores.order_by('total_suministros')
+                qs = []
         else:
-            proveedores = proveedores.order_by('-total_suministros')
+            # Annotate each supplier with the count of registered supplies in the selected period
+            proveedores = Proveedor.objects.annotate(
+                total_suministros=Coalesce(
+                    models.Count(
+                        'detalles_materia',
+                        filter=models.Q(
+                            detalles_materia__fecha_suministro__gte=fecha_inicio,
+                            detalles_materia__fecha_suministro__lte=fecha_fin
+                        )
+                    ),
+                    0
+                )
+            )
 
-        qs = proveedores
+            # Encontrar el proveedor que más suministró (soportando empates)
+            proveedor_estrella_cantidad = 0
+            proveedores_ganadores = []
+            for p in proveedores:
+                if p.total_suministros > proveedor_estrella_cantidad:
+                    proveedor_estrella_cantidad = p.total_suministros
+                    proveedores_ganadores = [p.nombre_proveedor]
+                elif p.total_suministros == proveedor_estrella_cantidad and proveedor_estrella_cantidad > 0:
+                    proveedores_ganadores.append(p.nombre_proveedor)
+
+            if proveedor_estrella_cantidad > 0:
+                periodo_durante_map = {
+                    'diario': 'el día',
+                    'semanal': 'la semana',
+                    'mensual': 'el mes',
+                    'general': 'todo el tiempo'
+                }
+                p_durante = periodo_durante_map.get(periodo, 'el periodo')
+                if len(proveedores_ganadores) > 1:
+                    nombres = ", ".join(proveedores_ganadores[:-1]) + " y " + proveedores_ganadores[-1]
+                    proveedor_estrella_mensaje = f"Los proveedores que más cantidad suministraron durante {p_durante} fueron: {nombres}"
+                else:
+                    proveedor_estrella_mensaje = f"El proveedor que más cantidad suministró durante {p_durante} fue: {proveedores_ganadores[0]}"
+
+            if ordenar == 'suministros_desc':
+                proveedores = proveedores.order_by('-total_suministros')
+            elif ordenar == 'suministros_asc':
+                proveedores = proveedores.order_by('total_suministros')
+            else:
+                proveedores = proveedores.order_by('-total_suministros')
+
+            qs = proveedores
+
         template_path = 'reportes/pdf_proveedores.html'
         titulo = "Reporte de Proveedores"
     elif modulo in ['materias', 'materia_prima']:
@@ -1033,6 +1051,8 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'proveedor_estrella_mensaje': proveedor_estrella_mensaje,
         'producto_filtrado': producto_filtrado,
         'total_vendido': total_vendido,
+        'proveedor_filtrado': proveedor_filtrado,
+        'total_suministros': total_suministros,
     }
     return generar_pdf(template_path, contexto, f"MATPI_{modulo}")
 
