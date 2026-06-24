@@ -124,3 +124,34 @@ class ProveedorViewsTest(TestCase):
         response = self.client.post(reverse('registrar_suministro_materia'), datos)
         self.assertRedirects(response, reverse('listar_proveedores'))
         self.assertTrue(DetalleProveedorMateriaP.objects.filter(proveedor=self.proveedor, materia_prima=self.materia).exists())
+
+    def test_registrar_suministro_materia_vencimiento_menos_una_semana_fail(self):
+        self.login_como_admin()
+        datos = {
+            'txt_proveedor_id': self.proveedor.id,
+            'txt_materia_id': self.materia.id,
+            'txt_cantidad': '50',
+            'txt_precio': '1500',
+            'txt_fecha': timezone.now().strftime('%Y-%m-%dT%H:%M'),
+            'txt_vencimiento': (timezone.now().date() + timedelta(days=5)).strftime('%Y-%m-%d') # 5 days (less than a week)
+        }
+        response = self.client.post(reverse('registrar_suministro_materia'), datos)
+        self.assertRedirects(response, reverse('mostrar_registro_suministro', args=[self.proveedor.id]))
+        # Ensure it was NOT created
+        self.assertFalse(DetalleProveedorMateriaP.objects.filter(proveedor=self.proveedor, materia_prima=self.materia).exists())
+
+    def test_registrar_suministro_materia_vencimiento_vacio_fail(self):
+        self.login_como_admin()
+        datos = {
+            'txt_proveedor_id': self.proveedor.id,
+            'txt_materia_id': self.materia.id,
+            'txt_cantidad': '50',
+            'txt_precio': '1500',
+            'txt_fecha': timezone.now().strftime('%Y-%m-%dT%H:%M'),
+            'txt_vencimiento': '' # empty
+        }
+        response = self.client.post(reverse('registrar_suministro_materia'), datos)
+        self.assertRedirects(response, reverse('mostrar_registro_suministro', args=[self.proveedor.id]))
+        # Ensure it was NOT created
+        self.assertFalse(DetalleProveedorMateriaP.objects.filter(proveedor=self.proveedor, materia_prima=self.materia).exists())
+

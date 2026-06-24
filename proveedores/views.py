@@ -167,16 +167,20 @@ def registrar_suministro_materia(request):
         fecha        = request.POST.get('txt_fecha')
         vencimiento = request.POST.get('txt_vencimiento')
 
-        if vencimiento:
-            from datetime import datetime, timedelta
-            try:
-                venc_date = datetime.strptime(vencimiento, '%Y-%m-%d').date()
-                today_date = timezone.now().date()
-                if venc_date < today_date + timedelta(days=7):
-                    messages.error(request, "La fecha de vencimiento no puede ser menor a una semana de la fecha actual.")
-                    return redirect('listar_proveedores')
-            except ValueError:
-                pass
+        if not vencimiento:
+            messages.error(request, "La fecha de vencimiento es requerida y no puede ser menor a una semana.")
+            return redirect('mostrar_registro_suministro', id=proveedor_id)
+
+        from datetime import datetime, timedelta
+        try:
+            venc_date = datetime.strptime(vencimiento, '%Y-%m-%d').date()
+            today_date = timezone.now().date()
+            if venc_date < today_date + timedelta(days=7):
+                messages.error(request, "La fecha de vencimiento no puede ser menor a una semana de la fecha actual.")
+                return redirect('mostrar_registro_suministro', id=proveedor_id)
+        except ValueError:
+            messages.error(request, "La fecha de vencimiento es inválida.")
+            return redirect('mostrar_registro_suministro', id=proveedor_id)
 
         try:
             with transaction.atomic():
