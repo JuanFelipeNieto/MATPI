@@ -82,3 +82,12 @@ def eliminar_factura(request, id):
     from django.contrib import messages
     messages.warning(request, "Las facturas no pueden ser eliminadas del sistema por integridad contable.")
     return redirect('listar_facturas')
+
+
+@require_GET
+def detalle_factura(request, id):
+    from django.shortcuts import get_object_or_404
+    factura = get_object_or_404(Factura, pk=id)
+    data = {'factura': factura}
+    return render(request, 'facturas/detalles.html', data)
+

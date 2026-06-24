@@ -108,3 +108,11 @@ class FacturaViewsTest(TestCase):
         self.assertRedirects(response, reverse('listar_facturas'))
         # La factura debe seguir existiendo por integridad contable
         self.assertTrue(Factura.objects.filter(id=self.factura.id).exists())
+
+    def test_detalle_factura_get(self):
+        self.login_como_cajero()
+        response = self.client.get(reverse('detalle_factura', args=[self.factura.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'facturas/detalles.html')
+        self.assertEqual(response.context['factura'], self.factura)
+

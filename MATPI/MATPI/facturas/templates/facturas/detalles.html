@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalles de la Factura #{{ factura.id }} — Matpi{% endblock %}
+
+{% block content %}
+<div class="formulario-seccion">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Detalles de la Factura #{{ factura.id }}</h1>
+        <span class="badge badge-success" style="padding: 8px 15px; border-radius: 20px;">
+            Facturado
+        </span>
+    </div>
+
+    <div class="card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Fecha y Hora de Registro</span>
+                <p style="font-weight: 600; font-size: 1.1rem;">{{ factura.pedido.fecha|date:"d/m/Y H:i" }}</p>
+            </div>
+            <div>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Cliente</span>
+                <p style="font-weight: 600; font-size: 1.1rem;">{{ factura.pedido.cliente.nombre_completo|default:"No aplica" }}</p>
+            </div>
+            <div>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Método de Pago</span>
+                <p style="font-weight: 600; font-size: 1.1rem;">{{ factura.pedido.metodo_pago|default:"—" }}</p>
+            </div>
+            <div>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Cajero responsable</span>
+                <p style="font-weight: 600; font-size: 1.1rem;">{{ factura.pedido.usuario.nombre_completo|default:"Sistema" }}</p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+            <div>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Valor Base Pedido</span>
+                <p style="font-weight: 600; font-size: 1.1rem;">${{ factura.pedido.valor }}</p>
+            </div>
+            <div>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">IVA (%)</span>
+                <p style="font-weight: 600; font-size: 1.1rem;">{{ factura.iva|default:"0" }}%</p>
+            </div>
+            <div>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Valor Total Facturado</span>
+                <p style="font-weight: 600; font-size: 1.1rem; color: var(--primary);">${{ factura.valor_total }}</p>
+            </div>
+            <div>
+                <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 5px;">Descripción</span>
+                <p style="font-weight: 600; font-size: 1.1rem;">{{ factura.descripcion|default:"Sin descripción" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <h3>Productos de la Orden</h3>
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Notas / Exclusiones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in factura.pedido.detalles.all %}
+                <tr>
+                    <td>
+                        <div style="font-weight: bold;">{{ detalle.producto.nombre_producto }}</div>
+                        <small style="color: #64748b;">$ {{ detalle.producto.precio_productov }} unit.</small>
+                    </td>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td style="font-weight: bold;">$ {{ detalle.subtotal }}</td>
+                    <td>
+                        {% if detalle.notas %}
+                            <div style="margin-bottom: 5px;">📝 {{ detalle.notas }}</div>
+                        {% endif %}
+                        {% if detalle.materias_excluidas.exists %}
+                            <div style="color: #dc2626; font-size: 0.85rem;">
+                                🚫 Excluye:
+                                {% for m in detalle.materias_excluidas.all %}
+                                    {{ m.nombre_materia_prima }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if not detalle.notas and not detalle.materias_excluidas.exists %}
+                            <span style="color: #94a3b8; font-style: italic;">Sin observaciones</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align:center; color: #64748b;">No hay productos registrados en este pedido.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="background-color: #f8fafc; font-size: 1.2rem;">
+                    <td colspan="2" style="text-align: right; font-weight: bold;">VALOR TOTAL FACTURA (con IVA):</td>
+                    <td colspan="2" style="font-weight: 900; color: var(--primary);">$ {{ factura.valor_total }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div style="margin-top: 30px; display: flex; gap: 15px;">
+        <a href="{% url 'listar_facturas' %}" class="btn btn-cancelar" style="flex: 1; text-align: center; text-decoration: none;">🔙 Volver al listado</a>
+    </div>
+</div>
+{% endblock %}
