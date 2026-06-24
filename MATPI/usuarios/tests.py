@@ -221,7 +221,47 @@ class UsuarioViewsCompleteTest(TestCase):
         # Debe retornar el archivo PDF listo para descarga
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
-        self.assertIn('attachment; filename="MATPI_usuarios.pdf"', response['Content-Disposition'])
+        self.assertIn('inline; filename="MATPI_usuarios.pdf"', response['Content-Disposition'])
+
+    def test_reporte_facturas_con_producto_pdf(self):
+        from productos.models import Producto
+        from pedidos.models import Pedido, DetallePedidoProducto
+        from facturas.models import Factura
+
+        self.login_como_admin()
+
+        producto = Producto.objects.create(
+            nombre_producto="Hamburguesa Especial",
+            precio=12000,
+            categoria="Hamburguesas"
+        )
+        pedido = Pedido.objects.create(
+            estado='Completado',
+            valor=12000,
+            numero_orden=101,
+            metodo_pago='Efectivo',
+            usuario=self.admin_user
+        )
+        DetallePedidoProducto.objects.create(
+            pedido=pedido,
+            producto=producto,
+            cantidad=1,
+            precio_unitario=12000
+        )
+        factura = Factura.objects.create(
+            id=999,
+            valor_total=12960,
+            descripcion="Test",
+            iva=8.0,
+            pedido=pedido
+        )
+
+        response = self.client.get(
+            reverse('generar_reporte', kwargs={'modulo': 'facturas', 'periodo': 'general'}) + f'?producto={producto.id}'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertIn('inline; filename="MATPI_facturas.pdf"', response['Content-Disposition'])
 
 
     # 16. Actualizar Metas

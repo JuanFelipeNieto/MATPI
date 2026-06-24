@@ -1,6 +1,11 @@
 {% extends "reportes/base_pdf.html" %}
 
 {% block content %}
+{% if producto_filtrado %}
+<div style="background-color: #f8fafc; border-left: 4px solid #c53030; padding: 8px; margin-bottom: 15px; border-radius: 4px; font-size: 1.1em; color: #333;">
+    <strong>Filtrado por producto:</strong> {{ producto_filtrado.nombre_producto }}
+</div>
+{% endif %}
 <table class="table-data">
     <thead>
         <tr>

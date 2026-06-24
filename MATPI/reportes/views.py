@@ -5,11 +5,13 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
 from .services import generar_csv_general
+from productos.models import Producto
 
 @require_GET
 def dashboard_reportes(request):
     """Renderiza la vista principal del dashboard de reportes."""
-    return render(request, 'reportes/dashboard_reportes.html')
+    productos = Producto.objects.all().order_by('nombre_producto')
+    return render(request, 'reportes/dashboard_reportes.html', {'productos': productos})
 
 def _procesar_logica_reporte(tipo_reporte, periodo):
     """Helper que maneja la lógica de generar el string según parámetros."""

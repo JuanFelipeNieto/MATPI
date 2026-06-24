@@ -476,6 +476,7 @@ def generar_grafica_pedidos(queryset, periodo):
 @require_GET
 def reporte_modulo_pdf(request, modulo, periodo):
     from reportes.services import obtener_rango_fechas
+    from productos.models import Producto
     ahora = timezone.now()
     fecha_inicio, fecha_fin = obtener_rango_fechas(periodo)
     cajero_estrella_mensaje = None
@@ -485,6 +486,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
     cliente_estrella_mensaje = None
     reserva_estrella_mensaje = None
     proveedor_estrella_mensaje = None
+    producto_filtrado = None
 
     pedidos_completados = Pedido.objects.filter(fecha__gte=fecha_inicio, fecha__lte=fecha_fin, estado__in=['Preparacion', 'Completado'])
     reservas_periodo = Reserva.objects.filter(fecha__gte=fecha_inicio)
@@ -823,8 +825,14 @@ def reporte_modulo_pdf(request, modulo, periodo):
         titulo = "Reporte de Materia Prima"
     elif modulo == 'facturas':
         ordenar = request.GET.get('ordenar', '')
+        producto_id = request.GET.get('producto')
 
         facturas = facturas_periodo
+
+        if producto_id:
+            producto_filtrado = Producto.objects.filter(pk=producto_id).first()
+            if producto_filtrado:
+                facturas = facturas.filter(pedido__detalles__producto=producto_filtrado).distinct()
 
         if ordenar == 'valor_desc':
             facturas = facturas.order_by('-valor_total')
@@ -1008,6 +1016,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'cliente_estrella_mensaje': cliente_estrella_mensaje,
         'reserva_estrella_mensaje': reserva_estrella_mensaje,
         'proveedor_estrella_mensaje': proveedor_estrella_mensaje,
+        'producto_filtrado': producto_filtrado,
     }
     return generar_pdf(template_path, contexto, f"MATPI_{modulo}")
 

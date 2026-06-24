@@ -155,6 +155,15 @@
                                 <option value="valor_asc">Valor total (menor a mayor)</option>
                             </select>
                         </div>
+                        <div style="margin-bottom: 4px; margin-top: 8px;">
+                            <label for="facturas_producto" style="display:block; font-weight:600; margin-bottom:3px; color: #444;">Venta por Producto:</label>
+                            <select id="facturas_producto" style="width:100%; padding:4px; border-radius:4px; border:1px solid #ccc; font-family: inherit; font-size: 0.85em; cursor: pointer;">
+                                <option value="">-- Todos los productos --</option>
+                                {% for prod in productos %}
+                                    <option value="{{ prod.id }}">{{ prod.nombre_producto }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                 </details>
 
@@ -451,9 +460,11 @@
     function descargarReporteFacturas() {
         var periodo = document.getElementById('periodo_facturas').value;
         var ordenar = document.getElementById('facturas_ordenar').value;
+        var producto = document.getElementById('facturas_producto').value;
 
         var url = '/reporte/facturas/' + periodo + '/?';
         if (ordenar) url += 'ordenar=' + encodeURIComponent(ordenar) + '&';
+        if (producto) url += 'producto=' + encodeURIComponent(producto) + '&';
 
         window.open(url, '_blank');
     }
