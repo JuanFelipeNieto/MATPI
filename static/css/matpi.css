@@ -763,9 +763,13 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .custom-table td.acciones {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.custom-table td.acciones a,
+.custom-table td.acciones button {
+    margin: 2px 4px;
 }
 
 /* ================================================
