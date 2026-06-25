@@ -121,5 +121,5 @@ class ReservaViewsTest(TestCase):
         }
         response = self.client.post(reverse('registrar_reserva'), datos)
         self.assertRedirects(response, reverse('listar_reservas'))
-        # La reserva debe haberse guardado exitosamente con observaciones vacías o nulas
-        self.assertTrue(Reserva.objects.filter(observaciones='').exists() or Reserva.objects.filter(observaciones__isnull=True).exists())
+        # La reserva debe haberse guardado exitosamente con observaciones por defecto ("ninguna")
+        self.assertTrue(Reserva.objects.filter(observaciones='ninguna').exists())

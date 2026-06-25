@@ -1,4 +1,0 @@
-{
-  "buildAptPackages": ["libcairo2-dev", "pkg-config"],
-  "aptPackages": ["libcairo2-dev"]
-}

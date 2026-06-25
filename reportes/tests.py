@@ -64,7 +64,7 @@ class ReporteViewsTest(TestCase):
         response = self.client.get(reverse('generar_reporte_pdf') + '?tipo=general&periodo=mensual')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
-        self.assertIn('attachment; filename="reporte_general_mensual.pdf"', response['Content-Disposition'])
+        self.assertIn('inline; filename="reporte_general_mensual.pdf"', response['Content-Disposition'])
 
     def test_enviar_reporte_correo_post_success(self):
         self.login_como_admin()
