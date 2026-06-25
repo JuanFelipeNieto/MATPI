@@ -73,6 +73,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-guardar" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-top: auto;">Guardar Reserva</button>
+                <button type="button" class="btn btn-cancelar" onclick="confirmarLimpiarReserva(this.form)" style="width: 100%; text-align: center; padding: 14px; font-size: 1.1rem; margin-top: 10px; display: block; box-sizing: border-box;">❌ Cancelar Registro</button>
             </form>
         {% endif %}
     </div>
@@ -164,6 +165,12 @@
 </div>
 
 <script>
+function confirmarLimpiarReserva(form) {
+    if (confirm('¿Está seguro de que desea cancelar el registro y limpiar el formulario?')) {
+        form.reset();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const txtFechas = document.querySelectorAll('input[type="datetime-local"]');
     txtFechas.forEach(function(txtFecha) {
