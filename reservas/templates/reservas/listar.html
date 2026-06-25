@@ -72,8 +72,10 @@
                     <textarea id="txt_observaciones" name="txt_observaciones" placeholder="Opcional" style="flex: 1; resize: none; padding: 12px;" maxlength="100"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-guardar" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-top: auto;">Guardar Reserva</button>
-                <button type="button" class="btn btn-cancelar" onclick="confirmarLimpiarReserva(this.form)" style="width: 100%; text-align: center; padding: 14px; font-size: 1.1rem; margin-top: 10px; display: block; box-sizing: border-box;">❌ Cancelar Registro</button>
+                <div class="form-actions" style="display: flex; gap: 10px; margin-top: auto;">
+                    <button type="submit" class="btn btn-guardar" style="flex: 1; padding: 14px; font-size: 1.1rem;">Guardar Reserva</button>
+                    <button type="button" class="btn btn-cancelar" onclick="confirmarLimpiarReserva(this.form)" style="flex: 1; text-align: center; padding: 14px; font-size: 1.1rem; box-sizing: border-box;">Cancelar Registro</button>
+                </div>
             </form>
         {% endif %}
     </div>
