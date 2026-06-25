@@ -11,7 +11,7 @@ import re
 from django.views.decorators.http import require_http_methods, require_GET
 
 MSG_NO_PERMISOS = "No tienes permisos para realizar esta acción."
-MSG_DATOS_INVALIDOS = "Los datos no son válidos"
+MSG_DATOS_INVALIDOS = "El contenido del archivo Excel no cumple con las condiciones para agregarlo al listado."
 
 # Función auxiliar para validar si el ID en sesión es Administrador
 def check_admin(request):
@@ -290,17 +290,30 @@ def eliminar_lote(request, id_lote):
     return redirect('ver_lotes', id_materia=id_materia)
 
 def _validar_fila_materia_prima(row):
+    if all(cell is None or str(cell).strip() == '' for cell in row):
+        return None
+
     if len(row) < 4:
         raise ValueError(MSG_DATOS_INVALIDOS)
     nombre, unidad, cant_unidad, tipo = row[:4]
-    if not nombre:
-        return None
+    
+    if not nombre or str(nombre).strip() == '':
+        raise ValueError(MSG_DATOS_INVALIDOS)
+        
     try:
         cant_unidad = int(cant_unidad or 1)
+        if cant_unidad <= 0:
+            raise ValueError()
     except (ValueError, TypeError):
         raise ValueError(MSG_DATOS_INVALIDOS)
+        
     unidad = unidad or 'und'
-    tipo = tipo or 'Comida'
+    
+    tipo_str = str(tipo or '').strip().capitalize()
+    if tipo_str and tipo_str not in ['Comida', 'Bebida']:
+        raise ValueError(MSG_DATOS_INVALIDOS)
+    tipo = tipo_str or 'Comida'
+    
     return {
         'nombre_materia_prima': nombre,
         'unidad_medida': unidad,
@@ -345,6 +358,10 @@ def importar_materia_prima_excel(request):
                 return redirect('listar_materia_prima')
             materias_a_crear.append(datos)
 
+        if not materias_a_crear:
+            messages.error(request, MSG_DATOS_INVALIDOS)
+            return redirect('importar_materia_prima_excel')
+
         creados = 0
         if materias_a_crear:
             with transaction.atomic():
@@ -384,15 +401,29 @@ def _buscar_materia_prima_por_nombre(nombre_completo):
     return materia
 
 def _validar_fila_lote(row, row_idx):
+    if all(cell is None or str(cell).strip() == '' for cell in row[:4]):
+        return None
+
     if len(row) < 2:
         raise ValueError(MSG_DATOS_INVALIDOS)
     nombre_completo, cantidad, f_vencimiento, precio = row[:4]
-    if not nombre_completo or cantidad is None:
-        return None
+    
+    if not nombre_completo or str(nombre_completo).strip() == '':
+        raise ValueError(MSG_DATOS_INVALIDOS)
+        
+    if cantidad is None or str(cantidad).strip() == '':
+        raise ValueError(MSG_DATOS_INVALIDOS)
+        
     try:
         cantidad = float(cantidad)
-        if precio is not None:
+        if cantidad <= 0:
+            raise ValueError()
+        if precio is not None and str(precio).strip() != '':
             precio = float(precio)
+            if precio <= 0:
+                raise ValueError()
+        else:
+            precio = None
     except (ValueError, TypeError):
         raise ValueError(MSG_DATOS_INVALIDOS)
 
@@ -448,6 +479,10 @@ def importar_lotes_excel(request):
                 messages.error(request, "el lote ya existe")
                 return redirect('listar_materia_prima')
             lotes_a_crear.append(datos)
+
+        if not lotes_a_crear:
+            messages.error(request, MSG_DATOS_INVALIDOS)
+            return redirect('importar_lotes_excel')
 
         if lotes_a_crear:
             with transaction.atomic():

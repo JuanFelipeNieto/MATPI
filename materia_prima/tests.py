@@ -266,5 +266,60 @@ class MateriaPrimaViewsCompleteTest(TestCase):
         response = self.client.post(reverse('importar_lotes_excel'), {'archivo_excel': archivo_excel})
         self.assertRedirects(response, reverse('importar_lotes_excel'))
 
+    # 14. PRUEBA: Importar Materia Prima Excel (Datos Inválidos - No cumple condiciones)
+    def test_importar_materia_prima_excel_invalid_data(self):
+        self.login_como_admin()
+
+        # Fila con cantidad por unidad no entero
+        filas = [
+            ("Nombre Materia Prima", "Unidad de Medida", "Cantidad por Unidad", "Tipo"),
+            ("Queso", "und", "tres", "Comida")
+        ]
+        archivo_excel = self.create_in_memory_excel(filas)
+
+        response = self.client.post(reverse('importar_materia_prima_excel'), {'archivo_excel': archivo_excel}, follow=True)
+        self.assertContains(response, "El contenido del archivo Excel no cumple con las condiciones para agregarlo al listado.")
+
+    # 15. PRUEBA: Importar Materia Prima Excel (Archivo Vacío)
+    def test_importar_materia_prima_excel_empty_file(self):
+        self.login_como_admin()
+
+        # Solo encabezados
+        filas = [
+            ("Nombre Materia Prima", "Unidad de Medida", "Cantidad por Unidad", "Tipo")
+        ]
+        archivo_excel = self.create_in_memory_excel(filas)
+
+        response = self.client.post(reverse('importar_materia_prima_excel'), {'archivo_excel': archivo_excel}, follow=True)
+        self.assertContains(response, "El contenido del archivo Excel no cumple con las condiciones para agregarlo al listado.")
+
+    # 16. PRUEBA: Importar Lotes Excel (Datos Inválidos - No cumple condiciones)
+    def test_importar_lotes_excel_invalid_data(self):
+        self.login_como_admin()
+
+        # Fila con cantidad no numérica
+        filas = [
+            ("Nombre Materia Prima Completo", "Cantidad Inicial", "Fecha Vencimiento", "Precio Unidad"),
+            ("Pan de Hamburguesa", "cincuenta", "2026-06-01", 600)
+        ]
+        archivo_excel = self.create_in_memory_excel(filas)
+
+        response = self.client.post(reverse('importar_lotes_excel'), {'archivo_excel': archivo_excel}, follow=True)
+        self.assertContains(response, "El contenido del archivo Excel no cumple con las condiciones para agregarlo al listado.")
+
+    # 17. PRUEBA: Importar Lotes Excel (Archivo Vacío)
+    def test_importar_lotes_excel_empty_file(self):
+        self.login_como_admin()
+
+        # Solo encabezados
+        filas = [
+            ("Nombre Materia Prima Completo", "Cantidad Inicial", "Fecha Vencimiento", "Precio Unidad")
+        ]
+        archivo_excel = self.create_in_memory_excel(filas)
+
+        response = self.client.post(reverse('importar_lotes_excel'), {'archivo_excel': archivo_excel}, follow=True)
+        self.assertContains(response, "El contenido del archivo Excel no cumple con las condiciones para agregarlo al listado.")
+
+
 
 
