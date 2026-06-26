@@ -91,6 +91,27 @@ class MateriaPrimaViewsCompleteTest(TestCase):
         self.assertTemplateUsed(response, 'materia_prima/listar.html')
         self.assertIn('materia_primas', response.context)
 
+    def test_listar_materia_prima_confirmation_message_contains_products(self):
+        self.login_como_admin()
+        # Create a product and relate it to the raw material
+        producto = Producto.objects.create(
+            nombre_producto="Hamburguesa Clasica",
+            precio=15000,
+            categoria="Hamburguesas",
+            cantidad=10
+        )
+        DetalleProductoMateriaP.objects.create(
+            producto=producto,
+            materia_prima=self.materia_pan,
+            cantidad_usada=1.0,
+            unidad_medida="und"
+        )
+        
+        response = self.client.get(reverse('listar_materia_prima'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Se eliminará de los siguientes productos:")
+        self.assertContains(response, "- Hamburguesa Clasica")
+
 
     # 2. Buscar materia prima con el filtro
     def test_listar_materia_prima_buscar(self):

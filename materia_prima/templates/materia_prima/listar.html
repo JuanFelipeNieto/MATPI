@@ -83,8 +83,13 @@
                         <a href="{% url 'ver_lotes' mp.id %}" class="btn-editar" style="background: #6c757d;">📦 Lotes</a>
                         {% if es_admin %}
                         <a href="{% url 'pre_editar_materia_prima' mp.id %}" class="btn-editar">Editar</a>
+                        {% if mp.detalles_producto.all %}
+                        <a href="{% url 'eliminar_materia_prima' mp.id %}" class="btn-danger"
+                            onclick="return confirm('¿Eliminar esta materia prima?\n\nSe eliminará de los siguientes productos:\n{% for dp in mp.detalles_producto.all %}- {{ dp.producto.nombre_producto|escapejs }}\n{% endfor %}')">Eliminar</a>
+                        {% else %}
                         <a href="{% url 'eliminar_materia_prima' mp.id %}" class="btn-danger"
                             onclick="return confirm('¿Eliminar esta materia prima?')">Eliminar</a>
+                        {% endif %}
                         {% endif %}
                     </td>
                 </tr>

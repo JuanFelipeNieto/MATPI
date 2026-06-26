@@ -71,7 +71,7 @@ def listar_materia_prima(request):
     materia_primas = MateriaPrima.objects.annotate(
         num_lotes=Count('lotes'),
         total_cantidad=Coalesce(Sum('lotes__cantidad_actual'), Value(Decimal('0')))
-    )
+    ).prefetch_related('detalles_producto__producto')
 
     if query:
         materia_primas = materia_primas.filter(nombre_materia_prima__icontains=query)
