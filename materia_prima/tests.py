@@ -341,6 +341,67 @@ class MateriaPrimaViewsCompleteTest(TestCase):
         response = self.client.post(reverse('importar_lotes_excel'), {'archivo_excel': archivo_excel}, follow=True)
         self.assertContains(response, "El contenido del archivo Excel no cumple con las condiciones para agregarlo al listado.")
 
+    # 18. PRUEBA: Registrar Materia Prima Duplicada (Mismo nombre y equivalencia)
+    def test_registrar_materia_prima_duplicate(self):
+        self.login_como_admin()
+        # self.materia_pan has name 'Pan de hamburguesa' and equivalence 1 (default from setUp)
+        datos = {
+            'txt_nombre': 'Pan de hamburguesa',
+            'txt_unidad': 'und',
+            'txt_cantidad_unidad': str(self.materia_pan.cantidad_por_unidad),
+            'txt_tipo': 'Comida',
+            'txt_cantidad': '10',
+            'txt_fecha_ingreso': timezone.now().date().strftime('%Y-%m-%d')
+        }
+        response = self.client.post(reverse('registrar_materia_prima'), datos, follow=True)
+        self.assertContains(response, "Ya existe una materia prima con ese nombre y equivalencia.")
+
+    # 19. PRUEBA: Editar Materia Prima a una Duplicada
+    def test_editar_materia_prima_duplicate(self):
+        self.login_como_admin()
+        # Create a second raw material
+        materia2 = MateriaPrima.objects.create(
+            nombre_materia_prima="Carne",
+            unidad_medida="g",
+            cantidad_por_unidad=150,
+            tipo="Comida"
+        )
+        # Try to edit materia2 to match self.materia_pan (Pan de hamburguesa, equivalence 1)
+        datos = {
+            'txt_id': materia2.id,
+            'txt_nombre': 'Pan de hamburguesa',
+            'txt_unidad': 'und',
+            'txt_cantidad_unidad': str(self.materia_pan.cantidad_por_unidad),
+            'txt_tipo': 'Comida'
+        }
+        response = self.client.post(reverse('editar_materia_prima'), datos, follow=True)
+        self.assertContains(response, "Ya existe otra materia prima con ese nombre y equivalencia.")
+
+    # 20. PRUEBA: Importar Excel de Materias Primas con Duplicados
+    def test_importar_materia_prima_excel_duplicate_db(self):
+        self.login_como_admin()
+        # Excel contains self.materia_pan duplicate
+        filas = [
+            ("Nombre Materia Prima", "Unidad de Medida", "Cantidad por Unidad", "Tipo"),
+            ("Pan de hamburguesa", "und", str(self.materia_pan.cantidad_por_unidad), "Comida")
+        ]
+        archivo_excel = self.create_in_memory_excel(filas)
+        response = self.client.post(reverse('importar_materia_prima_excel'), {'archivo_excel': archivo_excel}, follow=True)
+        self.assertContains(response, "No se puede importar el archivo debido a que los datos ya existen o ya fueron ingresados")
+
+    # 21. PRUEBA: Importar Excel de Materias Primas con Duplicados dentro del archivo
+    def test_importar_materia_prima_excel_duplicate_in_file(self):
+        self.login_como_admin()
+        # Excel contains two rows with the same name and equivalence
+        filas = [
+            ("Nombre Materia Prima", "Unidad de Medida", "Cantidad por Unidad", "Tipo"),
+            ("Queso Cheddar", "g", "200", "Comida"),
+            ("Queso Cheddar", "g", "200", "Comida")
+        ]
+        archivo_excel = self.create_in_memory_excel(filas)
+        response = self.client.post(reverse('importar_materia_prima_excel'), {'archivo_excel': archivo_excel}, follow=True)
+        self.assertContains(response, "No se puede importar el archivo debido a que contiene registros duplicados")
+
 
 
 

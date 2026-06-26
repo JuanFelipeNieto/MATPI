@@ -140,6 +140,10 @@ def registrar_materia_prima(request):
         data = extract_materia_prima_data(request.POST)
         nombre, unidad, cantidad_unidad, tipo, cantidad, f_ingreso = unpack_materia_prima_data(data)
 
+        if MateriaPrima.objects.filter(nombre_materia_prima__iexact=nombre.strip(), cantidad_por_unidad=cantidad_unidad).exists():
+            messages.error(request, "Ya existe una materia prima con ese nombre y equivalencia.")
+            return redirect('mostrar_registro_materia_prima')
+
         try:
             with transaction.atomic():
                 materia = MateriaPrima.objects.create(
@@ -188,9 +192,16 @@ def editar_materia_prima(request):
     if request.method == 'POST':
         materia = get_materia_prima_from_post(request.POST)
 
-        materia.nombre_materia_prima = request.POST.get('txt_nombre')
+        nombre = request.POST.get('txt_nombre')
+        cantidad_unidad = int(request.POST.get('txt_cantidad_unidad', 1))
+
+        if MateriaPrima.objects.filter(nombre_materia_prima__iexact=nombre.strip(), cantidad_por_unidad=cantidad_unidad).exclude(pk=materia.pk).exists():
+            messages.error(request, "Ya existe otra materia prima con ese nombre y equivalencia.")
+            return redirect('pre_editar_materia_prima', id=materia.pk)
+
+        materia.nombre_materia_prima = nombre
         materia.unidad_medida        = request.POST.get('txt_unidad')
-        materia.cantidad_por_unidad  = int(request.POST.get('txt_cantidad_unidad', 1))
+        materia.cantidad_por_unidad  = cantidad_unidad
         materia.tipo                 = request.POST.get('txt_tipo', 'Comida')
         materia.save()
 
@@ -324,9 +335,7 @@ def _validar_fila_materia_prima(row):
 def _verificar_duplicado_materia_prima(datos):
     return MateriaPrima.objects.filter(
         nombre_materia_prima__iexact=datos['nombre_materia_prima'],
-        unidad_medida__iexact=datos['unidad_medida'],
-        cantidad_por_unidad=datos['cantidad_por_unidad'],
-        tipo=datos['tipo']
+        cantidad_por_unidad=datos['cantidad_por_unidad']
     ).exists()
 
 @require_http_methods(["GET", "POST"])
@@ -349,6 +358,7 @@ def importar_materia_prima_excel(request):
         rows = list(sheet.iter_rows(min_row=2, values_only=True))
 
         materias_a_crear = []
+        nombres_vistos = set()
         for row in rows:
             datos = _validar_fila_materia_prima(row)
             if not datos:
@@ -356,6 +366,14 @@ def importar_materia_prima_excel(request):
             if _verificar_duplicado_materia_prima(datos):
                 messages.error(request, "No se puede importar el archivo debido a que los datos ya existen o ya fueron ingresados")
                 return redirect('listar_materia_prima')
+            
+            # Verificar duplicados dentro del mismo archivo excel
+            key = (datos['nombre_materia_prima'].strip().lower(), datos['cantidad_por_unidad'])
+            if key in nombres_vistos:
+                messages.error(request, "No se puede importar el archivo debido a que contiene registros duplicados")
+                return redirect('listar_materia_prima')
+            nombres_vistos.add(key)
+            
             materias_a_crear.append(datos)
 
         if not materias_a_crear:

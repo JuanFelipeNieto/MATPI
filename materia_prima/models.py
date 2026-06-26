@@ -18,6 +18,7 @@ class MateriaPrima(models.Model):
 
     class Meta:
         db_table = 'Materia_Prima'
+        unique_together = (('nombre_materia_prima', 'cantidad_por_unidad'),)
 
     @property
     def stock_total(self):
