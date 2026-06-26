@@ -7,6 +7,15 @@
     Este producto se vendió <strong>{{ total_vendido }}</strong> veces {{ periodo_durante }}.
 </div>
 {% endif %}
+
+{% if mejor_venta_mensaje %}
+<div style="text-align: center; margin-bottom: 25px;">
+    <div style="background-color: #fefcf0; border: 2px solid #d4af37; color: #8a6d3b; padding: 8px 25px; font-size: 12px; font-weight: bold; border-radius: 20px; display: inline-block; font-family: Helvetica, Arial, sans-serif;">
+        🏆 {{ mejor_venta_mensaje }}
+    </div>
+</div>
+{% endif %}
+
 <table class="table-data">
     <thead>
         <tr>

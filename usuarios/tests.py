@@ -260,6 +260,44 @@ class UsuarioViewsCompleteTest(TestCase):
             reverse('generar_reporte', kwargs={'modulo': 'facturas', 'periodo': 'general'}) + f'?producto={producto.id}'
         )
         self.assertEqual(response.status_code, 200)
+        self.assertIn('inline; filename="MATPI_facturas.pdf"', response['Content-Disposition'])
+
+    def test_reporte_facturas_mejor_venta(self):
+        from pedidos.models import Pedido
+        from facturas.models import Factura
+
+        self.login_como_admin()
+
+        pedido1 = Pedido.objects.create(
+            estado='Completado',
+            valor=10000,
+            numero_orden=201,
+            metodo_pago='Efectivo',
+            usuario=self.admin_user
+        )
+        factura1 = Factura.objects.create(
+            id=888,
+            valor_total=10000,
+            pedido=pedido1
+        )
+
+        pedido2 = Pedido.objects.create(
+            estado='Completado',
+            valor=25000,
+            numero_orden=202,
+            metodo_pago='Efectivo',
+            usuario=self.admin_user
+        )
+        factura2 = Factura.objects.create(
+            id=889,
+            valor_total=25000,
+            pedido=pedido2
+        )
+
+        response = self.client.get(
+            reverse('generar_reporte', kwargs={'modulo': 'facturas', 'periodo': 'general'})
+        )
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertIn('inline; filename="MATPI_facturas.pdf"', response['Content-Disposition'])
 

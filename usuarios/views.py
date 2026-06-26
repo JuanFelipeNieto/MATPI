@@ -486,6 +486,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
     cliente_estrella_mensaje = None
     reserva_estrella_mensaje = None
     proveedor_estrella_mensaje = None
+    mejor_venta_mensaje = None
     producto_filtrado = None
     total_vendido = 0
     proveedor_filtrado = None
@@ -866,6 +867,18 @@ def reporte_modulo_pdf(request, modulo, periodo):
         else:
             facturas = facturas.order_by('-valor_total')
 
+        # Encontrar la mejor venta (factura con mayor valor_total)
+        mejor_venta_factura = facturas.order_by('-valor_total').first()
+        if mejor_venta_factura:
+            periodo_durante_map = {
+                'diario': 'el día',
+                'semanal': 'la semana',
+                'mensual': 'el mes',
+                'general': 'todo el tiempo'
+            }
+            p_durante = periodo_durante_map.get(periodo, 'el periodo')
+            mejor_venta_mensaje = f"La mejor venta durante {p_durante} fue por un valor de ${mejor_venta_factura.valor_total} en la factura #{mejor_venta_factura.id}"
+
         qs = facturas
         template_path = 'reportes/pdf_facturas.html'
         titulo = "Reporte de Facturas"
@@ -1049,6 +1062,7 @@ def reporte_modulo_pdf(request, modulo, periodo):
         'cliente_estrella_mensaje': cliente_estrella_mensaje,
         'reserva_estrella_mensaje': reserva_estrella_mensaje,
         'proveedor_estrella_mensaje': proveedor_estrella_mensaje,
+        'mejor_venta_mensaje': mejor_venta_mensaje,
         'producto_filtrado': producto_filtrado,
         'total_vendido': total_vendido,
         'proveedor_filtrado': proveedor_filtrado,
