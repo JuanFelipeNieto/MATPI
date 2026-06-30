@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
 import json
+from datetime import datetime, timedelta
 from .models import Pedido, DetallePedidoProducto
 from usuarios.models import Cajero, Administrador, Usuario
 from productos.models import Producto
@@ -223,11 +224,14 @@ def mostrar_registro_pedido(request):
 
     # Calcular el próximo número de orden (se reinicia a 1 cada día)
     hoy_local = timezone.localdate()
-    max_orden = Pedido.objects.filter(fecha__date=hoy_local).aggregate(Max('numero_orden'))['numero_orden__max'] or 0
+    hoy_inicio_dt = timezone.make_aware(datetime.combine(hoy_local, datetime.min.time()))
+    hoy_fin_dt = hoy_inicio_dt + timedelta(days=1)
+
+    max_orden = Pedido.objects.filter(fecha__gte=hoy_inicio_dt, fecha__lt=hoy_fin_dt).aggregate(Max('numero_orden'))['numero_orden__max'] or 0
     prox_orden = max_orden + 1
 
     datos = {
-        'reservas': Reserva.objects.filter(fecha__date=hoy_local),
+        'reservas': Reserva.objects.filter(fecha__gte=hoy_inicio_dt, fecha__lt=hoy_fin_dt),
         'clientes': Cliente.objects.all(),
         'productos': productos_filtrados,
         'bebidas': [p for p in productos_filtrados if p.categoria == 'Bebidas'],
@@ -421,12 +425,15 @@ def pre_editar_pedido(request, id):
         })
 
     hoy_local = timezone.localdate()
+    hoy_inicio_dt = timezone.make_aware(datetime.combine(hoy_local, datetime.min.time()))
+    hoy_fin_dt = hoy_inicio_dt + timedelta(days=1)
+
     if pedido.reserva:
         reservas = Reserva.objects.filter(
-            models.Q(fecha__date=hoy_local) | models.Q(pk=pedido.reserva.id)
+            (models.Q(fecha__gte=hoy_inicio_dt) & models.Q(fecha__lt=hoy_fin_dt)) | models.Q(pk=pedido.reserva.id)
         )
     else:
-        reservas = Reserva.objects.filter(fecha__date=hoy_local)
+        reservas = Reserva.objects.filter(fecha__gte=hoy_inicio_dt, fecha__lt=hoy_fin_dt)
 
     datos = {
         'pedido': pedido,

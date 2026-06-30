@@ -123,3 +123,100 @@ class ReservaViewsTest(TestCase):
         self.assertRedirects(response, reverse('listar_reservas'))
         # La reserva debe haberse guardado exitosamente con observaciones por defecto ("ninguna")
         self.assertTrue(Reserva.objects.filter(observaciones='ninguna').exists())
+
+    def test_reserva_completada_y_pendiente_en_listar(self):
+        self.login_como_cajero()
+        
+        # 1. Reserva de hoy pendiente
+        reserva_hoy_p = Reserva.objects.create(
+            fecha=timezone.now().replace(hour=14, minute=0, second=0, microsecond=0),
+            estado=True,
+            observaciones="Pendiente",
+            cliente=self.cliente,
+            cajero=self.cajero
+        )
+        
+        # 2. Reserva de hoy completada
+        reserva_hoy_c = Reserva.objects.create(
+            fecha=timezone.now().replace(hour=15, minute=0, second=0, microsecond=0),
+            estado=True,
+            observaciones="Completada",
+            cliente=self.cliente,
+            cajero=self.cajero
+        )
+        from pedidos.models import Pedido
+        Pedido.objects.create(
+            estado='Registrado',
+            valor=12000,
+            numero_orden=2,
+            metodo_pago='Efectivo',
+            usuario=self.cajero_user,
+            reserva=reserva_hoy_c,
+            cliente=self.cliente
+        )
+        
+        response = self.client.get(reverse('listar_reservas'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Completada")
+        self.assertContains(response, "Pendiente")
+
+    def test_reserva_auto_delete_rules(self):
+        self.login_como_cajero()
+        
+        # 1. Reserva pendiente en el pasado (hace 2 horas) -> debe borrarse
+        fecha_pasada_p = timezone.now() - timedelta(hours=2)
+        reserva_pasada_p = Reserva.objects.create(
+            fecha=fecha_pasada_p,
+            estado=True,
+            observaciones="Pasada Pendiente",
+            cliente=self.cliente,
+            cajero=self.cajero
+        )
+        
+        # 2. Reserva completada hoy (hace 2 horas, pero hoy) -> NO debe borrarse
+        fecha_hoy_c = timezone.now().replace(hour=11, minute=0, second=0, microsecond=0)
+        reserva_hoy_c = Reserva.objects.create(
+            fecha=fecha_hoy_c,
+            estado=True,
+            observaciones="Completada Hoy",
+            cliente=self.cliente,
+            cajero=self.cajero
+        )
+        from pedidos.models import Pedido
+        Pedido.objects.create(
+            estado='Registrado',
+            valor=12000,
+            numero_orden=3,
+            metodo_pago='Efectivo',
+            usuario=self.cajero_user,
+            reserva=reserva_hoy_c,
+            cliente=self.cliente
+        )
+        
+        # 3. Reserva completada ayer -> debe borrarse
+        fecha_ayer_c = timezone.now() - timedelta(days=1)
+        reserva_ayer_c = Reserva.objects.create(
+            fecha=fecha_ayer_c,
+            estado=True,
+            observaciones="Completada Ayer",
+            cliente=self.cliente,
+            cajero=self.cajero
+        )
+        Pedido.objects.create(
+            estado='Registrado',
+            valor=12000,
+            numero_orden=4,
+            metodo_pago='Efectivo',
+            usuario=self.cajero_user,
+            reserva=reserva_ayer_c,
+            cliente=self.cliente
+        )
+        
+        # Al acceder al listado se ejecuta la auto-eliminación
+        response = self.client.get(reverse('listar_reservas'))
+        self.assertEqual(response.status_code, 200)
+        
+        # Verificar en base de datos
+        self.assertFalse(Reserva.objects.filter(id=reserva_pasada_p.id).exists())
+        self.assertTrue(Reserva.objects.filter(id=reserva_hoy_c.id).exists())
+        self.assertFalse(Reserva.objects.filter(id=reserva_ayer_c.id).exists())

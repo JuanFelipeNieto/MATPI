@@ -14,13 +14,18 @@ from clientes.models import Cliente
 @require_GET
 def listar_reservas(request, edit_id=None):
     # Auto-eliminación de reservas pasadas al acceder al listado
-    Reserva.objects.filter(fecha__lt=timezone.now()).delete()
+    # Reservas no completadas (pendientes) pasadas (fecha < ahora) -> se eliminan.
+    # Reservas completadas pasadas de días anteriores -> se eliminan.
+    ahora = timezone.now()
+    hoy_inicio_dt = timezone.make_aware(datetime.combine(timezone.localdate(), datetime.min.time()))
+    Reserva.objects.filter(pedidos__isnull=True, fecha__lt=ahora).delete()
+    Reserva.objects.filter(pedidos__isnull=False, fecha__lt=hoy_inicio_dt).delete()
 
     buscar = request.GET.get('buscar', '')
     fecha_desde = request.GET.get('fecha_desde', '')
     fecha_hasta = request.GET.get('fecha_hasta', '')
 
-    reservas_list = Reserva.objects.all()
+    reservas_list = Reserva.objects.prefetch_related('pedidos').all()
 
     if buscar:
         reservas_list = reservas_list.filter(

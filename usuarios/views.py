@@ -94,7 +94,12 @@ def logout_view(request):
 @login_requerido
 def dashboard(request):
     # Auto-eliminación de reservas pasadas al entrar al dashboard
-    Reserva.objects.filter(fecha__lt=timezone.now()).delete()
+    # Reservas no completadas (pendientes) pasadas (fecha < ahora) -> se eliminan.
+    # Reservas completadas pasadas de días anteriores -> se eliminan.
+    ahora = timezone.now()
+    hoy_inicio_dt = timezone.make_aware(datetime.combine(timezone.localdate(), datetime.min.time()))
+    Reserva.objects.filter(pedidos__isnull=True, fecha__lt=ahora).delete()
+    Reserva.objects.filter(pedidos__isnull=False, fecha__lt=hoy_inicio_dt).delete()
 
     config, _ = DashboardConfig.objects.get_or_create(id=1)
 
