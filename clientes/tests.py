@@ -109,3 +109,71 @@ class ClienteViewsTest(TestCase):
         response = self.client.post(reverse('eliminar_cliente', args=[self.cliente.id]))
         self.assertRedirects(response, reverse('listar_clientes'))
         self.assertFalse(Cliente.objects.filter(id=self.cliente.id).exists())
+
+    def test_registrar_cliente_documento_limites_exitoso(self):
+        self.login_como_admin()
+        
+        # Caso 1: Largo mínimo de 6 caracteres
+        datos_6 = {
+            'txt_id': '123456',
+            'txt_nombre': 'Pedro Perez',
+            'txt_telefono': '3123456789',
+            'txt_direccion': 'Calle 100',
+            'txt_localidad': 'Suba'
+        }
+        response = self.client.post(reverse('registrar_cliente'), datos_6)
+        self.assertRedirects(response, reverse('listar_clientes'))
+        self.assertTrue(Cliente.objects.filter(id=123456).exists())
+
+        # Caso 2: Largo máximo de 10 caracteres
+        datos_10 = {
+            'txt_id': '1234567899',
+            'txt_nombre': 'Ana Lopez',
+            'txt_telefono': '3123456789',
+            'txt_direccion': 'Calle 200',
+            'txt_localidad': 'Usaquén'
+        }
+        response = self.client.post(reverse('registrar_cliente'), datos_10)
+        self.assertRedirects(response, reverse('listar_clientes'))
+        self.assertTrue(Cliente.objects.filter(id=1234567899).exists())
+
+    def test_registrar_cliente_documento_limites_fallido(self):
+        self.login_como_admin()
+
+        # Caso 1: Largo menor al mínimo (5 caracteres)
+        datos_5 = {
+            'txt_id': '12345',
+            'txt_nombre': 'Pedro Perez',
+            'txt_telefono': '3123456789',
+            'txt_direccion': 'Calle 100',
+            'txt_localidad': 'Suba'
+        }
+        response = self.client.post(reverse('registrar_cliente'), datos_5)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Cliente.objects.filter(id=12345).exists())
+
+        # Caso 2: Largo mayor al máximo (11 caracteres)
+        datos_11 = {
+            'txt_id': '12345678901',
+            'txt_nombre': 'Ana Lopez',
+            'txt_telefono': '3123456789',
+            'txt_direccion': 'Calle 200',
+            'txt_localidad': 'Usaquén'
+        }
+        response = self.client.post(reverse('registrar_cliente'), datos_11)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Cliente.objects.filter(id=12345678901).exists())
+
+    def test_registrar_cliente_documento_duplicado(self):
+        self.login_como_admin()
+        # self.cliente.id es 1020304050 (creado en setUp)
+        datos = {
+            'txt_id': '1020304050',
+            'txt_nombre': 'Otro Nombre',
+            'txt_telefono': '3123456789',
+            'txt_direccion': 'Calle 300',
+            'txt_localidad': 'Suba'
+        }
+        response = self.client.post(reverse('registrar_cliente'), datos)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'clientes/registrar.html')

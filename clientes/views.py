@@ -50,8 +50,8 @@ def mostrar_registro_cliente(request):
 
 
 def _validar_datos_cliente(cliente_id, nombre, telefono):
-    if cliente_id and len(cliente_id) != 10:
-        raise ValueError("El número de documento debe tener exactamente 10 caracteres.")
+    if cliente_id and (len(cliente_id) < 6 or len(cliente_id) > 10):
+        raise ValueError("El número de documento debe tener entre 6 y 10 caracteres.")
     if nombre and len(nombre) < 3:
         raise ValueError("El nombre no puede tener menos de 3 caracteres.")
     if telefono and len(telefono) < 6:
@@ -89,6 +89,8 @@ def registrar_cliente(request):
     try:
         from django.contrib import messages
         _validar_datos_cliente(cliente_id, nombre, telefono)
+        if Cliente.objects.filter(pk=cliente_id).exists():
+            raise ValueError(f"Ya existe un cliente registrado con el número de documento '{cliente_id}'.")
         usuario_registrador = _obtener_usuario_registrador(request.session.get('usuario_id'))
 
         Cliente.objects.create(
