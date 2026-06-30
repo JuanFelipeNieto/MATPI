@@ -41,6 +41,11 @@ function agregarFila() {
     if(unitLabels) unitLabels.forEach(l => l.textContent = "");
     if(msgUnidades) msgUnidades.textContent = "";
 
+    const hiddenPrio = nuevaFila.querySelector('.input-prioridad-valor');
+    const checkboxPrio = nuevaFila.querySelector('.checkbox-prioridad');
+    if (hiddenPrio) hiddenPrio.value = "0";
+    if (checkboxPrio) checkboxPrio.checked = false;
+
     tbody.appendChild(nuevaFila);
 }
 

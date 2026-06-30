@@ -215,3 +215,34 @@ class PedidoViewsTest(TestCase):
         self.lote.save()
         response = self.client.get(reverse('mostrar_registro_pedido'))
         self.assertNotIn(self.producto, response.context['productos'])
+
+    def test_mostrar_registro_pedido_prioridad_ingrediente_json(self):
+        self.login_como_cajero()
+        
+        # 1. Por defecto, es_prioridad es False
+        self.assertFalse(self.detalle_materia.es_prioridad)
+        
+        response = self.client.get(reverse('mostrar_registro_pedido'))
+        self.assertEqual(response.status_code, 200)
+        
+        # Obtener el producto Hamburguesa Sencilla del contexto
+        productos = list(response.context['productos'])
+        hamburguesa = [p for p in productos if p.id == self.producto.id][0]
+        
+        import json
+        composicion = json.loads(hamburguesa.composicion_json)
+        self.assertEqual(len(composicion), 1)
+        self.assertFalse(composicion[0]['es_prioridad'])
+
+        # 2. Si lo marcamos como prioridad, debe ser True en el JSON
+        self.detalle_materia.es_prioridad = True
+        self.detalle_materia.save()
+        
+        response = self.client.get(reverse('mostrar_registro_pedido'))
+        productos = list(response.context['productos'])
+        hamburguesa = [p for p in productos if p.id == self.producto.id][0]
+        
+        composicion = json.loads(hamburguesa.composicion_json)
+        self.assertEqual(len(composicion), 1)
+        self.assertTrue(composicion[0]['es_prioridad'])
+

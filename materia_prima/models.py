@@ -101,6 +101,8 @@ class DetalleProductoMateriaP(models.Model):
     )
     cantidad_usada = models.DecimalField('Cantidad Usada', max_digits=10, decimal_places=2, default=0)
     unidad_medida = models.CharField('Unidad Usada', max_length=20, blank=True, default='')
+    es_prioridad = models.BooleanField('Es Prioridad', default=False)
+
 
     class Meta:
         db_table = 'Details_Producto_MateriaP'

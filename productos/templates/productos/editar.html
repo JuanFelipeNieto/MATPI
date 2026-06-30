@@ -26,8 +26,8 @@
                     <thead>
                         <tr>
                             <th style="width: 35%;">Materia Prima</th>
-
                             <th style="width: 30%;">Cantidad Total Usada</th>
+                            <th style="width: 15%; text-align: center;">Prioridad</th>
                             <th style="width: 15%;">Acciones</th>
                         </tr>
                     </thead>
@@ -59,6 +59,10 @@
                                     </div>
                                     <small class="msg-unidades text-success" style="display: block; margin-top: 5px; font-weight: bold;"></small>
                                 </td>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <input type="hidden" name="materia_prioridad[]" class="input-prioridad-valor" value="{% if item.es_prioridad %}1{% else %}0{% endif %}">
+                                    <input type="checkbox" class="checkbox-prioridad" onchange="this.previousElementSibling.value = this.checked ? '1' : '0'" {% if item.es_prioridad %}checked{% endif %}>
+                                </td>
                                 <td>
                                     <button type="button" class="btn btn-cancelar btn-sm" onclick="eliminarFila(this)">Eliminar</button>
                                 </td>
@@ -87,6 +91,10 @@
                                         <span class="unit-label"></span>
                                     </div>
                                     <small class="msg-unidades text-success" style="display: block; margin-top: 5px; font-weight: bold;"></small>
+                                </td>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <input type="hidden" name="materia_prioridad[]" class="input-prioridad-valor" value="0">
+                                    <input type="checkbox" class="checkbox-prioridad" onchange="this.previousElementSibling.value = this.checked ? '1' : '0'">
                                 </td>
                                 <td>
                                     <button type="button" class="btn btn-cancelar btn-sm" onclick="eliminarFila(this)">Eliminar</button>

@@ -157,15 +157,20 @@ def _validar_imagen_y_obtener_extension(imagen):
         if ext not in ['png', 'jpg', 'jpeg']:
             raise ValueError("Solo se permiten imágenes en formato JPG o PNG.")
 
-def _guardar_composicion_producto(producto, materias_ids, materias_cantidades, materias_unidades):
-    for m_id, m_cant, m_uni in zip(materias_ids, materias_cantidades, materias_unidades):
+def _guardar_composicion_producto(producto, materias_ids, materias_cantidades, materias_unidades, materias_prioridades=None):
+    if not materias_prioridades or len(materias_prioridades) != len(materias_ids):
+        materias_prioridades = ['0'] * len(materias_ids)
+
+    for m_id, m_cant, m_uni, m_prio in zip(materias_ids, materias_cantidades, materias_unidades, materias_prioridades):
         if m_id and m_cant:
             from decimal import Decimal
+            es_prio = (m_prio == '1')
             DetalleProductoMateriaP.objects.create(
                 producto=producto,
                 materia_prima_id=m_id,
                 cantidad_usada=Decimal(m_cant),
-                unidad_medida=m_uni
+                unidad_medida=m_uni,
+                es_prioridad=es_prio
             )
 
 @require_http_methods(["GET", "POST"])
@@ -215,8 +220,9 @@ def registrar_producto(request):
     materias_ids = request.POST.getlist(MATERIA_ID_KEY)
     materias_cantidades = request.POST.getlist(MATERIA_CANTIDAD_KEY)
     materias_unidades = request.POST.getlist(MATERIA_UNIDAD_KEY)
+    materias_prioridades = request.POST.getlist('materia_prioridad[]')
 
-    _guardar_composicion_producto(producto, materias_ids, materias_cantidades, materias_unidades)
+    _guardar_composicion_producto(producto, materias_ids, materias_cantidades, materias_unidades, materias_prioridades)
     recalcular_stock_producto(producto)
 
     messages.success(request, f"Producto '{producto.nombre_producto}' registrado exitosamente con stock calculado.")
@@ -304,8 +310,9 @@ def editar_producto(request):
     materias_ids = request.POST.getlist(MATERIA_ID_KEY)
     materias_cantidades = request.POST.getlist(MATERIA_CANTIDAD_KEY)
     materias_unidades = request.POST.getlist(MATERIA_UNIDAD_KEY)
+    materias_prioridades = request.POST.getlist('materia_prioridad[]')
 
-    _guardar_composicion_producto(producto, materias_ids, materias_cantidades, materias_unidades)
+    _guardar_composicion_producto(producto, materias_ids, materias_cantidades, materias_unidades, materias_prioridades)
     recalcular_stock_producto(producto)
 
     messages.success(request, "Producto actualizado correctamente y stock recalculado.")

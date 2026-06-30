@@ -111,6 +111,7 @@ function actualizarComposicion_y_Precio(elemento, excluidasPreseleccionadas = []
         if (elemento.type !== 'checkbox') {
             let html = "";
             composicion.forEach(mp => {
+                if (mp.es_prioridad) return; // Si es prioridad, no se puede excluir del pedido
                 const isExpired = mp.expired || false;
                 const isBad = mp.stock <= 0 || isExpired;
                 const labelStyle = isBad ? 'style="border-color: #ef4444; background: #fef2f2;"' : '';

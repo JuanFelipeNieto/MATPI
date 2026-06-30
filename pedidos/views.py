@@ -214,7 +214,8 @@ def mostrar_registro_pedido(request):
                 'stock': float(d.materia_prima.stock_total),
                 'expired': d.materia_prima.is_insumo_vencido,
                 # Enviamos la cantidad usada convertida a unidades para el cálculo del frontend
-                'cantidad_usada': float(d.cantidad_usada / d.materia_prima.cantidad_por_unidad) if not (d.unidad_medida == 'und' and getattr(d.materia_prima, 'unidad_medida', '') != 'und') else float(d.cantidad_usada)
+                'cantidad_usada': float(d.cantidad_usada / d.materia_prima.cantidad_por_unidad) if not (d.unidad_medida == 'und' and getattr(d.materia_prima, 'unidad_medida', '') != 'und') else float(d.cantidad_usada),
+                'es_prioridad': d.es_prioridad
             }
             for d in detalles_prod
         ])
@@ -400,7 +401,8 @@ def pre_editar_pedido(request, id):
                 'stock': float(d.materia_prima.stock_total),
                 'expired': d.materia_prima.is_insumo_vencido,
                 # Enviamos la cantidad usada convertida a unidades para el cálculo del frontend
-                'cantidad_usada': float(d.cantidad_usada / d.materia_prima.cantidad_por_unidad) if not (d.unidad_medida == 'und' and getattr(d.materia_prima, 'unidad_medida', '') != 'und') else float(d.cantidad_usada)
+                'cantidad_usada': float(d.cantidad_usada / d.materia_prima.cantidad_por_unidad) if not (d.unidad_medida == 'und' and getattr(d.materia_prima, 'unidad_medida', '') != 'und') else float(d.cantidad_usada),
+                'es_prioridad': d.es_prioridad
             }
             for d in detalles_prod
         ])
