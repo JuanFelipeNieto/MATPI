@@ -54,7 +54,10 @@
                             </td>
                             <td style="text-align: center; vertical-align: middle;">
                                 <input type="hidden" name="materia_prioridad[]" class="input-prioridad-valor" value="0">
-                                <input type="checkbox" class="checkbox-prioridad" onchange="this.previousElementSibling.value = this.checked ? '1' : '0'">
+                                <label class="switch-prioridad">
+                                    <input type="checkbox" class="checkbox-prioridad" onchange="this.closest('td').querySelector('.input-prioridad-valor').value = this.checked ? '1' : '0'">
+                                    <span class="slider-prioridad"></span>
+                                </label>
                             </td>
                             <td>
                                 <button type="button" class="btn btn-cancelar btn-sm" onclick="eliminarFila(this)">Eliminar</button>
