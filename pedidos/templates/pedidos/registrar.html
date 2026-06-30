@@ -90,6 +90,7 @@
                                         {% if producto.categoria != 'Bebidas' %}
                                         <option value="{{ producto.id }}"
                                                 data-precio="{{ producto.precio }}"
+                                                data-stock="{{ producto.cantidad }}"
                                                 data-composicion='{{ producto.composicion_json|safe }}'
                                                 {% if producto.tiene_vencidos %}disabled style="color: #e74c3c;"{% endif %}>
                                             {{ producto.nombre_producto }} {% if producto.tiene_vencidos %}(Insumo Vencido 🔴){% endif %}
@@ -100,11 +101,8 @@
                             </td>
                             <td>
                                 <label class="sr-only label-cantidad" for="select_cantidad_0">Cantidad</label>
-                                <select name="producto_cantidad[]" id="select_cantidad_0" class="form-control select-cantidad" onchange="calcularTotal()" required>
-                                    {% for i in "123456789"|make_list %}<option value="{{ forloop.counter }}">{{ forloop.counter }}</option>{% endfor %}
-                                    <option value="10">10</option>
-                                    <option value="15">15</option>
-                                    <option value="20">20</option>
+                                <select name="producto_cantidad[]" id="select_cantidad_0" class="form-control select-cantidad" onchange="calcularTotal()" required disabled>
+                                    <option value="">—</option>
                                 </select>
                             </td>
                             <td class="subtotal-fila" style="font-size: 1.1rem;">$0</td>
@@ -165,6 +163,7 @@
         {% for bebida in bebidas %}
         <option value="{{ bebida.id }}"
                 data-precio="{{ bebida.precio }}"
+                data-stock="{{ bebida.cantidad }}"
                 data-composicion='[]'
                 {% if bebida.tiene_vencidos %}disabled style="color: #e74c3c;"{% endif %}>
             {{ bebida.nombre_producto }} {% if bebida.tiene_vencidos %}(Insumo Vencido 🔴){% endif %}

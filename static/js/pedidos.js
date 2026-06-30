@@ -140,50 +140,75 @@ function actualizarComposicion_y_Precio(elemento, excluidasPreseleccionadas = []
 
         // 2. Calcular los límites de stock
         let stockLimitado = Infinity;
-        let agotado = false;
-        const checkedIds = new Set(Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`)).map(cb => Number.parseInt(cb.value, 10)));
+        if (composicion.length > 0) {
+            let agotado = false;
+            const checkedIds = new Set(Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`)).map(cb => Number.parseInt(cb.value, 10)));
 
-        composicion.forEach(mp => {
-            if (!checkedIds.has(mp.id)) {
-                const posible = Math.floor(mp.stock / mp.cantidad_usada);
-                if (posible < stockLimitado) stockLimitado = posible;
-                if (mp.stock <= 0) agotado = true;
-            }
-        });
-
-        // 3. Aplicar estado visual si faltan ingredientes vitales
-        if (agotado) {
-            fila.style.border = "2px solid #ef4444";
-            fila.style.backgroundColor = "#fff5f5";
-        } else {
-            fila.style.border = "";
-            fila.style.backgroundColor = "";
-        }
-
-        if (stockLimitado <= 10 && stockLimitado > 0) {
-            Array.from(selectCant.options).forEach(opt => {
-                if (Number.parseInt(opt.value, 10) > stockLimitado) {
-                    opt.disabled = true;
-                    opt.style.color = "#ccc";
-                } else {
-                    opt.disabled = false;
-                    opt.style.color = "inherit";
+            composicion.forEach(mp => {
+                if (!checkedIds.has(mp.id)) {
+                    const posible = Math.floor(mp.stock / mp.cantidad_usada);
+                    if (posible < stockLimitado) stockLimitado = posible;
+                    if (mp.stock <= 0) agotado = true;
                 }
             });
 
-            if (Number.parseInt(selectCant.value, 10) > stockLimitado) {
-                selectCant.value = stockLimitado;
+            // 3. Aplicar estado visual si faltan ingredientes vitales
+            if (agotado) {
+                fila.style.border = "2px solid #ef4444";
+                fila.style.backgroundColor = "#fff5f5";
+            } else {
+                fila.style.border = "";
+                fila.style.backgroundColor = "";
             }
         } else {
-            Array.from(selectCant.options).forEach(opt => {
-                opt.disabled = false;
-                opt.style.color = "inherit";
-            });
+            // Si no tiene composición (ej: Bebidas), el stock es su cantidad de producto
+            const stockPropio = Number.parseInt(opcion.dataset.stock || "0", 10);
+            stockLimitado = stockPropio;
+
+            if (stockLimitado <= 0) {
+                fila.style.border = "2px solid #ef4444";
+                fila.style.backgroundColor = "#fff5f5";
+            } else {
+                fila.style.border = "";
+                fila.style.backgroundColor = "";
+            }
+        }
+
+        // Reconstruir dinámicamente las opciones del select de cantidad
+        const valorActual = selectCant.value;
+        selectCant.innerHTML = "";
+
+        const maxCant = (stockLimitado === Infinity) ? 20 : stockLimitado;
+        if (maxCant > 0) {
+            for (let k = 1; k <= maxCant; k++) {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.innerText = k;
+                selectCant.appendChild(opt);
+            }
+            if (valorActual && Number.parseInt(valorActual, 10) <= maxCant) {
+                selectCant.value = valorActual;
+            } else {
+                selectCant.value = 1;
+            }
+            selectCant.disabled = false;
+        } else {
+            const opt = document.createElement('option');
+            opt.value = 0;
+            opt.innerText = "0";
+            selectCant.appendChild(opt);
+            selectCant.value = 0;
+            selectCant.disabled = true;
         }
     } else if (listaExcl) {
         listaExcl.innerHTML = "";
         fila.style.border = "";
         fila.style.backgroundColor = "";
+        if (selectCant) {
+            selectCant.innerHTML = '<option value="">—</option>';
+            selectCant.value = "";
+            selectCant.disabled = true;
+        }
     }
 
     calcularTotal();
