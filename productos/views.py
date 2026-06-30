@@ -197,8 +197,16 @@ def registrar_producto(request):
             mp = MateriaPrima.objects.get(pk=materia_id)
             nombre = mp.nombre_materia_prima
 
+    nombre_normalizado = (nombre or "Sin nombre").strip()
+    if Producto.objects.filter(nombre_producto__iexact=nombre_normalizado).exists():
+        messages.error(request, f"Ya existe un producto con el nombre '{nombre_normalizado}'.")
+        if categoria == 'Bebidas':
+            return redirect('mostrar_registro_bebida')
+        else:
+            return redirect('mostrar_registro_comida')
+
     producto = Producto.objects.create(
-        nombre_producto=nombre or "Sin nombre",
+        nombre_producto=nombre_normalizado,
         precio=request.POST.get('txt_precio'),
         categoria=categoria,
         imagen=imagen,
@@ -272,7 +280,12 @@ def editar_producto(request):
             mp = MateriaPrima.objects.get(pk=materia_id[0])
             nombre = mp.nombre_materia_prima
 
-    producto.nombre_producto = nombre or producto.nombre_producto
+    nombre_normalizado = (nombre or producto.nombre_producto).strip()
+    if Producto.objects.filter(nombre_producto__iexact=nombre_normalizado).exclude(pk=producto.pk).exists():
+        messages.error(request, f"Ya existe un producto con el nombre '{nombre_normalizado}'.")
+        return redirect('pre_editar_producto', id=producto.id)
+
+    producto.nombre_producto = nombre_normalizado
     producto.precio          = request.POST.get('txt_precio')
     producto.categoria       = categoria
 

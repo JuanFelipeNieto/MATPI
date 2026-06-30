@@ -153,11 +153,23 @@ class ProductoViewsCompleteTest(TestCase):
     # 6. Registrar producto Bebida (exitoso)
     def test_registrar_bebida(self):
         self.login_como_admin()
+        materia_pepsi = MateriaPrima.objects.create(
+            nombre_materia_prima="Pepsi 350ml",
+            unidad_medida="und",
+            cantidad_por_unidad=1,
+            tipo="Bebida"
+        )
+        Lote.objects.create(
+            materia_prima=materia_pepsi,
+            cantidad_inicial=12.0,
+            cantidad_actual=12.0,
+            precio_unidad=1200
+        )
         datos = {
             'txt_nombre': '',
             'txt_categoria': 'Bebidas',
             'txt_precio': '4000',
-            'materia_id[]': [self.materia_coca.id],
+            'materia_id[]': [materia_pepsi.id],
             'materia_cantidad[]': ['1.0'],
             'materia_unidad[]': ['und']
         }
@@ -166,7 +178,7 @@ class ProductoViewsCompleteTest(TestCase):
 
         producto = Producto.objects.filter(categoria='Bebidas', precio=4000).first()
         self.assertIsNotNone(producto)
-        self.assertEqual(producto.nombre_producto, self.materia_coca.nombre_materia_prima)
+        self.assertEqual(producto.nombre_producto, materia_pepsi.nombre_materia_prima)
 
     # 7. Registrar Producto (Fallido o Imagen Inválida)
     def test_registrar_producto_falla(self):
@@ -271,6 +283,70 @@ class ProductoViewsCompleteTest(TestCase):
         self.producto_bebida.refresh_from_db()
         
         self.assertEqual(self.producto_bebida.cantidad, 24)
+
+    def test_registrar_comida_nombre_duplicado_case_insensitive(self):
+        self.login_como_admin()
+        # "Hamburguesa Sencilla" already exists (created in setUp)
+        # We try to register "hamburguesa sencilla" (lowercase, extra spacing)
+        datos = {
+            'txt_nombre': '  hamburguesa sencilla  ',
+            'txt_categoria': 'Hamburguesas',
+            'txt_precio': '15000',
+            'materia_id[]': [self.materia_carne.id],
+            'materia_cantidad[]': ['150.0'],
+            'materia_unidad[]': ['g']
+        }
+        response = self.client.post(reverse('registrar_producto'), datos)
+        # Should redirect back to registrar comida page
+        self.assertRedirects(response, reverse('mostrar_registro_comida'))
+        # Should have only 1 product named Hamburguesa Sencilla
+        self.assertEqual(Producto.objects.filter(nombre_producto__iexact='Hamburguesa Sencilla').count(), 1)
+
+    def test_editar_comida_nombre_duplicado_case_insensitive(self):
+        self.login_como_admin()
+        # Create another product first
+        otro_producto = Producto.objects.create(
+            nombre_producto="Hamburguesa Doble",
+            precio=15000,
+            categoria="Hamburguesas"
+        )
+        # Try to edit "Hamburguesa Sencilla" to "hamburguesa doble"
+        datos = {
+            'txt_id': self.producto_comida.id,
+            'txt_nombre': 'hamburguesa doble',
+            'txt_precio': '12000',
+            'txt_categoria': 'Hamburguesas',
+            'materia_id[]': [self.materia_carne.id],
+            'materia_cantidad[]': ['150.0'],
+            'materia_unidad[]': ['g']
+        }
+        response = self.client.post(reverse('editar_producto'), datos)
+        # Should redirect back to pre_editar_producto page for self.producto_comida
+        self.assertRedirects(response, reverse('pre_editar_producto', args=[self.producto_comida.id]))
+        # The name of self.producto_comida should NOT have changed
+        self.producto_comida.refresh_from_db()
+        self.assertEqual(self.producto_comida.nombre_producto, "Hamburguesa Sencilla")
+
+    def test_editar_comida_mismo_nombre_capitalizacion_diferente(self):
+        self.login_como_admin()
+        # Try to edit "Hamburguesa Sencilla" to "HAMBURGUESA SENCILLA" (just casing change, no other duplicates)
+        datos = {
+            'txt_id': self.producto_comida.id,
+            'txt_nombre': 'HAMBURGUESA SENCILLA',
+            'txt_precio': '13000',
+            'txt_categoria': 'Hamburguesas',
+            'materia_id[]': [self.materia_carne.id],
+            'materia_cantidad[]': ['150.0'],
+            'materia_unidad[]': ['g']
+        }
+        response = self.client.post(reverse('editar_producto'), datos)
+        # Should redirect to listado of products
+        self.assertRedirects(response, reverse('listar_productos'))
+        # Name should be successfully updated with the new casing
+        self.producto_comida.refresh_from_db()
+        self.assertEqual(self.producto_comida.nombre_producto, "HAMBURGUESA SENCILLA")
+        self.assertEqual(self.producto_comida.precio, 13000)
+
 
 
 
