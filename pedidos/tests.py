@@ -246,3 +246,75 @@ class PedidoViewsTest(TestCase):
         self.assertEqual(len(composicion), 1)
         self.assertTrue(composicion[0]['es_prioridad'])
 
+    def test_registrar_pedido_reserva_dia_correcto(self):
+        self.login_como_cajero()
+        # Crear reserva para hoy
+        reserva_hoy = Reserva.objects.create(
+            fecha=timezone.now(),
+            cliente=self.cliente,
+            cajero=self.cajero
+        )
+        # Asegurar stock
+        self.lote.cantidad_actual = 10
+        self.lote.save()
+        
+        datos = {
+            'txt_cliente_id': self.cliente.id,
+            'txt_reserva': reserva_hoy.id,
+            'txt_numero_orden': 12,
+            'txt_metodo_pago': 'Efectivo',
+            'producto_id[]': [self.producto.id],
+            'producto_cantidad[]': [1],
+            'indices[]': [0]
+        }
+        response = self.client.post(reverse('registrar_pedido'), datos)
+        # Redirige a facturas
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Pedido.objects.filter(reserva=reserva_hoy).exists())
+
+    def test_registrar_pedido_reserva_dia_incorrecto(self):
+        self.login_como_cajero()
+        # Crear reserva para mañana
+        reserva_manana = Reserva.objects.create(
+            fecha=timezone.now() + timedelta(days=1),
+            cliente=self.cliente,
+            cajero=self.cajero
+        )
+        datos = {
+            'txt_cliente_id': self.cliente.id,
+            'txt_reserva': reserva_manana.id,
+            'txt_numero_orden': 12,
+            'txt_metodo_pago': 'Efectivo',
+            'producto_id[]': [self.producto.id],
+            'producto_cantidad[]': [1],
+            'indices[]': [0]
+        }
+        response = self.client.post(reverse('registrar_pedido'), datos)
+        # Debe redirigir y no asociar la reserva incorrecta
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('mostrar_registro_pedido'))
+        self.assertFalse(Pedido.objects.filter(reserva=reserva_manana).exists())
+
+    def test_editar_pedido_reserva_dia_incorrecto(self):
+        self.login_como_cajero()
+        # Crear reserva para mañana
+        reserva_manana = Reserva.objects.create(
+            fecha=timezone.now() + timedelta(days=1),
+            cliente=self.cliente,
+            cajero=self.cajero
+        )
+        datos = {
+            'txt_id': self.pedido.id,
+            'txt_cliente': self.cliente.id,
+            'txt_reserva': reserva_manana.id,
+            'txt_metodo_pago': 'Efectivo',
+            'producto_id[]': [self.producto.id],
+            'producto_cantidad[]': [1],
+            'indices[]': [0]
+        }
+        response = self.client.post(reverse('editar_pedido'), datos)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'/pedidos/editar/{self.pedido.id}/')
+        self.pedido.refresh_from_db()
+        self.assertNotEqual(self.pedido.reserva, reserva_manana)
+

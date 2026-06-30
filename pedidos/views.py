@@ -227,7 +227,7 @@ def mostrar_registro_pedido(request):
     prox_orden = max_orden + 1
 
     datos = {
-        'reservas': Reserva.objects.all(),
+        'reservas': Reserva.objects.filter(fecha__date=hoy_local),
         'clientes': Cliente.objects.all(),
         'productos': productos_filtrados,
         'bebidas': [p for p in productos_filtrados if p.categoria == 'Bebidas'],
@@ -301,6 +301,8 @@ def registrar_pedido(request):
 
     try:
         _validar_cliente_y_vencidos(request, productos_ids)
+        if reserva and reserva.fecha.date() != timezone.localdate():
+            raise ValueError("No se puede registrar el pedido: La reserva seleccionada debe ser para el día de hoy.")
 
         indices = request.POST.getlist('indices[]')
         exclusiones_data = []
@@ -418,10 +420,18 @@ def pre_editar_pedido(request, id):
             'tipo': 'bebida' if d.producto.categoria == 'Bebidas' else 'producto'
         })
 
+    hoy_local = timezone.localdate()
+    if pedido.reserva:
+        reservas = Reserva.objects.filter(
+            models.Q(fecha__date=hoy_local) | models.Q(pk=pedido.reserva.id)
+        )
+    else:
+        reservas = Reserva.objects.filter(fecha__date=hoy_local)
+
     datos = {
         'pedido': pedido,
         'cajeros': Cajero.objects.all(),
-        'reservas': Reserva.objects.all(),
+        'reservas': reservas,
         'clientes': Cliente.objects.all(),
         'productos': productos,
         'bebidas': Producto.objects.filter(categoria='Bebidas'),
@@ -468,7 +478,14 @@ def editar_pedido(request):
     if usuario_id_post:
         pedido.usuario = Usuario.objects.get(pk=usuario_id_post)
 
-    pedido.reserva = Reserva.objects.get(pk=request.POST.get('txt_reserva')) if request.POST.get('txt_reserva') else None
+    reserva_id_nuevo = request.POST.get('txt_reserva')
+    reserva_nueva = Reserva.objects.filter(pk=reserva_id_nuevo).first() if reserva_id_nuevo else None
+    if reserva_nueva:
+        if (not pedido.reserva or reserva_nueva.id != pedido.reserva.id) and reserva_nueva.fecha.date() != timezone.localdate():
+            _descontar_stock_pedido(pedido)
+            messages.error(request, "No se pudo actualizar el pedido: La reserva seleccionada debe ser para el día de hoy.")
+            return redirect(f'/pedidos/editar/{pedido.id}/')
+    pedido.reserva = reserva_nueva
 
     # Validar Cliente en edición (Opcional, pero si se escribe debe existir)
     cliente_id = request.POST.get('txt_cliente')
