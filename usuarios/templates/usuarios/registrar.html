@@ -14,7 +14,7 @@
         <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
             <div class="form-group">
                 <label for="txt_id">Documento de Identidad</label>
-                <input type="text" id="txt_id" name="txt_id" placeholder="Número de documento" required minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ datos.txt_id|default_if_none:'' }}">
+                <input type="text" id="txt_id" name="txt_id" placeholder="Número de documento" required minlength="6" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ datos.txt_id|default_if_none:'' }}">
             </div>
 
             <div class="form-group">
@@ -168,12 +168,16 @@
             inputFechaIngreso.addEventListener('change', updateEstadoByFecha);
         }
 
-        // 2. Fecha de Nacimiento: Máximo hace 18 años.
+        // 2. Fecha de Nacimiento: Máximo hace 18 años y mínimo hace 70 años.
         const inputFechaNacimiento = document.getElementById('txt_fecha_nacimiento');
         if (inputFechaNacimiento) {
             const minYear = yyyy - 18;
             const maxDateNacimiento = `${minYear}-${mm}-${dd}`;
             inputFechaNacimiento.max = maxDateNacimiento;
+
+            const maxYear = yyyy - 70;
+            const minDateNacimiento = `${maxYear}-${mm}-${dd}`;
+            inputFechaNacimiento.min = minDateNacimiento;
         }
 
         // 3. Mostrar/Ocultar fecha de terminación

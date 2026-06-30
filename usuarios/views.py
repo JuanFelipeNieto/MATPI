@@ -170,9 +170,9 @@ def listar_usuarios(request):
         'es_admin': True
     })
 
-def _validar_usuario_base(doc_id, nombre, telefono, experiencia_file=None):
-    if doc_id is not None and len(doc_id) != 10:
-        raise ValueError("El documento debe tener exactamente 10 caracteres.")
+def _validar_usuario_base(doc_id, nombre, telefono, experiencia_file=None, fecha_nacimiento=None):
+    if doc_id is not None and (len(doc_id) < 6 or len(doc_id) > 10):
+        raise ValueError("El documento debe tener entre 6 y 10 caracteres.")
     if nombre:
         if len(nombre) < 3:
             raise ValueError("El nombre no puede tener menos de 3 caracteres.")
@@ -182,6 +182,26 @@ def _validar_usuario_base(doc_id, nombre, telefono, experiencia_file=None):
         raise ValueError("El teléfono no puede tener menos de 6 caracteres.")
     if experiencia_file and not experiencia_file.name.lower().endswith('.pdf'):
         raise ValueError("El archivo de experiencia laboral debe ser en formato PDF.")
+    
+    if fecha_nacimiento:
+        from datetime import datetime, date
+        if isinstance(fecha_nacimiento, str):
+            try:
+                fn = datetime.strptime(fecha_nacimiento, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValueError("La fecha de nacimiento no tiene un formato válido.")
+        else:
+            fn = fecha_nacimiento
+        
+        # Calcular edad
+        from django.utils import timezone
+        hoy = timezone.now().date()
+        edad = hoy.year - fn.year - ((hoy.month, hoy.day) < (fn.month, fn.day))
+        
+        if edad > 70:
+            raise ValueError("La edad del usuario no podrá ser mayor a 70 años.")
+        if edad < 18:
+            raise ValueError("El usuario debe ser mayor de 18 años.")
 
 def _validar_emergencia_requerido(emergencia_nombre, emergencia_parentesco, emergencia_numero):
     if not (emergencia_nombre and emergencia_parentesco and emergencia_numero):
@@ -265,7 +285,7 @@ def registrar_usuario(request):
             emergencia_numero = request.POST.get('txt_emergencia_numero')
             experiencia_file = request.FILES.get('txt_experiencia')
 
-            _validar_usuario_base(doc_id, nombre, telefono, experiencia_file)
+            _validar_usuario_base(doc_id, nombre, telefono, experiencia_file, request.POST.get('txt_fecha_nacimiento'))
             _validar_emergencia(emergencia_nombre, emergencia_parentesco, emergencia_numero, required=True)
 
             f_ingreso = datetime.strptime(f_ingreso_str, '%Y-%m-%d').date()

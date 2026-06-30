@@ -379,3 +379,76 @@ class UsuarioViewsCompleteTest(TestCase):
         # Verificar que las fechas NO cambiaron (deben seguir siendo las originales)
         self.assertEqual(str(self.cajero_user.fecha_nacimiento), '1995-05-05')
         self.assertNotEqual(str(self.cajero_user.fecha_ingreso), '2010-01-01')
+
+    def test_registrar_usuario_documento_limites_exitoso(self):
+        self.login_como_admin()
+        
+        # Caso 1: Largo mínimo de 6 caracteres
+        datos_6 = {
+            'txt_id': '123456',
+            'txt_nombre': 'Pedro Perez',
+            'txt_contrasena': 'secure123',
+            'txt_correo': 'pedro@matpi.com',
+            'txt_telefono': '3123456789',
+            'txt_fecha_nacimiento': '1990-01-01',
+            'txt_direccion': 'Calle 100',
+            'txt_fecha_ingreso': timezone.now().date().strftime('%Y-%m-%d'),
+            'txt_eps': 'SURA',
+            'txt_tipo_contrato': 'Indefinido',
+            'txt_turno': 'Mañana',
+            'txt_emergencia_nombre': 'Contacto Auxiliar',
+            'txt_emergencia_parentesco': 'Hermano',
+            'txt_emergencia_numero': '3159876543'
+        }
+        response = self.client.post(reverse('registrar_usuario'), datos_6)
+        self.assertRedirects(response, reverse('listar_usuarios'))
+        self.assertTrue(Usuario.objects.filter(id='123456').exists())
+
+    def test_registrar_usuario_documento_limites_fallido(self):
+        self.login_como_admin()
+        
+        # Caso 1: Largo menor al mínimo (5 caracteres)
+        datos_5 = {
+            'txt_id': '12345',
+            'txt_nombre': 'Pedro Perez',
+            'txt_contrasena': 'secure123',
+            'txt_correo': 'pedro@matpi.com',
+            'txt_telefono': '3123456789',
+            'txt_fecha_nacimiento': '1990-01-01',
+            'txt_direccion': 'Calle 100',
+            'txt_fecha_ingreso': timezone.now().date().strftime('%Y-%m-%d'),
+            'txt_eps': 'SURA',
+            'txt_tipo_contrato': 'Indefinido',
+            'txt_turno': 'Mañana',
+            'txt_emergencia_nombre': 'Contacto Auxiliar',
+            'txt_emergencia_parentesco': 'Hermano',
+            'txt_emergencia_numero': '3159876543'
+        }
+        response = self.client.post(reverse('registrar_usuario'), datos_5)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Usuario.objects.filter(id='12345').exists())
+
+    def test_registrar_usuario_edad_limite_fallido(self):
+        self.login_como_admin()
+        
+        # Caso 1: Más de 70 años (ej: 1950-01-01)
+        datos_viejo = {
+            'txt_id': '2233445566',
+            'txt_nombre': 'Pedro Perez',
+            'txt_contrasena': 'secure123',
+            'txt_correo': 'pedro@matpi.com',
+            'txt_telefono': '3123456789',
+            'txt_fecha_nacimiento': '1950-01-01',
+            'txt_direccion': 'Calle 100',
+            'txt_fecha_ingreso': timezone.now().date().strftime('%Y-%m-%d'),
+            'txt_eps': 'SURA',
+            'txt_tipo_contrato': 'Indefinido',
+            'txt_turno': 'Mañana',
+            'txt_emergencia_nombre': 'Contacto Auxiliar',
+            'txt_emergencia_parentesco': 'Hermano',
+            'txt_emergencia_numero': '3159876543'
+        }
+        response = self.client.post(reverse('registrar_usuario'), datos_viejo)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Usuario.objects.filter(id='2233445566').exists())
+
