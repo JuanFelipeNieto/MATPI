@@ -452,3 +452,27 @@ class UsuarioViewsCompleteTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Usuario.objects.filter(id='2233445566').exists())
 
+    def test_registrar_usuario_documento_duplicado(self):
+        self.login_como_admin()
+        # El ID de self.cajero_user es '0987654321' (creado en setUp)
+        datos = {
+            'txt_id': '0987654321',
+            'txt_nombre': 'Otro Nombre',
+            'txt_contrasena': 'secure123',
+            'txt_correo': 'cajero@matpi.com',
+            'txt_telefono': '3123456789',
+            'txt_fecha_nacimiento': '1998-10-10',
+            'txt_direccion': 'Calle 100',
+            'txt_fecha_ingreso': timezone.now().date().strftime('%Y-%m-%d'),
+            'txt_eps': 'SURA',
+            'txt_tipo_contrato': 'Indefinido',
+            'txt_turno': 'Mañana',
+            'txt_emergencia_nombre': 'Contacto Auxiliar',
+            'txt_emergencia_parentesco': 'Hermano',
+            'txt_emergencia_numero': '3159876543'
+        }
+        response = self.client.post(reverse('registrar_usuario'), datos)
+        # Debe recargar la misma página mostrando el error
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'usuarios/registrar.html')
+

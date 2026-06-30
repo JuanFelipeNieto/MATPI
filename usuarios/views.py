@@ -286,6 +286,8 @@ def registrar_usuario(request):
             experiencia_file = request.FILES.get('txt_experiencia')
 
             _validar_usuario_base(doc_id, nombre, telefono, experiencia_file, request.POST.get('txt_fecha_nacimiento'))
+            if Usuario.objects.filter(pk=doc_id).exists():
+                raise ValueError(f"Ya existe un usuario registrado con el número de documento '{doc_id}'.")
             _validar_emergencia(emergencia_nombre, emergencia_parentesco, emergencia_numero, required=True)
 
             f_ingreso = datetime.strptime(f_ingreso_str, '%Y-%m-%d').date()
