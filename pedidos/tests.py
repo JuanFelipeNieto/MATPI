@@ -318,7 +318,7 @@ class PedidoViewsTest(TestCase):
         self.pedido.refresh_from_db()
         self.assertNotEqual(self.pedido.reserva, reserva_manana)
 
-    def test_registrar_pedido_productos_duplicados_fail(self):
+    def test_registrar_pedido_productos_duplicados_success(self):
         self.login_como_cajero()
         datos = {
             'txt_cliente_id': self.cliente.id,
@@ -330,9 +330,18 @@ class PedidoViewsTest(TestCase):
         }
         response = self.client.post(reverse('registrar_pedido'), datos)
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('mostrar_registro_pedido'))
+        pedido = Pedido.objects.latest('id')
+        self.assertRedirects(response, f'/facturas/registrar/?pedido_id={pedido.id}')
+        
+        # Check details
+        detalles = pedido.detalles.all().order_by('id')
+        self.assertEqual(detalles.count(), 2)
+        self.assertEqual(detalles[0].producto, self.producto)
+        self.assertEqual(detalles[0].cantidad, 1)
+        self.assertEqual(detalles[1].producto, self.producto)
+        self.assertEqual(detalles[1].cantidad, 2)
 
-    def test_editar_pedido_productos_duplicados_fail(self):
+    def test_editar_pedido_productos_duplicados_success(self):
         self.login_como_cajero()
         datos = {
             'txt_id': self.pedido.id,
@@ -344,6 +353,13 @@ class PedidoViewsTest(TestCase):
         }
         response = self.client.post(reverse('editar_pedido'), datos)
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, f'/pedidos/editar/{self.pedido.id}/')
+        self.assertIn('/facturas/registrar/', response.url)
+        self.pedido.refresh_from_db()
+        detalles = self.pedido.detalles.all().order_by('id')
+        self.assertEqual(detalles.count(), 2)
+        self.assertEqual(detalles[0].producto, self.producto)
+        self.assertEqual(detalles[0].sample_amount if hasattr(detalles[0], 'sample_amount') else detalles[0].cantidad, 1)
+        self.assertEqual(detalles[1].producto, self.producto)
+        self.assertEqual(detalles[1].sample_amount if hasattr(detalles[1], 'sample_amount') else detalles[1].cantidad, 1)
 
 

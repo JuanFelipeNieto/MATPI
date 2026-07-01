@@ -304,9 +304,7 @@ def registrar_pedido(request):
     cantidades = request.POST.getlist(PRODUCTO_CANTIDAD_KEY)
 
     try:
-        productos_filtrados = [pid for pid in productos_ids if pid]
-        if len(productos_filtrados) != len(set(productos_filtrados)):
-            raise ValueError("No se permiten productos duplicados en el mismo pedido.")
+
 
         _validar_cliente_y_vencidos(request, productos_ids)
         if reserva and timezone.localtime(reserva.fecha).date() != timezone.localdate():
@@ -471,11 +469,7 @@ def editar_pedido(request):
     cantidades_nuevas = request.POST.getlist(PRODUCTO_CANTIDAD_KEY)
     indices_nuevos = request.POST.getlist('indices[]')
 
-    productos_filtrados = [pid for pid in productos_ids_nuevos if pid]
-    if len(productos_filtrados) != len(set(productos_filtrados)):
-        _descontar_stock_pedido(pedido)
-        messages.error(request, "No se pudo actualizar el pedido: No se permiten productos duplicados en el mismo pedido.")
-        return redirect(f'/pedidos/editar/{pedido.id}/')
+
     exclusiones_data_nuevas = []
     for i in range(len(productos_ids_nuevos)):
         idx = indices_nuevos[i] if i < len(indices_nuevos) else i

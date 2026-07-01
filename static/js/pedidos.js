@@ -93,27 +93,18 @@ function eliminarFilaProducto(boton) {
 
 function actualizarOpcionesRepetidas() {
     const selects = Array.from(document.querySelectorAll('.select-producto'));
-    const valoresSeleccionados = new Set(
-        selects.map(s => s.value).filter(val => val !== "")
-    );
 
     selects.forEach(select => {
-        const valorActual = select.value;
         Array.from(select.options).forEach(opt => {
             if (opt.value === "") return;
 
-            if (valoresSeleccionados.has(opt.value) && opt.value !== valorActual) {
+            const esRojoOriginal = (opt.style.color === "rgb(231, 76, 60)" || opt.style.color === "#e74c3c" || opt.text.includes("🔴"));
+            if (esRojoOriginal) {
                 opt.disabled = true;
-                opt.style.color = "#ccc";
+                opt.style.color = "#e74c3c";
             } else {
-                const esRojoOriginal = (opt.style.color === "rgb(231, 76, 60)" || opt.style.color === "#e74c3c" || opt.text.includes("🔴"));
-                if (esRojoOriginal) {
-                    opt.disabled = true;
-                    opt.style.color = "#e74c3c";
-                } else {
-                    opt.disabled = false;
-                    opt.style.color = "inherit";
-                }
+                opt.disabled = false;
+                opt.style.color = "inherit";
             }
         });
     });
@@ -296,6 +287,9 @@ function validarStockYSubmit(e, accionTexto, esEdicion = false) {
     let error = false;
     let msg = "";
 
+    const necesidadesInsumos = {};
+    const necesidadesBebidas = {};
+
     filas.forEach(fila => {
         const select = fila.querySelector('.select-producto');
         const opcion = select.options[select.selectedIndex];
@@ -303,17 +297,54 @@ function validarStockYSubmit(e, accionTexto, esEdicion = false) {
 
         const composicion = JSON.parse(opcion.dataset.composicion || "[]");
         const cantidad = Number.parseInt(fila.querySelector('.select-cantidad').value, 10);
-        const excluidas = new Set(Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`)).map(cb => Number.parseInt(cb.value, 10)));
 
-        composicion.forEach(mp => {
-            if (!excluidas.has(mp.id)) {
-                if (mp.stock < (mp.cantidad_usada * cantidad)) {
-                    error = true;
-                    msg += `- ${opcion.text.trim()}: Insumo "${mp.nombre}" insuficiente (Disponible: ${mp.stock})\n`;
+        if (composicion.length > 0) {
+            const excluidas = new Set(
+                Array.from(fila.querySelectorAll(`.lista-exclusiones input[type="checkbox"]:checked`))
+                .map(cb => Number.parseInt(cb.value, 10))
+            );
+
+            composicion.forEach(mp => {
+                if (!excluidas.has(mp.id)) {
+                    if (!necesidadesInsumos[mp.id]) {
+                        necesidadesInsumos[mp.id] = {
+                            nombre: mp.nombre,
+                            stock: mp.stock,
+                            cant_total: 0
+                        };
+                    }
+                    necesidadesInsumos[mp.id].cant_total += mp.cantidad_usada * cantidad;
                 }
+            });
+        } else {
+            const pId = opcion.value;
+            const stock = Number.parseInt(opcion.dataset.stock || "0", 10);
+            if (!necesidadesBebidas[pId]) {
+                necesidadesBebidas[pId] = {
+                    nombre: opcion.text.trim(),
+                    stock: stock,
+                    cant_total: 0
+                };
             }
-        });
+            necesidadesBebidas[pId].cant_total += cantidad;
+        }
     });
+
+    for (const id in necesidadesInsumos) {
+        const item = necesidadesInsumos[id];
+        if (item.stock < item.cant_total) {
+            error = true;
+            msg += `- Insumo "${item.nombre}" insuficiente (Disponible: ${item.stock}, Requerido total: ${item.cant_total})\n`;
+        }
+    }
+
+    for (const id in necesidadesBebidas) {
+        const item = necesidadesBebidas[id];
+        if (item.stock < item.cant_total) {
+            error = true;
+            msg += `- Bebida "${item.nombre}" insuficiente (Disponible: ${item.stock}, Requerido total: ${item.cant_total})\n`;
+        }
+    }
 
     if (error) {
         alert("No se puede " + accionTexto + " el pedido por falta de stock:\n\n" + msg);
