@@ -155,3 +155,41 @@ class ProveedorViewsTest(TestCase):
         # Ensure it was NOT created
         self.assertFalse(DetalleProveedorMateriaP.objects.filter(proveedor=self.proveedor, materia_prima=self.materia).exists())
 
+    def test_registrar_proveedor_nombre_duplicado_fail(self):
+        self.login_como_admin()
+        # Nombre de proveedor existente: "Distribuidora Carnes"
+        datos = {
+            'txt_nombre': '  distribuidora carnes  ',  # Nombre existente con espacios y diferente capitalizacion
+            'txt_direccion': 'Calle Nueva 99',
+            'txt_correo': 'nuevo@prov.com',
+            'txt_telefono': '3000000000'
+        }
+        response = self.client.post(reverse('registrar_proveedor'), datos)
+        self.assertRedirects(response, reverse('mostrar_registro_proveedor'))
+        # Asegurar que no se creó otro proveedor
+        self.assertEqual(Proveedor.objects.filter(nombre_proveedor__icontains='Distribuidora Carnes').count(), 1)
+
+    def test_editar_proveedor_nombre_duplicado_fail(self):
+        self.login_como_admin()
+        # Crear otro proveedor primero
+        otro_proveedor = Proveedor.objects.create(
+            nombre_proveedor="Proveeduría Central",
+            direccion="Carrera 15",
+            correo_electronico="central@prov.com",
+            telefono="3222222222"
+        )
+        # Intentar editar self.proveedor para tener el nombre de otro_proveedor
+        datos = {
+            'txt_id': self.proveedor.id,
+            'txt_nombre': 'proveeduría central',  # Nombre de otro_proveedor con diferente capitalizacion
+            'txt_direccion': self.proveedor.direccion,
+            'txt_correo': self.proveedor.correo_electronico,
+            'txt_telefono': self.proveedor.telefono
+        }
+        response = self.client.post(reverse('editar_proveedor'), datos)
+        self.assertRedirects(response, reverse('pre_editar_proveedor', args=[self.proveedor.id]))
+        # Asegurar que el nombre de self.proveedor no cambió
+        self.proveedor.refresh_from_db()
+        self.assertEqual(self.proveedor.nombre_proveedor, 'Distribuidora Carnes')
+
+

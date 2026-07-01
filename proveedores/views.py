@@ -65,6 +65,13 @@ def registrar_proveedor(request):
         correo    = request.POST.get('txt_correo')
         telefono  = request.POST.get('txt_telefono')
         try:
+            if nombre:
+                nombre = nombre.strip()
+            if not nombre:
+                raise ValueError("El nombre del proveedor es requerido.")
+            if Proveedor.objects.filter(nombre_proveedor__iexact=nombre).exists():
+                raise ValueError(f"Ya existe un proveedor registrado con el nombre '{nombre}'.")
+
             Proveedor.objects.create(
                 nombre_proveedor=nombre,
                 direccion=direccion,
@@ -72,10 +79,13 @@ def registrar_proveedor(request):
                 telefono=telefono,
             )
             messages.success(request, "Proveedor registrado exitosamente.")
+            return redirect('listar_proveedores')
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('mostrar_registro_proveedor')
         except Exception as e:
             messages.error(request, f"Error al registrar: {str(e)}")
-
-        return redirect('listar_proveedores')
+            return redirect('mostrar_registro_proveedor')
     return redirect('mostrar_registro_proveedor')
 
 
@@ -104,6 +114,13 @@ def editar_proveedor(request):
         correo    = request.POST.get('txt_correo')
         telefono  = request.POST.get('txt_telefono')
         try:
+            if nombre:
+                nombre = nombre.strip()
+            if not nombre:
+                raise ValueError("El nombre del proveedor es requerido.")
+            if Proveedor.objects.filter(nombre_proveedor__iexact=nombre).exclude(pk=proveedor_id).exists():
+                raise ValueError(f"Ya existe otro proveedor registrado con el nombre '{nombre}'.")
+
             proveedor = Proveedor.objects.get(pk=proveedor_id)
             proveedor.nombre_proveedor    = nombre
             proveedor.direccion           = direccion
@@ -111,8 +128,13 @@ def editar_proveedor(request):
             proveedor.telefono            = telefono
             proveedor.save()
             messages.success(request, "Proveedor actualizado correctamente.")
+            return redirect('listar_proveedores')
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('pre_editar_proveedor', id=proveedor_id)
         except Exception as e:
             messages.error(request, f"Error al actualizar: {str(e)}")
+            return redirect('pre_editar_proveedor', id=proveedor_id)
 
     return redirect('listar_proveedores')
 
