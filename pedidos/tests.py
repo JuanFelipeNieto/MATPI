@@ -318,3 +318,32 @@ class PedidoViewsTest(TestCase):
         self.pedido.refresh_from_db()
         self.assertNotEqual(self.pedido.reserva, reserva_manana)
 
+    def test_registrar_pedido_productos_duplicados_fail(self):
+        self.login_como_cajero()
+        datos = {
+            'txt_cliente_id': self.cliente.id,
+            'txt_numero_orden': 12,
+            'txt_metodo_pago': 'Efectivo',
+            'producto_id[]': [self.producto.id, self.producto.id],  # Duplicate product
+            'producto_cantidad[]': [1, 2],
+            'indices[]': [0, 1]
+        }
+        response = self.client.post(reverse('registrar_pedido'), datos)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('mostrar_registro_pedido'))
+
+    def test_editar_pedido_productos_duplicados_fail(self):
+        self.login_como_cajero()
+        datos = {
+            'txt_id': self.pedido.id,
+            'txt_cliente': self.cliente.id,
+            'txt_metodo_pago': 'Efectivo',
+            'producto_id[]': [self.producto.id, self.producto.id],  # Duplicate product
+            'producto_cantidad[]': [1, 1],
+            'indices[]': [0, 1]
+        }
+        response = self.client.post(reverse('editar_pedido'), datos)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'/pedidos/editar/{self.pedido.id}/')
+
+

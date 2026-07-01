@@ -84,10 +84,39 @@ function eliminarFilaProducto(boton) {
     const tbody = document.getElementById('body-productos');
     if (tbody.rows.length > 1) {
         boton.closest('tr').remove();
+        actualizarOpcionesRepetidas();
         calcularTotal();
     } else {
         alert("El pedido debe tener al menos un item.");
     }
+}
+
+function actualizarOpcionesRepetidas() {
+    const selects = Array.from(document.querySelectorAll('.select-producto'));
+    const valoresSeleccionados = new Set(
+        selects.map(s => s.value).filter(val => val !== "")
+    );
+
+    selects.forEach(select => {
+        const valorActual = select.value;
+        Array.from(select.options).forEach(opt => {
+            if (opt.value === "") return;
+
+            if (valoresSeleccionados.has(opt.value) && opt.value !== valorActual) {
+                opt.disabled = true;
+                opt.style.color = "#ccc";
+            } else {
+                const esRojoOriginal = (opt.style.color === "rgb(231, 76, 60)" || opt.style.color === "#e74c3c" || opt.text.includes("🔴"));
+                if (esRojoOriginal) {
+                    opt.disabled = true;
+                    opt.style.color = "#e74c3c";
+                } else {
+                    opt.disabled = false;
+                    opt.style.color = "inherit";
+                }
+            }
+        });
+    });
 }
 
 function toggleDetalles(boton) {
@@ -211,6 +240,7 @@ function actualizarComposicion_y_Precio(elemento, excluidasPreseleccionadas = []
         }
     }
 
+    actualizarOpcionesRepetidas();
     calcularTotal();
 }
 

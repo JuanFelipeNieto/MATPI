@@ -198,6 +198,8 @@
         if (datos) {
             select.value = datos.producto_id;
             actualizarComposicion_y_Precio(select, datos.excluidas_ids);
+        } else {
+            actualizarOpcionesRepetidas();
         }
 
         contadorFilas++;
@@ -227,6 +229,7 @@
         } else {
             agregarFilaProducto();
         }
+        actualizarOpcionesRepetidas();
         filtrarReservas(document.getElementById('txt_cliente_id').value);
     };
 </script>
