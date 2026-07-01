@@ -45,7 +45,7 @@
 
         <div class="form-acciones">
             <button type="submit" class="btn btn-guardar">Registrar</button>
-            <a href="{% url 'listar_proveedores' %}" class="btn btn-cancelar">Cancelar</a>
+            <a href="{% url 'listar_proveedores' %}" class="btn btn-cancelar" onclick="return confirm('¿Está seguro de que desea cancelar el registro del suministro?');">Cancelar</a>
         </div>
     </form>
 </div>
